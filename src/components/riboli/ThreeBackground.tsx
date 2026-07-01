@@ -274,7 +274,7 @@ export function ThreeBackground() {
       p.group.add(wire2);
     }
 
-    // ---- CONSOLE (base + windshield + wheel) ----
+    // ---- CONSOLE (base + windshield + wheel + seat + T-top) ----
     const consoleGroupGeoms: {
       geom: THREE.BufferGeometry;
       mat: THREE.MeshStandardMaterial;
@@ -282,12 +282,12 @@ export function ThreeBackground() {
       rot?: THREE.Euler;
     }[] = [
       {
-        geom: new THREE.BoxGeometry(0.85, 0.7, 0.7),
+        geom: new THREE.BoxGeometry(0.85, 0.7, 0.75),
         mat: solidMatFor(NAVY_DARK, 0.2, 0.6),
         offset: new THREE.Vector3(0.1, 0.8, 0),
       },
       {
-        geom: new THREE.BoxGeometry(0.05, 0.45, 0.75),
+        geom: new THREE.BoxGeometry(0.05, 0.45, 0.78),
         mat: solidMatFor(0x88bcd8, 0.9, 0.1),
         offset: new THREE.Vector3(0.5, 1.28, 0),
         rot: new THREE.Euler(0, 0, -0.35),
@@ -298,8 +298,45 @@ export function ThreeBackground() {
         offset: new THREE.Vector3(0.05, 1.05, 0),
         rot: new THREE.Euler(Math.PI / 2.4, 0, 0),
       },
+      // Leaning post / seat
+      {
+        geom: new THREE.BoxGeometry(0.55, 0.55, 0.85),
+        mat: solidMatFor(NAVY_DARK, 0.15, 0.7),
+        offset: new THREE.Vector3(-0.55, 0.72, 0),
+      },
+      {
+        geom: new THREE.BoxGeometry(0.12, 0.45, 0.85),
+        mat: solidMatFor(NAVY_DARK, 0.15, 0.7),
+        offset: new THREE.Vector3(-0.8, 1.2, 0),
+      },
+      // T-top canopy
+      {
+        geom: new THREE.BoxGeometry(1.5, 0.06, 1.4),
+        mat: solidMatFor(NAVY, 0.35, 0.45),
+        offset: new THREE.Vector3(-0.1, 2.15, 0),
+      },
+      // 4 T-top posts
+      {
+        geom: new THREE.CylinderGeometry(0.035, 0.035, 1.4, 12),
+        mat: solidMatFor(0xb8c5cf, 0.85, 0.25),
+        offset: new THREE.Vector3(0.55, 1.45, 0.55),
+      },
+      {
+        geom: new THREE.CylinderGeometry(0.035, 0.035, 1.4, 12),
+        mat: solidMatFor(0xb8c5cf, 0.85, 0.25),
+        offset: new THREE.Vector3(0.55, 1.45, -0.55),
+      },
+      {
+        geom: new THREE.CylinderGeometry(0.035, 0.035, 1.4, 12),
+        mat: solidMatFor(0xb8c5cf, 0.85, 0.25),
+        offset: new THREE.Vector3(-0.75, 1.45, 0.55),
+      },
+      {
+        geom: new THREE.CylinderGeometry(0.035, 0.035, 1.4, 12),
+        mat: solidMatFor(0xb8c5cf, 0.85, 0.25),
+        offset: new THREE.Vector3(-0.75, 1.45, -0.55),
+      },
     ];
-    // Composite geometry for wire preview (merge boxes)
     const consoleWirePreview = consoleGroupGeoms[0].geom;
 
     {
@@ -332,27 +369,43 @@ export function ThreeBackground() {
     }
 
     // ---- ENGINE (outboard at stern) ----
+    let propSpinGroup: THREE.Group | null = null;
     const engineParts: {
       geom: THREE.BufferGeometry;
       mat: THREE.MeshStandardMaterial;
       offset: THREE.Vector3;
       rot?: THREE.Euler;
     }[] = [
+      // Cowling
       {
-        geom: new THREE.BoxGeometry(0.45, 0.75, 0.4),
-        mat: solidMatFor(NAVY_DARK, 0.5, 0.35),
-        offset: new THREE.Vector3(-2.95, 0.7, 0),
+        geom: new THREE.BoxGeometry(0.5, 0.85, 0.48),
+        mat: solidMatFor(NAVY_DARK, 0.55, 0.3),
+        offset: new THREE.Vector3(-2.95, 0.75, 0),
       },
+      // Cowling top accent
       {
-        geom: new THREE.CylinderGeometry(0.08, 0.08, 0.55, 16),
+        geom: new THREE.BoxGeometry(0.45, 0.15, 0.42),
+        mat: solidMatFor(RED, 0.4, 0.35),
+        offset: new THREE.Vector3(-2.95, 1.22, 0),
+      },
+      // Mid-shaft housing
+      {
+        geom: new THREE.BoxGeometry(0.22, 0.55, 0.28),
         mat: solidMatFor(NAVY_DARK, 0.6, 0.3),
         offset: new THREE.Vector3(-2.95, 0.05, 0),
       },
+      // Gearcase (torpedo)
       {
-        geom: new THREE.ConeGeometry(0.14, 0.28, 20),
-        mat: solidMatFor(RED, 0.4, 0.4),
-        offset: new THREE.Vector3(-3.15, -0.25, 0),
+        geom: new THREE.CapsuleGeometry(0.14, 0.5, 6, 12),
+        mat: solidMatFor(NAVY_DARK, 0.7, 0.25),
+        offset: new THREE.Vector3(-3.05, -0.35, 0),
         rot: new THREE.Euler(0, 0, Math.PI / 2),
+      },
+      // Skeg
+      {
+        geom: new THREE.BoxGeometry(0.22, 0.22, 0.03),
+        mat: solidMatFor(NAVY_DARK, 0.7, 0.25),
+        offset: new THREE.Vector3(-2.9, -0.5, 0),
       },
     ];
     const engineWirePreview = engineParts[0].geom;
@@ -371,6 +424,34 @@ export function ThreeBackground() {
         group.add(mesh);
         return { mesh, mat };
       });
+      // Propeller
+      propSpinGroup = new THREE.Group();
+      propSpinGroup.position.set(-3.35, -0.35, 0);
+      const hubMat = solidMatFor(0xc0c8d0, 0.9, 0.2);
+      const hub = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.05, 0.05, 0.08, 12),
+        hubMat,
+      );
+      hub.rotation.z = Math.PI / 2;
+      hub.visible = false;
+      propSpinGroup.add(hub);
+      solids.push({ mesh: hub, mat: hubMat });
+      for (let b = 0; b < 3; b++) {
+        const bladeMat = solidMatFor(0xc0c8d0, 0.9, 0.2);
+        const blade = new THREE.Mesh(
+          new THREE.BoxGeometry(0.02, 0.22, 0.07),
+          bladeMat,
+        );
+        blade.position.set(0, 0.13, 0);
+        const bWrap = new THREE.Group();
+        bWrap.rotation.x = (b * Math.PI * 2) / 3;
+        bWrap.add(blade);
+        blade.visible = false;
+        propSpinGroup.add(bWrap);
+        solids.push({ mesh: blade, mat: bladeMat });
+      }
+      group.add(propSpinGroup);
+
       group.visible = false;
       scene.add(group);
       parts.push({
@@ -382,6 +463,65 @@ export function ThreeBackground() {
         fromOffset: new THREE.Vector3(-2.5, 0.5, 0),
         phaseStart: 0.75,
         phaseEnd: 1.0,
+      });
+    }
+
+    // ---- BOW RAIL + NAV LIGHTS ----
+    {
+      const railCurve = new THREE.CatmullRomCurve3(
+        [
+          new THREE.Vector3(0.6, 0.75, 1.05),
+          new THREE.Vector3(1.4, 0.8, 0.9),
+          new THREE.Vector3(2.1, 0.85, 0.55),
+          new THREE.Vector3(2.55, 0.9, 0.05),
+          new THREE.Vector3(2.1, 0.85, -0.55),
+          new THREE.Vector3(1.4, 0.8, -0.9),
+          new THREE.Vector3(0.6, 0.75, -1.05),
+        ],
+        false,
+        "catmullrom",
+        0.4,
+      );
+      const railGroup = new THREE.Group();
+      const railGeom = new THREE.TubeGeometry(railCurve, 40, 0.035, 10, false);
+      const railMat = solidMatFor(0xc8d1d9, 0.9, 0.2);
+      const railMesh = new THREE.Mesh(railGeom, railMat);
+      railMesh.visible = false;
+      railGroup.add(railMesh);
+      const navRedMat = solidMatFor(RED, 0.3, 0.4);
+      const navRed = new THREE.Mesh(
+        new THREE.SphereGeometry(0.05, 12, 12),
+        navRedMat,
+      );
+      navRed.position.set(2.1, 0.9, 0.55);
+      navRed.visible = false;
+      const navGreenMat = solidMatFor(0x2ecc71, 0.3, 0.4);
+      const navGreen = new THREE.Mesh(
+        new THREE.SphereGeometry(0.05, 12, 12),
+        navGreenMat,
+      );
+      navGreen.position.set(2.1, 0.9, -0.55);
+      navGreen.visible = false;
+      railGroup.add(navRed, navGreen);
+      const edges = new THREE.EdgesGeometry(railGeom, 20);
+      const wireMat = wireMatFor();
+      const wire = new THREE.LineSegments(edges, wireMat);
+      railGroup.add(wire);
+      railGroup.visible = false;
+      scene.add(railGroup);
+      parts.push({
+        group: railGroup,
+        wire,
+        wireMat,
+        solids: [
+          { mesh: railMesh, mat: railMat },
+          { mesh: navRed, mat: navRedMat },
+          { mesh: navGreen, mat: navGreenMat },
+        ],
+        finalPos: new THREE.Vector3(0, 0, 0),
+        fromOffset: new THREE.Vector3(0, 2, 0),
+        phaseStart: 0.2,
+        phaseEnd: 0.5,
       });
     }
 

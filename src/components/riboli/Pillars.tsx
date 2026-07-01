@@ -20,7 +20,7 @@ const pillars = [
 
 export function Pillars() {
   return (
-    <section id="pillars" className="bg-brand-navy py-20 md:py-28 px-6 md:px-10">
+    <section id="pillars" className="relative py-20 md:py-28 px-6 md:px-10">
       <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-px bg-white/10">
         {pillars.map((p, i) => (
           <motion.div
@@ -29,7 +29,7 @@ export function Pillars() {
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true, margin: "-80px" }}
             transition={{ duration: 0.6, delay: i * 0.12 }}
-            className="bg-brand-navy p-10 md:p-12 group hover:bg-brand-navy-2 transition-colors"
+            className="bg-brand-navy/60 backdrop-blur-sm p-10 md:p-12 group hover:bg-brand-navy-2/70 transition-colors"
           >
             <span className="block text-brand-red font-mono text-xs mb-6">
               {p.n} / 03

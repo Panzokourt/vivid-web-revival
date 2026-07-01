@@ -4,7 +4,7 @@ export function DealersCTA() {
   return (
     <section
       id="dealers"
-      className="relative bg-brand-navy py-24 md:py-32 px-6 md:px-10 text-center overflow-hidden"
+      className="relative py-24 md:py-32 px-6 md:px-10 text-center overflow-hidden"
     >
       <div className="absolute inset-0 opacity-[0.04] bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:60px_60px]" />
       <motion.div

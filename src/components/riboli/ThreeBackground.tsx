@@ -621,7 +621,7 @@ export function ThreeBackground() {
     const posAttr = gridGeom.attributes.position as THREE.BufferAttribute;
 
     // Remap: assembly completes at 55% of page scroll; last 45% just holds & camera drifts around the finished RIB.
-    const ASSEMBLY_END = 0.55;
+    const ASSEMBLY_END = 1.0;
 
 
     const animate = () => {

@@ -620,8 +620,9 @@ export function ThreeBackground() {
     const clock = new THREE.Clock();
     const posAttr = gridGeom.attributes.position as THREE.BufferAttribute;
 
-    // Remap: assembly completes at 70% of page scroll; last 30% just holds & camera drifts.
-    const ASSEMBLY_END = 0.7;
+    // Remap: assembly completes at 55% of page scroll; last 45% just holds & camera drifts around the finished RIB.
+    const ASSEMBLY_END = 0.55;
+
 
     const animate = () => {
       const t = clock.getElapsedTime();

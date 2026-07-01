@@ -1,50 +1,55 @@
-## Επισκόπηση
+# 3D RIB Scroll Assembly
 
-Ολικό redesign της αρχικής σελίδας του RIBOLI, βασισμένο στο επιλεγμένο "Technical performance" direction. Dark navy palette, κόκκινο brand accent, Syncopate + Inter typography, cinematic AI-generated φωτογραφίες, framer-motion animations και three.js particle/grid background στο hero.
+Αντικαθιστούμε τα particles και το icosahedron στο `ThreeBackground.tsx` με ένα διαδραστικό RIB σκάφος που συναρμολογείται καθώς ο χρήστης κάνει scroll. Το subtle wave grid (θάλασσα) παραμένει από κάτω.
 
-## Sections που θα φτιαχτούν (μία σελίδα, `/`)
+## Στυλ
 
-1. **Nav** — RIBOLI logo, links (Μοντέλα, Τεχνολογία, Υπηρεσίες, Dealers, Επικοινωνία), CTA "Find a Dealer". Fade-in κάτω, subtle backdrop blur στο scroll.
-2. **Hero** — Fullscreen. Πίσω από την cinematic AI φωτογραφία τρέχει **three.js scene**: floating particles + wireframe grid με depth/parallax σε mouse move. Headline "Η Απόδοση Επαναπροσδιορίζεται" με letter-by-letter reveal, subtitle + 2 CTA buttons, scroll indicator.
-3. **Πυλώνες** (Ποιότητα / Απόδοση / Εξυπηρέτηση) — 3 κάρτες με stagger scroll-in.
-4. **Featured Μοντέλα** — Grid 3 RIB μοντέλων (R-680 SPORT, R-950 CRUISE, R-520 EXPLORE) με AI φωτογραφίες, hover scale, όνομα + μήκος/HP/άτομα.
-5. **Τεχνολογία & Κατασκευή** — Split layout: 3 numbered steps αριστερά (ORCA Hypalon, Deep-V Hull, Custom Engineering), τεχνική AI φωτογραφία δεξιά με "25+ Χρόνια Εμπειρίας" red badge.
-6. **Stats strip** — Animated counters (25+ χρόνια, 500+ σκάφη, 12 dealers, 10ετής εγγύηση).
-7. **Dealers CTA band** — Dark navy με κεντρικό headline και CTA.
-8. **Footer** — Logo, social links, copyright.
+Mix wireframe → solid: τα κομμάτια εμφανίζονται πρώτα ως λεπτές μπλε γραμμές (wireframe), και μόλις κουμπώσουν στη θέση τους γίνονται opaque solid low-poly με navy/κόκκινες accent επιφάνειες. Δίνει engineering / blueprint αίσθηση που ταιριάζει με το υπόλοιπο site.
 
-## Animations
+## Sequence συναρμολόγησης (scroll 0 → 1)
 
-- `framer-motion` για scroll-triggered fade/slide-up/stagger σε section headings, κάρτες, callouts.
-- Letter-by-letter reveal στο hero H1.
-- Counter animation (whileInView) στα stats.
-- Hover: image scale-105, red arrow slide.
-- **three.js**: particle field ~800 particles + λεπτό wireframe plane grid με depth fog, ήπια αυτόματη περιστροφή + mouse parallax. Pointer-events disabled ώστε να μη σπάει το UX.
+Το scroll progress (0..1) χωρίζεται σε 4 φάσεις:
 
-## Φωτογραφίες
+```text
+0.00 – 0.25  ΓΑΣΤΡΑ (hull)     — Deep-V γάστρα πέφτει από κάτω, wireframe → solid
+0.25 – 0.50  TUBES              — Δύο πλευρικοί σωλήνες γλιστρούν από αριστερά/δεξιά και κουμπώνουν
+0.50 – 0.75  CONSOLE            — Κεντρικό console + τιμόνι/παρμπρίζ κατεβαίνουν από πάνω
+0.75 – 1.00  ΚΙΝΗΤΗΡΑΣ          — Outboard engine έρχεται από πίσω και κουμπώνει στην πρύμη
+```
 
-AI-generated με `imagegen--generate_image` (fast tier, .jpg):
-- `hero.jpg` — aerial RIB κόβει Αιγαίο (1920×1080)
-- `model-r680.jpg`, `model-r950.jpg`, `model-r520.jpg` (800×1000)
-- `tech-detail.jpg` — hull stitching close-up (1200×1200)
+Κάθε part έχει:
+- **from-position** (offset εκτός θέσης) και **to-position** (τελική θέση στο σκάφος)
+- Easing (easeInOutCubic) πάνω στο local phase progress (0..1)
+- Opacity 0→1 και wireframe→solid transition στα τελευταία 30% του local phase
+- Μικρό "settle" bounce στο τέλος (scale 1.05 → 1.0)
 
-Αποθηκεύονται στο `src/assets/` και εξωτερικοποιούνται με `lovable-assets` CLI.
+## Camera
+
+Η κάμερα κάνει αργό orbit γύρω από το σκάφος καθώς προχωράει το scroll: ξεκινά μπροστά-χαμηλά (0.00), περνάει σε 3/4 πλάγια όψη στη μέση, καταλήγει σε ελαφρώς πίσω-πάνω όψη (1.00) όπου φαίνεται και ο κινητήρας. Διατηρείται το ήπιο pointer parallax.
+
+## Background
+
+- **Διατηρείται**: το wave-displaced grid κάτω από το σκάφος (subtle θάλασσα)
+- **Αφαιρούνται**: near/mid/far particle layers, icosahedron, upper red grid
+- **Νέο**: subtle fresnel/rim glow γύρω από κάθε part μόλις κουμπώσει (emissive edge)
 
 ## Τεχνικές λεπτομέρειες
 
-- **Stack**: TanStack Start + React 19, Tailwind v4, framer-motion, three.js.
-- **Νέα dependencies**: `bun add three @types/three framer-motion`.
-- **Fonts**: Syncopate + Inter μέσω `<link>` στο `src/routes/__root.tsx` head (όχι `@import` στο styles.css).
-- **Design tokens** στο `src/styles.css` κάτω από `@theme`: `--color-brand-navy: #0A1F30`, `--color-brand-red: #E63946`, `--color-brand-slate: #F8FAFC`, `--font-display: 'Syncopate'`, `--font-sans: 'Inter'`. Χωρίς hardcoded χρώματα στα components.
-- **`__root.tsx` head**: πραγματικός title/description/OG για RIBOLI ("RIBOLI — Χειροποίητα σκάφη RIB για την Ελληνική Θάλασσα"), Syncopate+Inter `<link>` tags.
-- **`src/routes/index.tsx`**: αντικαθιστά τελείως το placeholder και συνθέτει τα components.
-- **Components** στο `src/components/riboli/`:
-  - `Nav.tsx`, `Hero.tsx`, `ThreeBackground.tsx` (client-only three.js scene), `Pillars.tsx`, `FeaturedModels.tsx`, `TechConstruction.tsx`, `Stats.tsx`, `DealersCTA.tsx`, `Footer.tsx`.
-- **three.js**: γίνεται mount μόνο client-side (`useEffect`), με proper cleanup του renderer/animation frame στο unmount ώστε να μη σπάει το SSR.
-- Καμία backend αλλαγή, μόνο frontend.
+- **Geometry**: Τα RIB parts κατασκευάζονται procedurally με primitives του Three.js — δεν χρειάζεται εξωτερικό GLTF asset:
+  - Γάστρα: `ExtrudeGeometry` από ένα Deep-V shape (πλάγια όψη επεκτεινόμενη)
+  - Tubes: 2× `TubeGeometry` κατά μήκος καμπύλης που ακολουθεί το περίγραμμα της γάστρας
+  - Console: composite από `BoxGeometry` (βάση) + `CylinderGeometry` (τιμόνι) + λεπτό `PlaneGeometry` (παρμπρίζ)
+  - Κινητήρας: `BoxGeometry` (κύριο σώμα) + `CylinderGeometry` (κάτω άξονας/προπέλα)
+- **Materials**: Δύο materials ανά part που κάνουμε swap/crossfade:
+  - `LineSegments` με `EdgesGeometry` + `LineBasicMaterial` (wireframe φάση)
+  - `MeshStandardMaterial` (navy #1e3a56 base, red #e63946 accents) για solid φάση
+- **Lighting**: 1× `HemisphereLight` (soft ambient) + 1× `DirectionalLight` από πάνω-πλάγια για shading στη solid φάση
+- **Scroll driver**: κρατάμε το υπάρχον `scroll.target/current` lerp και το περνάμε ως prop σε μια νέα `updateBoat(s)` function μέσα στο render loop
+- **Performance**: Τα parts στη wireframe φάση παραμένουν `visible=false` όσο δεν έχουν φτάσει στη φάση τους. Χαμηλά polygon counts (Deep-V hull ~200 tris). Κρατάμε `pixelRatio ≤ 2`.
+- **prefers-reduced-motion**: Όταν true, τα parts εμφανίζονται όλα στη τελική θέση χωρίς animation· μόνο η κάμερα κάνει πολύ ήπιο orbit.
 
-## Εκτός scope
+## Αρχεία που αλλάζουν
 
-- Άλλες σελίδες (Μοντέλα, Εταιρία, Dealers κ.λπ.) — μόνο η αρχική σε αυτή τη φάση.
-- Πολυγλωσσία EL/EN switch.
-- CMS/Backend για μοντέλα (στατικό content array).
+- `src/components/riboli/ThreeBackground.tsx` — πλήρης αντικατάσταση της scene setup (parts + assembly logic). Το wave grid παραμένει.
+
+Δεν αλλάζει καμία άλλη σελίδα ή section — το κομμάτι είναι εντελώς μέσα στο fixed background component.

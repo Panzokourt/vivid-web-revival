@@ -423,7 +423,19 @@ export function ThreeBackground() {
 
     const easeInOutCubic = (t: number) =>
       t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const easeOutBack = (t: number) => {
+      const c1 = 1.70158;
+      const c3 = c1 + 1;
+      return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
+    };
     const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+
+    // Reassign phase windows so the whole assembly is complete by 70% of page scroll.
+    // Slight overlap so pieces layer naturally instead of feeling stop-and-go.
+    parts[0].phaseStart = 0.0;   parts[0].phaseEnd = 0.3;   // hull
+    parts[1].phaseStart = 0.25;  parts[1].phaseEnd = 0.55;  // tubes
+    parts[2].phaseStart = 0.5;   parts[2].phaseEnd = 0.78;  // console
+    parts[3].phaseStart = 0.72;  parts[3].phaseEnd = 1.0;   // engine
 
     const updatePart = (p: Part, s: number) => {
       const local = clamp01((s - p.phaseStart) / (p.phaseEnd - p.phaseStart));
@@ -432,38 +444,53 @@ export function ThreeBackground() {
         return;
       }
       p.group.visible = true;
-      const eased = easeInOutCubic(local);
+
+      // Position: ease-out back → satisfying "snap" as it seats
+      const posT = easeOutBack(local);
       p.group.position.set(
-        p.finalPos.x + p.fromOffset.x * (1 - eased),
-        p.finalPos.y + p.fromOffset.y * (1 - eased),
-        p.finalPos.z + p.fromOffset.z * (1 - eased),
+        p.finalPos.x + p.fromOffset.x * (1 - posT),
+        p.finalPos.y + p.fromOffset.y * (1 - posT),
+        p.finalPos.z + p.fromOffset.z * (1 - posT),
       );
-      // Wire opacity: fade in 0→0.3, hold, fade out 0.7→1.0
-      const wireIn = clamp01(local / 0.3);
-      const wireOut = 1 - clamp01((local - 0.7) / 0.3);
+
+      // Wire opacity: fade in fast (0→0.25), hold, fade out as solid takes over (0.7→0.95)
+      const wireIn = clamp01(local / 0.25);
+      const wireOut = 1 - clamp01((local - 0.7) / 0.25);
       p.wireMat.opacity = wireIn * wireOut * 0.85;
-      // Solid opacity: fade in 0.7→1.0
-      const solidIn = clamp01((local - 0.6) / 0.4);
+
+      // Solid opacity: crossfades in during the last third
+      const solidIn = easeInOutCubic(clamp01((local - 0.55) / 0.4));
       p.solids.forEach(({ mesh, mat }) => {
         mat.opacity = solidIn;
         mesh.visible = solidIn > 0.01;
       });
-      // Settle bounce right at seat
-      const settle = local > 0.95 ? 1 + (1 - local) * 0.4 : 1;
-      p.group.scale.setScalar(settle);
+
+      // Snap settle: a tiny squash-and-release around the seat moment (0.85–1.0)
+      let scale = 1;
+      if (local > 0.85 && local < 1) {
+        const s2 = (local - 0.85) / 0.15;
+        scale = 1 + Math.sin(s2 * Math.PI) * 0.06;
+      }
+      p.group.scale.setScalar(scale);
     };
 
     let raf = 0;
     const clock = new THREE.Clock();
     const posAttr = gridGeom.attributes.position as THREE.BufferAttribute;
 
+    // Remap: assembly completes at 70% of page scroll; last 30% just holds & camera drifts.
+    const ASSEMBLY_END = 0.7;
+
     const animate = () => {
       const t = clock.getElapsedTime();
 
       pointer.x += (pointer.tx - pointer.x) * 0.04;
       pointer.y += (pointer.ty - pointer.y) * 0.04;
-      scroll.current += (scroll.target - scroll.current) * 0.06;
-      const s = prefersReduced ? 1 : scroll.current;
+      scroll.current += (scroll.target - scroll.current) * 0.08;
+      const rawS = prefersReduced ? 1 : scroll.current;
+      const s = clamp01(rawS / ASSEMBLY_END); // assembly progress
+      const sExtra = clamp01((rawS - ASSEMBLY_END) / (1 - ASSEMBLY_END)); // after-assembly
+
 
       // Ocean waves under boat
       if (!prefersReduced) {
@@ -485,15 +512,15 @@ export function ThreeBackground() {
       boatRoot.position.y = Math.sin(t * 0.6) * 0.12;
       boatRoot.rotation.z = Math.sin(t * 0.5) * 0.015;
 
-      // Camera slow orbit driven by scroll (0 → 1) plus pointer parallax
-      const angle = Math.PI * 0.15 + s * Math.PI * 0.55;
-      const radius = 8.5 - s * 1.5;
-      const camY = 1.6 + s * 1.4;
-      camera.position.x =
-        Math.sin(angle) * radius + pointer.x * 0.6;
+      // Camera: orbit during assembly (s: 0→1), then a gentle continued drift after (sExtra)
+      const angle = Math.PI * 0.15 + s * Math.PI * 0.55 + sExtra * Math.PI * 0.25;
+      const radius = 8.5 - s * 1.5 - sExtra * 0.6;
+      const camY = 1.6 + s * 1.4 + sExtra * 0.5;
+      camera.position.x = Math.sin(angle) * radius + pointer.x * 0.6;
       camera.position.z = Math.cos(angle) * radius;
       camera.position.y = camY + -pointer.y * 0.4;
       camera.lookAt(0, 0.3, 0);
+
 
       renderer.render(scene, camera);
       raf = requestAnimationFrame(animate);

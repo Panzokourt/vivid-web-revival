@@ -1,26 +1,21 @@
 import { motion } from "framer-motion";
-import { useEffect, useState } from "react";
-import { ThreeBackground } from "./ThreeBackground";
 import heroImg from "@/assets/hero.jpg";
 
 const line1 = "Η ΑΠΟΔΟΣΗ";
 const line2 = "ΕΠΑΝΑΠΡΟΣΔΙΟΡΙΖΕΤΑΙ";
 
 export function Hero() {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
   return (
-    <section className="relative h-screen min-h-[640px] flex items-center justify-center overflow-hidden bg-brand-navy">
+    <section className="relative h-screen min-h-[640px] flex items-center justify-center overflow-hidden">
       <img
         src={heroImg}
         alt="RIB σκάφος RIBOLI στην ελληνική θάλασσα"
         width={1920}
         height={1088}
-        className="absolute inset-0 w-full h-full object-cover opacity-60"
+        className="absolute inset-0 w-full h-full object-cover opacity-40"
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-brand-navy/70 via-brand-navy/30 to-brand-navy" />
-      {mounted && <ThreeBackground />}
+      <div className="absolute inset-0 bg-gradient-to-b from-brand-navy/60 via-transparent to-brand-navy/80" />
+
 
       <div className="relative z-10 text-center px-4 max-w-5xl">
         <motion.span

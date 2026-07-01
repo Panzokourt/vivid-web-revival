@@ -26,7 +26,7 @@ const models = [
 
 export function FeaturedModels() {
   return (
-    <section id="models" className="py-24 md:py-32 px-6 md:px-10 bg-brand-slate">
+    <section id="models" className="relative py-24 md:py-32 px-6 md:px-10">
       <div className="max-w-7xl mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -39,13 +39,13 @@ export function FeaturedModels() {
             <span className="text-brand-red font-bold text-xs uppercase tracking-[0.2em] mb-4 block">
               Η ΣΥΛΛΟΓΗ ΜΑΣ
             </span>
-            <h2 className="text-3xl md:text-5xl font-display uppercase text-brand-navy leading-tight">
+            <h2 className="text-3xl md:text-5xl font-display uppercase text-white leading-tight">
               ΜΟΝΤΕΛΑ
             </h2>
           </div>
           <a
             href="#"
-            className="self-start text-xs font-bold uppercase tracking-widest border-b-2 border-brand-red pb-1 text-brand-navy hover:text-brand-red transition-colors"
+            className="self-start text-xs font-bold uppercase tracking-widest border-b-2 border-brand-red pb-1 text-white hover:text-brand-red transition-colors"
           >
             ΌΛΑ ΤΑ ΣΚΑΦΗ →
           </a>
@@ -62,7 +62,7 @@ export function FeaturedModels() {
               transition={{ duration: 0.6, delay: i * 0.12 }}
               className="group cursor-pointer block"
             >
-              <div className="overflow-hidden mb-6 relative bg-white">
+              <div className="overflow-hidden mb-6 relative bg-brand-navy/40 backdrop-blur-sm border border-white/5">
                 <img
                   src={m.img}
                   alt={m.name}
@@ -77,10 +77,10 @@ export function FeaturedModels() {
               </div>
               <div className="flex justify-between items-start">
                 <div>
-                  <h3 className="font-display text-xl text-brand-navy mb-1">
+                  <h3 className="font-display text-xl text-white mb-1">
                     {m.name}
                   </h3>
-                  <p className="text-brand-stone text-sm">{m.specs}</p>
+                  <p className="text-white/60 text-sm">{m.specs}</p>
                 </div>
                 <span className="text-brand-red font-bold text-xl group-hover:translate-x-1 transition-transform">
                   →

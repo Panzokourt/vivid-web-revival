@@ -31,7 +31,7 @@ function Counter({ to, suffix }: { to: number; suffix: string }) {
 
 export function Stats() {
   return (
-    <section className="bg-brand-navy-2 py-16 md:py-20 px-6 md:px-10 border-y border-white/5">
+    <section className="relative py-16 md:py-20 px-6 md:px-10 border-y border-white/5 bg-brand-navy-2/40 backdrop-blur-sm">
       <div className="max-w-7xl mx-auto grid grid-cols-2 lg:grid-cols-4 gap-10">
         {stats.map((s, i) => (
           <motion.div

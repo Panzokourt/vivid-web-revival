@@ -83,13 +83,17 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "RIBOLI — Ελληνική κατασκευή φουσκωτών σκαφών RIB υψηλών επιδόσεων. Χειροποίητη ναυπηγική, ORCA Hypalon, Deep-V γάστρες, δίκτυο dealers σε όλη την Ελλάδα.",
       },
-      { property: "og:title", content: "RIBOLI — Κατασκευασμένα για την Ελληνική Θάλασσα" },
+      { property: "og:title", content: "RIBOLI — Χειροποίητα σκάφη RIB για την Ελληνική Θάλασσα" },
       {
         property: "og:description",
         content: "Premium φουσκωτά σκάφη RIB, χειροποίητα στην Ελλάδα.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "RIBOLI — Χειροποίητα σκάφη RIB για την Ελληνική Θάλασσα" },
+      { name: "description", content: "Riboli Reimagined is a website redesign that enhances user experience with rich content and dynamic visuals." },
+      { property: "og:description", content: "Riboli Reimagined is a website redesign that enhances user experience with rich content and dynamic visuals." },
+      { name: "twitter:description", content: "Riboli Reimagined is a website redesign that enhances user experience with rich content and dynamic visuals." },
     ],
     links: [
       { rel: "stylesheet", href: appCss },

@@ -572,11 +572,11 @@ export function ThreeBackground() {
 
     // Reassign phase windows so the whole assembly is complete well before the
     // end of the page, giving the user time to enjoy the finished boat.
-    parts[0].phaseStart = 0.0;   parts[0].phaseEnd = 0.22;  // hull
-    parts[1].phaseStart = 0.18;  parts[1].phaseEnd = 0.42;  // tubes
-    parts[4].phaseStart = 0.35;  parts[4].phaseEnd = 0.58;  // bow rail + nav lights
-    parts[2].phaseStart = 0.5;   parts[2].phaseEnd = 0.75;  // console + T-top
-    parts[3].phaseStart = 0.7;   parts[3].phaseEnd = 0.95;  // engine + prop
+    parts[0].phaseStart = 0.0;   parts[0].phaseEnd = 0.20;  // hull
+    parts[1].phaseStart = 0.15;  parts[1].phaseEnd = 0.40;  // tubes
+    parts[4].phaseStart = 0.35;  parts[4].phaseEnd = 0.60;  // bow rail + nav lights
+    parts[2].phaseStart = 0.55;  parts[2].phaseEnd = 0.80;  // console + T-top
+    parts[3].phaseStart = 0.75;  parts[3].phaseEnd = 1.0;   // engine + prop
 
 
     const updatePart = (p: Part, s: number) => {

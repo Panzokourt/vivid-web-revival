@@ -2,8 +2,13 @@ import { useEffect, useRef } from "react";
 import * as THREE from "three";
 
 /**
- * Global fixed 3D background that spans the whole page.
- * Reacts smoothly to scroll and pointer without demanding attention.
+ * Global fixed 3D background.
+ * As the user scrolls, a RIB boat assembles piece by piece:
+ *   0.00 – 0.25  Hull (Deep-V γάστρα)
+ *   0.25 – 0.50  Tubes (side pontoons)
+ *   0.50 – 0.75  Console + windshield
+ *   0.75 – 1.00  Outboard engine
+ * A subtle wave grid stays underneath.
  */
 export function ThreeBackground() {
   const mountRef = useRef<HTMLDivElement>(null);
@@ -20,10 +25,10 @@ export function ThreeBackground() {
     const height = window.innerHeight;
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x0a1f30, 0.05);
+    scene.fog = new THREE.FogExp2(0x0a1f30, 0.045);
 
-    const camera = new THREE.PerspectiveCamera(55, width / height, 0.1, 200);
-    camera.position.set(0, 0.4, 10);
+    const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 200);
+    camera.position.set(0, 2, 9);
 
     const renderer = new THREE.WebGLRenderer({ alpha: true, antialias: true });
     renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
@@ -31,79 +36,364 @@ export function ThreeBackground() {
     renderer.setClearColor(0x000000, 0);
     mount.appendChild(renderer.domElement);
 
-    // ---- Layered particles ----
-    const makeParticles = (
-      count: number,
-      spread: number,
-      color: number,
-      size: number,
-      opacity: number,
-    ) => {
-      const positions = new Float32Array(count * 3);
-      for (let i = 0; i < count; i++) {
-        positions[i * 3] = (Math.random() - 0.5) * spread;
-        positions[i * 3 + 1] = (Math.random() - 0.5) * spread * 0.7;
-        positions[i * 3 + 2] = (Math.random() - 0.5) * spread * 0.7;
-      }
-      const geom = new THREE.BufferGeometry();
-      geom.setAttribute("position", new THREE.BufferAttribute(positions, 3));
-      const mat = new THREE.PointsMaterial({
-        color,
-        size,
-        transparent: true,
-        opacity,
-        depthWrite: false,
-        blending: THREE.AdditiveBlending,
-        sizeAttenuation: true,
-      });
-      return { pts: new THREE.Points(geom, mat), geom, mat };
-    };
+    // Lights for the solid shading phase
+    const hemi = new THREE.HemisphereLight(0x9ec7de, 0x0a1f30, 0.9);
+    scene.add(hemi);
+    const key = new THREE.DirectionalLight(0xffffff, 1.1);
+    key.position.set(4, 6, 3);
+    scene.add(key);
+    const rim = new THREE.DirectionalLight(0xe63946, 0.5);
+    rim.position.set(-4, 2, -3);
+    scene.add(rim);
 
-    const near = makeParticles(700, 30, 0x9ec7de, 0.045, 0.9);
-    const mid = makeParticles(900, 50, 0x5b8ba8, 0.03, 0.6);
-    const far = makeParticles(500, 80, 0xe63946, 0.025, 0.25);
-    scene.add(near.pts, mid.pts, far.pts);
-
-    // ---- Wave-displaced ocean grid ----
-    const gridGeom = new THREE.PlaneGeometry(90, 90, 80, 80);
+    // ---- Wave-displaced ocean grid (kept) ----
+    const gridGeom = new THREE.PlaneGeometry(80, 80, 70, 70);
     const basePositions = gridGeom.attributes.position.array.slice() as Float32Array;
     const gridMat = new THREE.MeshBasicMaterial({
       color: 0x2b6a94,
       wireframe: true,
       transparent: true,
-      opacity: 0.28,
+      opacity: 0.22,
     });
-    const grid = new THREE.Mesh(gridGeom, gridMat);
-    grid.rotation.x = -Math.PI / 2.15;
-    grid.position.y = -6;
-    scene.add(grid);
+    const gridMesh = new THREE.Mesh(gridGeom, gridMat);
+    gridMesh.rotation.x = -Math.PI / 2;
+    gridMesh.position.y = -2.2;
+    scene.add(gridMesh);
 
-    // ---- Upper accent grid ----
-    const grid2Geom = new THREE.PlaneGeometry(80, 80, 40, 40);
-    const grid2Mat = new THREE.MeshBasicMaterial({
-      color: 0xe63946,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.05,
+    // ============================================================
+    //  RIB parts
+    // ============================================================
+
+    const NAVY = 0x1e3a56;
+    const NAVY_DARK = 0x14283d;
+    const RED = 0xe63946;
+    const TUBE_GRAY = 0x2c3e50;
+    const WIRE_COLOR = 0x7fb3d5;
+
+    type Part = {
+      group: THREE.Group;
+      wire: THREE.LineSegments;
+      wireMat: THREE.LineBasicMaterial;
+      solids: { mesh: THREE.Mesh; mat: THREE.MeshStandardMaterial }[];
+      finalPos: THREE.Vector3;
+      fromOffset: THREE.Vector3;
+      phaseStart: number;
+      phaseEnd: number;
+    };
+    const parts: Part[] = [];
+
+    const wireMatFor = () =>
+      new THREE.LineBasicMaterial({
+        color: WIRE_COLOR,
+        transparent: true,
+        opacity: 0,
+      });
+    const solidMatFor = (color: number, metalness = 0.3, roughness = 0.55) =>
+      new THREE.MeshStandardMaterial({
+        color,
+        metalness,
+        roughness,
+        transparent: true,
+        opacity: 0,
+      });
+
+    const wrapPart = (
+      geoms: { geom: THREE.BufferGeometry; mat: THREE.MeshStandardMaterial }[],
+      wireSource: THREE.BufferGeometry,
+      finalPos: THREE.Vector3,
+      fromOffset: THREE.Vector3,
+      phaseStart: number,
+      phaseEnd: number,
+    ): Part => {
+      const group = new THREE.Group();
+      const edges = new THREE.EdgesGeometry(wireSource, 20);
+      const wireMat = wireMatFor();
+      const wire = new THREE.LineSegments(edges, wireMat);
+      group.add(wire);
+      const solids = geoms.map(({ geom, mat }) => {
+        const mesh = new THREE.Mesh(geom, mat);
+        mesh.visible = false;
+        group.add(mesh);
+        return { mesh, mat };
+      });
+      group.visible = false;
+      scene.add(group);
+      return {
+        group,
+        wire,
+        wireMat,
+        solids,
+        finalPos,
+        fromOffset,
+        phaseStart,
+        phaseEnd,
+      };
+    };
+
+    // ---- HULL (Deep-V) built from BufferGeometry ----
+    const buildHullGeometry = () => {
+      // Stations along the length (x = length axis; bow at +x, stern at -x)
+      const stations = [
+        { x: -2.6, scaleZ: 1.0, scaleY: 1.0, deckY: 0.35 }, // stern
+        { x: -1.2, scaleZ: 1.05, scaleY: 1.0, deckY: 0.4 },
+        { x: 0.4, scaleZ: 1.0, scaleY: 1.0, deckY: 0.45 },
+        { x: 1.8, scaleZ: 0.75, scaleY: 0.9, deckY: 0.55 },
+        { x: 2.6, scaleZ: 0.15, scaleY: 0.5, deckY: 0.65 }, // near bow point
+      ];
+      // Cross-section points (z, y) — port to starboard
+      const cs: [number, number][] = [
+        [-1.15, 0.35], // gunwale port
+        [-0.95, 0.0], // chine port
+        [0.0, -0.55], // keel
+        [0.95, 0.0], // chine stbd
+        [1.15, 0.35], // gunwale stbd
+      ];
+      const N = cs.length;
+      const positions: number[] = [];
+      // Hull vertices
+      stations.forEach((s) => {
+        cs.forEach(([z, y]) => {
+          const adjY = y * s.scaleY + (s.deckY - 0.35);
+          positions.push(s.x, adjY, z * s.scaleZ);
+        });
+      });
+      const indices: number[] = [];
+      for (let si = 0; si < stations.length - 1; si++) {
+        for (let k = 0; k < N - 1; k++) {
+          const a = si * N + k;
+          const b = si * N + k + 1;
+          const c = (si + 1) * N + k;
+          const d = (si + 1) * N + k + 1;
+          indices.push(a, c, b, b, c, d);
+        }
+      }
+      // Deck (top) between the two gunwale rails
+      const deckStart = positions.length / 3;
+      stations.forEach((s) => {
+        positions.push(s.x, s.deckY, -1.15 * s.scaleZ);
+        positions.push(s.x, s.deckY, 1.15 * s.scaleZ);
+      });
+      for (let si = 0; si < stations.length - 1; si++) {
+        const a = deckStart + si * 2;
+        const b = deckStart + si * 2 + 1;
+        const c = deckStart + (si + 1) * 2;
+        const d = deckStart + (si + 1) * 2 + 1;
+        indices.push(a, b, c, b, d, c);
+      }
+      // Stern transom (close the back)
+      for (let k = 0; k < N - 2; k++) {
+        indices.push(0, k + 2, k + 1);
+      }
+      const geom = new THREE.BufferGeometry();
+      geom.setAttribute(
+        "position",
+        new THREE.Float32BufferAttribute(positions, 3),
+      );
+      geom.setIndex(indices);
+      geom.computeVertexNormals();
+      return geom;
+    };
+
+    const hullGeom = buildHullGeometry();
+    const hullMat = solidMatFor(NAVY, 0.4, 0.5);
+    parts.push(
+      wrapPart(
+        [{ geom: hullGeom, mat: hullMat }],
+        hullGeom,
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(0, -3.5, 0),
+        0.0,
+        0.25,
+      ),
+    );
+
+    // ---- TUBES (two side pontoons) ----
+    const makeTubeCurve = (side: 1 | -1) => {
+      // Trace the gunwale from stern to bow tip
+      const zBase = 1.1 * side;
+      const pts = [
+        new THREE.Vector3(-2.6, 0.4, zBase * 1.0),
+        new THREE.Vector3(-1.2, 0.42, zBase * 1.05),
+        new THREE.Vector3(0.4, 0.45, zBase * 1.0),
+        new THREE.Vector3(1.8, 0.55, zBase * 0.7),
+        new THREE.Vector3(2.55, 0.65, zBase * 0.12),
+      ];
+      return new THREE.CatmullRomCurve3(pts, false, "catmullrom", 0.4);
+    };
+    const tubeGroupSolidGeoms: THREE.BufferGeometry[] = [];
+    const tubePortGeom = new THREE.TubeGeometry(
+      makeTubeCurve(-1),
+      40,
+      0.25,
+      12,
+      false,
+    );
+    const tubeStbdGeom = new THREE.TubeGeometry(
+      makeTubeCurve(1),
+      40,
+      0.25,
+      12,
+      false,
+    );
+    tubeGroupSolidGeoms.push(tubePortGeom, tubeStbdGeom);
+    const tubeMatA = solidMatFor(TUBE_GRAY, 0.05, 0.85);
+    const tubeMatB = solidMatFor(TUBE_GRAY, 0.05, 0.85);
+    // Merge wire sources into one for edge preview
+    const tubeWireCombined = new THREE.BufferGeometry();
+    {
+      const posA = tubePortGeom.attributes.position.array as Float32Array;
+      const posB = tubeStbdGeom.attributes.position.array as Float32Array;
+      const merged = new Float32Array(posA.length + posB.length);
+      merged.set(posA, 0);
+      merged.set(posB, posA.length);
+      tubeWireCombined.setAttribute(
+        "position",
+        new THREE.Float32BufferAttribute(merged, 3),
+      );
+    }
+    // Simpler: use edges of each; combine by adding both as separate LineSegments via a group.
+    // Instead we just use one tube geom's edges for the wire preview — visually close enough.
+    parts.push({
+      ...wrapPart(
+        [
+          { geom: tubePortGeom, mat: tubeMatA },
+          { geom: tubeStbdGeom, mat: tubeMatB },
+        ],
+        tubePortGeom,
+        new THREE.Vector3(0, 0, 0),
+        new THREE.Vector3(0, 0, 2.8),
+        0.25,
+        0.5,
+      ),
     });
-    const grid2 = new THREE.Mesh(grid2Geom, grid2Mat);
-    grid2.rotation.x = Math.PI / 2.15;
-    grid2.position.y = 7;
-    scene.add(grid2);
+    // Add a second edge preview for the starboard tube inside the same group
+    {
+      const p = parts[parts.length - 1];
+      const edges2 = new THREE.EdgesGeometry(tubeStbdGeom, 20);
+      const wire2 = new THREE.LineSegments(edges2, p.wireMat);
+      p.group.add(wire2);
+    }
 
-    // ---- Slow-rotating wire icosahedron (subtle centerpiece) ----
-    const icoGeom = new THREE.IcosahedronGeometry(3.2, 1);
-    const icoMat = new THREE.MeshBasicMaterial({
-      color: 0x4a8fb8,
-      wireframe: true,
-      transparent: true,
-      opacity: 0.14,
+    // ---- CONSOLE (base + windshield + wheel) ----
+    const consoleGroupGeoms: {
+      geom: THREE.BufferGeometry;
+      mat: THREE.MeshStandardMaterial;
+      offset: THREE.Vector3;
+      rot?: THREE.Euler;
+    }[] = [
+      {
+        geom: new THREE.BoxGeometry(0.85, 0.7, 0.7),
+        mat: solidMatFor(NAVY_DARK, 0.2, 0.6),
+        offset: new THREE.Vector3(0.1, 0.8, 0),
+      },
+      {
+        geom: new THREE.BoxGeometry(0.05, 0.45, 0.75),
+        mat: solidMatFor(0x88bcd8, 0.9, 0.1),
+        offset: new THREE.Vector3(0.5, 1.28, 0),
+        rot: new THREE.Euler(0, 0, -0.35),
+      },
+      {
+        geom: new THREE.CylinderGeometry(0.14, 0.14, 0.03, 24),
+        mat: solidMatFor(RED, 0.3, 0.4),
+        offset: new THREE.Vector3(0.05, 1.05, 0),
+        rot: new THREE.Euler(Math.PI / 2.4, 0, 0),
+      },
+    ];
+    // Composite geometry for wire preview (merge boxes)
+    const consoleWirePreview = consoleGroupGeoms[0].geom;
+
+    {
+      const group = new THREE.Group();
+      const edges = new THREE.EdgesGeometry(consoleWirePreview, 20);
+      const wireMat = wireMatFor();
+      const wire = new THREE.LineSegments(edges, wireMat);
+      wire.position.copy(consoleGroupGeoms[0].offset);
+      group.add(wire);
+      const solids = consoleGroupGeoms.map(({ geom, mat, offset, rot }) => {
+        const mesh = new THREE.Mesh(geom, mat);
+        mesh.position.copy(offset);
+        if (rot) mesh.rotation.copy(rot);
+        mesh.visible = false;
+        group.add(mesh);
+        return { mesh, mat };
+      });
+      group.visible = false;
+      scene.add(group);
+      parts.push({
+        group,
+        wire,
+        wireMat,
+        solids,
+        finalPos: new THREE.Vector3(0, 0, 0),
+        fromOffset: new THREE.Vector3(0, 3.5, 0),
+        phaseStart: 0.5,
+        phaseEnd: 0.75,
+      });
+    }
+
+    // ---- ENGINE (outboard at stern) ----
+    const engineParts: {
+      geom: THREE.BufferGeometry;
+      mat: THREE.MeshStandardMaterial;
+      offset: THREE.Vector3;
+      rot?: THREE.Euler;
+    }[] = [
+      {
+        geom: new THREE.BoxGeometry(0.45, 0.75, 0.4),
+        mat: solidMatFor(NAVY_DARK, 0.5, 0.35),
+        offset: new THREE.Vector3(-2.95, 0.7, 0),
+      },
+      {
+        geom: new THREE.CylinderGeometry(0.08, 0.08, 0.55, 16),
+        mat: solidMatFor(NAVY_DARK, 0.6, 0.3),
+        offset: new THREE.Vector3(-2.95, 0.05, 0),
+      },
+      {
+        geom: new THREE.ConeGeometry(0.14, 0.28, 20),
+        mat: solidMatFor(RED, 0.4, 0.4),
+        offset: new THREE.Vector3(-3.15, -0.25, 0),
+        rot: new THREE.Euler(0, 0, Math.PI / 2),
+      },
+    ];
+    const engineWirePreview = engineParts[0].geom;
+    {
+      const group = new THREE.Group();
+      const edges = new THREE.EdgesGeometry(engineWirePreview, 20);
+      const wireMat = wireMatFor();
+      const wire = new THREE.LineSegments(edges, wireMat);
+      wire.position.copy(engineParts[0].offset);
+      group.add(wire);
+      const solids = engineParts.map(({ geom, mat, offset, rot }) => {
+        const mesh = new THREE.Mesh(geom, mat);
+        mesh.position.copy(offset);
+        if (rot) mesh.rotation.copy(rot);
+        mesh.visible = false;
+        group.add(mesh);
+        return { mesh, mat };
+      });
+      group.visible = false;
+      scene.add(group);
+      parts.push({
+        group,
+        wire,
+        wireMat,
+        solids,
+        finalPos: new THREE.Vector3(0, 0, 0),
+        fromOffset: new THREE.Vector3(-2.5, 0.5, 0),
+        phaseStart: 0.75,
+        phaseEnd: 1.0,
+      });
+    }
+
+    // Boat root group — a tiny bob + slow spin for life
+    const boatRoot = new THREE.Group();
+    parts.forEach((p) => {
+      scene.remove(p.group);
+      boatRoot.add(p.group);
     });
-    const ico = new THREE.Mesh(icoGeom, icoMat);
-    ico.position.set(0, 0, -6);
-    scene.add(ico);
+    scene.add(boatRoot);
 
-    // ---- Pointer + scroll tracking (smooth) ----
+    // ---- Pointer + scroll tracking ----
     const pointer = { tx: 0, ty: 0, x: 0, y: 0 };
     const scroll = { target: 0, current: 0 };
 
@@ -116,7 +406,7 @@ export function ThreeBackground() {
         1,
         document.documentElement.scrollHeight - window.innerHeight,
       );
-      scroll.target = window.scrollY / max; // 0..1
+      scroll.target = Math.min(1, Math.max(0, window.scrollY / max));
     };
     window.addEventListener("pointermove", onMove, { passive: true });
     window.addEventListener("scroll", onScroll, { passive: true });
@@ -131,6 +421,38 @@ export function ThreeBackground() {
     };
     window.addEventListener("resize", onResize);
 
+    const easeInOutCubic = (t: number) =>
+      t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+    const clamp01 = (v: number) => Math.min(1, Math.max(0, v));
+
+    const updatePart = (p: Part, s: number) => {
+      const local = clamp01((s - p.phaseStart) / (p.phaseEnd - p.phaseStart));
+      if (local <= 0) {
+        p.group.visible = false;
+        return;
+      }
+      p.group.visible = true;
+      const eased = easeInOutCubic(local);
+      p.group.position.set(
+        p.finalPos.x + p.fromOffset.x * (1 - eased),
+        p.finalPos.y + p.fromOffset.y * (1 - eased),
+        p.finalPos.z + p.fromOffset.z * (1 - eased),
+      );
+      // Wire opacity: fade in 0→0.3, hold, fade out 0.7→1.0
+      const wireIn = clamp01(local / 0.3);
+      const wireOut = 1 - clamp01((local - 0.7) / 0.3);
+      p.wireMat.opacity = wireIn * wireOut * 0.85;
+      // Solid opacity: fade in 0.7→1.0
+      const solidIn = clamp01((local - 0.6) / 0.4);
+      p.solids.forEach(({ mesh, mat }) => {
+        mat.opacity = solidIn;
+        mesh.visible = solidIn > 0.01;
+      });
+      // Settle bounce right at seat
+      const settle = local > 0.95 ? 1 + (1 - local) * 0.4 : 1;
+      p.group.scale.setScalar(settle);
+    };
+
     let raf = 0;
     const clock = new THREE.Clock();
     const posAttr = gridGeom.attributes.position as THREE.BufferAttribute;
@@ -138,49 +460,40 @@ export function ThreeBackground() {
     const animate = () => {
       const t = clock.getElapsedTime();
 
-      // Smooth interpolation
       pointer.x += (pointer.tx - pointer.x) * 0.04;
       pointer.y += (pointer.ty - pointer.y) * 0.04;
       scroll.current += (scroll.target - scroll.current) * 0.06;
-      const s = scroll.current;
+      const s = prefersReduced ? 1 : scroll.current;
 
-      // Particles drift gently, layers move at different speeds (parallax)
-      near.pts.rotation.y = t * 0.02 + s * 0.4;
-      near.pts.rotation.x = Math.sin(t * 0.08) * 0.05;
-      mid.pts.rotation.y = -t * 0.015 - s * 0.6;
-      mid.pts.rotation.x = Math.cos(t * 0.06) * 0.04;
-      far.pts.rotation.y = t * 0.008 + s * 0.9;
-
-      // Ocean waves
+      // Ocean waves under boat
       if (!prefersReduced) {
         for (let i = 0; i < basePositions.length; i += 3) {
           const x = basePositions[i];
           const y = basePositions[i + 1];
           const wave =
-            Math.sin(x * 0.3 + t * 0.8) * 0.4 +
-            Math.cos(y * 0.35 + t * 0.6) * 0.35;
+            Math.sin(x * 0.35 + t * 0.7) * 0.22 +
+            Math.cos(y * 0.4 + t * 0.55) * 0.2;
           posAttr.array[i + 2] = wave;
         }
         posAttr.needsUpdate = true;
       }
 
-      // Icosahedron slow rotation, drifts with scroll
-      ico.rotation.x = t * 0.05 + s * 0.5;
-      ico.rotation.y = t * 0.07 + s * 1.2;
-      ico.position.y = Math.sin(t * 0.3) * 0.4 - s * 2;
-      icoMat.opacity = 0.08 + Math.sin(t * 0.4) * 0.04 + s * 0.1;
+      // Assembly
+      parts.forEach((p) => updatePart(p, s));
 
-      grid2.rotation.z = t * 0.02;
+      // Idle bob for the whole boat
+      boatRoot.position.y = Math.sin(t * 0.6) * 0.12;
+      boatRoot.rotation.z = Math.sin(t * 0.5) * 0.015;
 
-      // Camera: gentle pointer parallax + scroll travel through the scene
-      camera.position.x = pointer.x * 0.5;
-      camera.position.y = 0.4 + -pointer.y * 0.3 - s * 1.2;
-      camera.position.z = 10 - s * 3.5;
-      camera.lookAt(0, -s * 1.5, -s * 4);
-
-      // Grid drifts down with scroll to reveal new terrain
-      grid.position.y = -6 - s * 2;
-      grid2.position.y = 7 - s * 3;
+      // Camera slow orbit driven by scroll (0 → 1) plus pointer parallax
+      const angle = Math.PI * 0.15 + s * Math.PI * 0.55;
+      const radius = 8.5 - s * 1.5;
+      const camY = 1.6 + s * 1.4;
+      camera.position.x =
+        Math.sin(angle) * radius + pointer.x * 0.6;
+      camera.position.z = Math.cos(angle) * radius;
+      camera.position.y = camY + -pointer.y * 0.4;
+      camera.lookAt(0, 0.3, 0);
 
       renderer.render(scene, camera);
       raf = requestAnimationFrame(animate);
@@ -193,16 +506,16 @@ export function ThreeBackground() {
       window.removeEventListener("scroll", onScroll);
       window.removeEventListener("resize", onResize);
       renderer.dispose();
-      [near, mid, far].forEach(({ geom, mat }) => {
-        geom.dispose();
-        mat.dispose();
-      });
       gridGeom.dispose();
       gridMat.dispose();
-      grid2Geom.dispose();
-      grid2Mat.dispose();
-      icoGeom.dispose();
-      icoMat.dispose();
+      parts.forEach((p) => {
+        p.wireMat.dispose();
+        (p.wire.geometry as THREE.BufferGeometry).dispose();
+        p.solids.forEach(({ mesh, mat }) => {
+          mesh.geometry.dispose();
+          mat.dispose();
+        });
+      });
       if (renderer.domElement.parentNode === mount) {
         mount.removeChild(renderer.domElement);
       }

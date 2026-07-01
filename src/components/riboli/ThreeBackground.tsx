@@ -655,6 +655,13 @@ export function ThreeBackground() {
       boatRoot.position.y = Math.sin(t * 0.6) * 0.12;
       boatRoot.rotation.z = Math.sin(t * 0.5) * 0.015;
 
+      // Spin propeller once the engine is fully seated
+      if (propSpinGroup) {
+        const engineLocal = clamp01((s - parts[3].phaseStart) / (parts[3].phaseEnd - parts[3].phaseStart));
+        propSpinGroup.rotation.x += 0.05 + engineLocal * 0.25;
+      }
+
+
       // Camera: orbit during assembly (s: 0→1), then a gentle continued drift after (sExtra)
       const angle = Math.PI * 0.15 + s * Math.PI * 0.55 + sExtra * Math.PI * 0.25;
       const radius = 8.5 - s * 1.5 - sExtra * 0.6;

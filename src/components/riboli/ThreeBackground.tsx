@@ -512,15 +512,15 @@ export function ThreeBackground() {
       boatRoot.position.y = Math.sin(t * 0.6) * 0.12;
       boatRoot.rotation.z = Math.sin(t * 0.5) * 0.015;
 
-      // Camera slow orbit driven by scroll (0 → 1) plus pointer parallax
-      const angle = Math.PI * 0.15 + s * Math.PI * 0.55;
-      const radius = 8.5 - s * 1.5;
-      const camY = 1.6 + s * 1.4;
-      camera.position.x =
-        Math.sin(angle) * radius + pointer.x * 0.6;
+      // Camera: orbit during assembly (s: 0→1), then a gentle continued drift after (sExtra)
+      const angle = Math.PI * 0.15 + s * Math.PI * 0.55 + sExtra * Math.PI * 0.25;
+      const radius = 8.5 - s * 1.5 - sExtra * 0.6;
+      const camY = 1.6 + s * 1.4 + sExtra * 0.5;
+      camera.position.x = Math.sin(angle) * radius + pointer.x * 0.6;
       camera.position.z = Math.cos(angle) * radius;
       camera.position.y = camY + -pointer.y * 0.4;
       camera.lookAt(0, 0.3, 0);
+
 
       renderer.render(scene, camera);
       raf = requestAnimationFrame(animate);

@@ -2,11 +2,11 @@ import { useEffect, useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 
 const links = [
-  { label: "Μοντέλα", href: "#models" },
-  { label: "Τεχνολογία", href: "#tech" },
-  { label: "Υπηρεσίες", href: "#pillars" },
-  { label: "Dealers", href: "#dealers" },
-  { label: "Επικοινωνία", href: "#footer" },
+  { label: "ΜΟΜΝΤΕΛΑ", href: "#models" },
+  { label: "ΤΕΧΝΟΛΟΓΙΑ", href: "#tech" },
+  { label: "ΥΠΗΡΕΣΙΕΣ", href: "#pillars" },
+  { label: "DEALERS", href: "#dealers" },
+  { label: "ΕΠΙΚΟΙΝΩΝΙΑ", href: "#footer" },
 ];
 
 export function Nav() {

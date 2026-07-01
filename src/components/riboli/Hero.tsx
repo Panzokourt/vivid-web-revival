@@ -3,8 +3,8 @@ import { useEffect, useState } from "react";
 import { ThreeBackground } from "./ThreeBackground";
 import heroImg from "@/assets/hero.jpg";
 
-const line1 = "Η Απόδοση";
-const line2 = "Επαναπροσδιορίζεται";
+const line1 = "Η ΑΠΟΔΟΣΗ";
+const line2 = "ΕΠΑΝΑΠΡΟΣΔΙΟΡΙΖΕΤΑΙ";
 
 export function Hero() {
   const [mounted, setMounted] = useState(false);
@@ -60,13 +60,13 @@ export function Hero() {
             href="#models"
             className="bg-brand-red text-white px-10 py-4 font-bold uppercase tracking-widest text-xs hover:bg-brand-red/85 transition-colors"
           >
-            Δείτε τη Σειρά
+            ΔΕΙΤΕ ΤΗ ΣΕΙΡΑ
           </a>
           <a
             href="#tech"
             className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-10 py-4 font-bold uppercase tracking-widest text-xs hover:bg-white/20 transition-colors"
           >
-            Τεχνικά Χαρακτηριστικά
+            ΤΕΧΝΙΚΑ ΧΑΡΑΚΤΗΡΙΣΤΙΚΑ
           </a>
         </motion.div>
       </div>

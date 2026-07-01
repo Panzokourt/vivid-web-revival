@@ -37,17 +37,17 @@ export function FeaturedModels() {
         >
           <div>
             <span className="text-brand-red font-bold text-xs uppercase tracking-[0.2em] mb-4 block">
-              Η Συλλογή μας
+              Η ΣΥΛΛΟΓΗ ΜΑΣ
             </span>
             <h2 className="text-3xl md:text-5xl font-display uppercase text-brand-navy leading-tight">
-              Εμβληματικά Μοντέλα
+              ΜΟΝΤΕΛΑ
             </h2>
           </div>
           <a
             href="#"
             className="self-start text-xs font-bold uppercase tracking-widest border-b-2 border-brand-red pb-1 text-brand-navy hover:text-brand-red transition-colors"
           >
-            Όλα τα σκάφη →
+            ΌΛΑ ΤΑ ΣΚΑΦΗ →
           </a>
         </motion.div>
 

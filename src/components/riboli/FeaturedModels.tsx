@@ -48,12 +48,12 @@ export function FeaturedModels() {
   }, []);
 
   return (
-    <section ref={root} id="models" className="relative bg-paper text-ink overflow-hidden">
-      <div className="px-6 md:px-10 pt-24 pb-10">
+    <section ref={root} id="models" className="relative bg-paper text-ink overflow-hidden h-screen flex flex-col">
+      <div className="px-6 md:px-10 pt-16 md:pt-20 pb-6 shrink-0">
         <div className="models-eyebrow flex items-end justify-between gap-6 max-w-[1600px] mx-auto">
           <div>
             <div className="text-[11px] uppercase tracking-[0.3em] text-ink/50">The Collection</div>
-            <h2 className="font-display text-6xl md:text-8xl leading-none mt-3">Models</h2>
+            <h2 className="font-display text-5xl md:text-7xl leading-none mt-2">Models</h2>
           </div>
           <div className="text-[11px] uppercase tracking-[0.3em] text-ink/50 hidden md:block">
             Scroll <span className="text-ink/80">→</span>
@@ -61,12 +61,12 @@ export function FeaturedModels() {
         </div>
       </div>
 
-      <div ref={track} className="flex gap-6 md:gap-10 px-6 md:px-10 pb-24 will-change-transform">
+      <div ref={track} className="flex gap-6 md:gap-10 px-6 md:px-10 pb-10 will-change-transform flex-1 min-h-0 items-stretch">
         {models.map((m) => (
           <Link
             key={m.to}
             to={m.to}
-            className="model-slide relative shrink-0 w-[85vw] md:w-[70vw] lg:w-[75vw] h-[80vh] lg:h-[85vh] bg-paper-2 overflow-hidden group block"
+            className="model-slide relative shrink-0 w-[85vw] md:w-[70vw] lg:w-[70vw] h-full bg-paper-2 overflow-hidden group block"
           >
 
             <img

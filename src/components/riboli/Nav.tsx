@@ -6,7 +6,7 @@ const links = [
   { label: "Models", href: "/#models" },
   { label: "About", href: "/about" },
   { label: "Dealers", href: "/#dealers" },
-  { label: "Contact", href: "/#footer" },
+  { label: "Contact", href: "/contact" },
 ];
 
 const NAV_TEXT_SHADOW = "0 2px 12px rgba(0,0,0,0.6), 0 0 2px rgba(0,0,0,0.4)";

@@ -53,12 +53,43 @@ function loadMapsScript(): Promise<void> {
 }
 
 export function DealersMap({ pins }: { pins: DealerPin[] }) {
+  const wrapperEl = useRef<HTMLDivElement>(null);
   const mapEl = useRef<HTMLDivElement>(null);
+  const asideEl = useRef<HTMLElement>(null);
   const mapRef = useRef<any>(null);
   const infoRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
   const [active, setActive] = useState<string>(pins[0]?.id ?? "");
   const [ready, setReady] = useState(false);
+
+  // Prevent the page from scrolling while the wheel is over the map/sidebar.
+  // React's onWheel is passive, so bind a native non-passive listener.
+  // If the wheel is over the sidebar, forward the delta to its own scroll.
+  useEffect(() => {
+    const el = wrapperEl.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      const aside = asideEl.current;
+      if (aside && aside.contains(e.target as Node)) {
+        const atTop = aside.scrollTop <= 0 && e.deltaY < 0;
+        const atBottom =
+          aside.scrollTop + aside.clientHeight >= aside.scrollHeight - 1 &&
+          e.deltaY > 0;
+        // Always keep the page still; only scroll inside the aside.
+        e.preventDefault();
+        if (!atTop && !atBottom) {
+          aside.scrollTop += e.deltaY;
+        }
+        return;
+      }
+      // Over the map: block page scroll; Google Maps handles zoom itself.
+      e.preventDefault();
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+
+
 
   useEffect(() => {
     let cancelled = false;
@@ -129,7 +160,10 @@ export function DealersMap({ pins }: { pins: DealerPin[] }) {
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-0 border border-ink/10 bg-paper overflow-hidden">
+    <div
+      ref={wrapperEl}
+      className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-0 border border-ink/10 bg-paper overflow-hidden overscroll-contain"
+    >
       <div className="relative aspect-[4/3] lg:aspect-auto lg:h-[560px] bg-paper-2/40">
         <div ref={mapEl} className="absolute inset-0" />
         {!ready && (
@@ -142,7 +176,10 @@ export function DealersMap({ pins }: { pins: DealerPin[] }) {
         </div>
       </div>
 
-      <aside className="border-t lg:border-t-0 lg:border-l border-ink/10 max-h-[560px] overflow-y-auto">
+      <aside
+        ref={asideEl}
+        className="border-t lg:border-t-0 lg:border-l border-ink/10 max-h-[560px] overflow-y-auto overscroll-contain"
+      >
         <div className="sticky top-0 bg-paper border-b border-ink/10 px-6 py-4 text-[10px] uppercase tracking-[0.35em] text-ink/50">
           Select a dealer
         </div>

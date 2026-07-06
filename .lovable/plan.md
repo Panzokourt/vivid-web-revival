@@ -1,28 +1,48 @@
-## 1. Smoother, slightly slower scrolling (Lenis + GSAP sync)
+## Auto-invert για μεγάλα κείμενα (mix-blend difference)
 
-The "low-fps" feeling comes from native scroll driving GSAP `scrub` triggers (hero parallax, pinned chapters, progress bar) directly — every wheel tick snaps. Fix by adding **Lenis** for interpolated smooth scrolling and syncing it with ScrollTrigger.
+Θα προσθέσουμε ένα utility που κάνει τα μεγάλα display texts να αντιστρέφονται αυτόματα ανάλογα με το τι είναι από πίσω τους — σκούρα γράμματα σε ανοιχτό φαίνονται σκούρα, σε σκούρο image γίνονται φωτεινά. Καμία χειροκίνητη ρύθμιση, δουλεύει και όταν αλλάξει η εικόνα.
 
-- Add dependency: `lenis` (small, ~4kb, framework-agnostic).
-- New file `src/lib/smooth-scroll.ts`: creates a single Lenis instance with:
-  - `duration: 1.4` (slightly slower / longer glide than default 1.2)
-  - `easing: t => 1 - Math.pow(1 - t, 3)` (smooth cubic-out)
-  - `wheelMultiplier: 0.85` (slightly slower on wheel — the "πιο αργό" feel)
-  - `touchMultiplier: 1.2` (keep touch responsive)
-  - Uses `requestAnimationFrame` loop, ticks `ScrollTrigger.update()` on every frame so pins/scrubs stay in perfect sync.
-  - Exports `initSmoothScroll()` and returns a cleanup.
-- New component `src/components/riboli/SmoothScroll.tsx`: client-only wrapper that calls `initSmoothScroll()` in `useEffect`, respects `prefersReducedMotion()` (bails out → native scroll), destroys on unmount.
-- Mount once in `src/routes/__root.tsx` inside `RootComponent`, above `<Outlet />`.
-- Adjust `ScrollProgress.tsx`: replace the per-update `gsap.to(bar, { duration: 0.15, ... })` tween with a direct `gsap.set(bar, { scaleY: self.progress })` — Lenis already smooths the input, so the extra 0.15s tween adds visible lag. The bar will follow the smooth scroll cleanly.
-- No changes needed to About pinned chapters, Hero parallax, or DealersCTA — they read from ScrollTrigger which is now driven by Lenis's rAF loop.
+### Πώς δουλεύει
 
-Reduced-motion: SmoothScroll bails, everything falls back to native scroll (behavior already handled by existing components).
+`mix-blend-mode: difference` + `color: white` δίνει "photographic negative" εφέ: το κείμενο πάντα γίνεται το αντίθετο του pixel από κάτω. Πάνω σε ανοιχτό paper background → σχεδόν μαύρο. Πάνω σε σκούρη θάλασσα/hero → λευκό. Οι μεταβάσεις (μισό γράμμα σε ένα, μισό στο άλλο) διαβάζονται πάντα.
 
-## 2. Remove "Technology" from top nav
+### Πού εφαρμόζεται
 
-In `src/components/riboli/Nav.tsx`, remove the `{ label: "Technology", href: "/#tech" }` entry from the `links` array. The nav becomes: Models · About · Dealers · Contact. Mobile menu updates automatically since it maps over the same array.
+Μόνο στα τεράστια display numerals/wordmarks που "κόβονται" πάνω από εικόνες:
 
-## Out of scope
+1. **FeaturedModels slides** — τα νούμερα 680 / 950 / 520 πάνω από τις hero εικόνες των μοντέλων.
+2. **ModelHero** — το μεγάλο νούμερο μοντέλου στο hero της σελίδας μοντέλου.
+3. **Footer** — το τεράστιο RIBALI wordmark στο κάτω μέρος (πέφτει πάνω στο ink background — θα το αφήσουμε ως έχει αν είναι ήδη ενιαίο, αλλιώς θα μπει και εκεί).
+4. **Hero** (αρχική) — το κύριο display headline εφόσον υπερβαίνει την εικόνα.
 
-- No layout, color, or copy changes.
-- No changes to the Technology section itself on the homepage (only the nav link is removed).
-- No changes to the loader overlay or magnetic buttons.
+Δεν αγγίζουμε: nav logo, body copy, small labels, buttons, eyebrow text, specs — αυτά έχουν ήδη σταθερό contrast.
+
+### Τεχνικά
+
+**`src/styles.css`** — νέο utility class:
+
+```css
+@utility text-invert-blend {
+  color: #fff;
+  mix-blend-mode: difference;
+  isolation: isolate;
+}
+```
+
+`isolation: isolate` στο κοντινότερο container ώστε το blend να "βλέπει" μόνο το section πίσω του, όχι όλη τη σελίδα (αποφεύγει παράξενα χρώματα από overlays/gradients πιο πάνω).
+
+**Αλλαγές στα components** — αντικατάσταση του υπάρχοντος `text-outline text-paper` (ή σκούρου fill) με `text-invert-blend` στα σημεία της λίστας. Παράλληλα:
+- αφαιρούμε το `bg-gradient-to-t from-ink/50` overlay από πάνω από τους αριθμούς στα FeaturedModels slides γιατί το difference blend το χρειάζεται καθαρό για σωστή αντιστροφή (ή το κρατάμε μόνο κάτω από τα labels, όχι κάτω από τον αριθμό).
+- ορίζουμε `isolation: isolate` στο `.model-slide` και στο `ModelHero` wrapper.
+
+### Fallback / edge cases
+
+- `prefers-reduced-transparency` / παλιοί browsers: το `mix-blend-mode` έχει άριστη υποστήριξη· δεν χρειάζεται fallback.
+- Δεν επηρεάζει accessibility tools (screen readers βλέπουν κανονικό κείμενο).
+- Δεν αλλάζει το layout, μόνο το χρώμα rendering.
+
+### Out of scope
+
+- Δεν αλλάζουμε typography, μεγέθη, ή layout.
+- Δεν εφαρμόζουμε το εφέ σε mικρά κείμενα ή paragraph text — εκεί το difference φαίνεται "νευρικό".
+- Αν αργότερα θέλεις outline stroke ή glow σε άλλα σημεία, το βλέπουμε ξεχωριστά.

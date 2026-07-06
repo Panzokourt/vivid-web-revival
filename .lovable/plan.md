@@ -1,61 +1,28 @@
-# GSAP Enhancements
+## 1. Smoother, slightly slower scrolling (Lenis + GSAP sync)
 
-Four new animation systems added across the app, all respecting `prefers-reduced-motion` (via existing `prefersReducedMotion()` helper) and cleaned up in `useEffect` returns.
+The "low-fps" feeling comes from native scroll driving GSAP `scrub` triggers (hero parallax, pinned chapters, progress bar) directly — every wheel tick snaps. Fix by adding **Lenis** for interpolated smooth scrolling and syncing it with ScrollTrigger.
 
-## 1. Magnetic / Cursor-Follow CTA Buttons
+- Add dependency: `lenis` (small, ~4kb, framework-agnostic).
+- New file `src/lib/smooth-scroll.ts`: creates a single Lenis instance with:
+  - `duration: 1.4` (slightly slower / longer glide than default 1.2)
+  - `easing: t => 1 - Math.pow(1 - t, 3)` (smooth cubic-out)
+  - `wheelMultiplier: 0.85` (slightly slower on wheel — the "πιο αργό" feel)
+  - `touchMultiplier: 1.2` (keep touch responsive)
+  - Uses `requestAnimationFrame` loop, ticks `ScrollTrigger.update()` on every frame so pins/scrubs stay in perfect sync.
+  - Exports `initSmoothScroll()` and returns a cleanup.
+- New component `src/components/riboli/SmoothScroll.tsx`: client-only wrapper that calls `initSmoothScroll()` in `useEffect`, respects `prefersReducedMotion()` (bails out → native scroll), destroys on unmount.
+- Mount once in `src/routes/__root.tsx` inside `RootComponent`, above `<Outlet />`.
+- Adjust `ScrollProgress.tsx`: replace the per-update `gsap.to(bar, { duration: 0.15, ... })` tween with a direct `gsap.set(bar, { scaleY: self.progress })` — Lenis already smooths the input, so the extra 0.15s tween adds visible lag. The bar will follow the smooth scroll cleanly.
+- No changes needed to About pinned chapters, Hero parallax, or DealersCTA — they read from ScrollTrigger which is now driven by Lenis's rAF loop.
 
-**New file**: `src/components/riboli/MagneticButton.tsx`
-- Wrapper component (`<MagneticButton as="a" href=... className=...>`) using `gsap.quickTo` for `x`/`y`.
-- On `mousemove` inside the element, translates the button toward cursor (strength ~0.3, max ~12px). On `mouseleave`, tweens back to 0 with elastic ease.
-- Inner span also gets a subtler follow (parallax feel).
-- Disabled on touch devices and when `prefersReducedMotion()` is true — falls back to plain element.
+Reduced-motion: SmoothScroll bails, everything falls back to native scroll (behavior already handled by existing components).
 
-**Applied to**:
-- Hero primary CTA ("Explore models" / configurator) in `src/components/riboli/Hero.tsx`
-- DealersCTA main button in `src/components/riboli/DealersCTA.tsx`
-- About page CTA buttons in `src/routes/about.tsx`
-- Nav "Configurator" pill in `src/components/riboli/Nav.tsx`
+## 2. Remove "Technology" from top nav
 
-## 2. Pinned Chapters with Crossfade (About page Story)
-
-**Edited**: `src/routes/about.tsx`
-- Rewrites the current Story block into a pinned section: left column is sticky text that swaps between 3 "chapters" (e.g. *1998 — The first hull*, *2010 — Open-sea DNA*, *2026 — The RIBALI line*).
-- Right column is a stacked stack of 3 absolutely-positioned images; ScrollTrigger with `scrub: true` and `pin: true` crossfades opacity between them as the user scrolls through the section (height ~300vh).
-- Left text also crossfades in sync (title + paragraph per chapter).
-- On mobile (< md), disables pin/scrub and shows the 3 chapters as a normal vertical stack.
-
-## 3. Side Scroll Progress Bar
-
-**New file**: `src/components/riboli/ScrollProgress.tsx`
-- Fixed vertical 2px bar on the right edge of viewport (`right-0 top-0 bottom-0`), with an inner `bg-primary` element whose `scaleY` is driven by `ScrollTrigger` on the document (`start: top top`, `end: bottom bottom`, `scrub: true`).
-- Also includes a small numeric % indicator at bottom-right that updates via the same trigger (optional, subtle).
-- Hidden when `prefersReducedMotion()`; hidden on print.
-
-**Mounted in**: `src/routes/__root.tsx` inside the RootComponent so it renders on every page.
-
-## 4. Page-Load "Tear" Overlay
-
-**New file**: `src/components/riboli/LoaderOverlay.tsx`
-- Full-viewport overlay with two halves (top + bottom, or left + right) using `bg-ink`. Renders on mount; a `gsap.timeline` on mount:
-  1. Small logo/wordmark "RIBALI" fades in center (0.4s).
-  2. Brief hold (0.3s).
-  3. Two halves split apart (`yPercent: -100` top, `yPercent: 100` bottom) with `power4.inOut` over 0.9s — the "tear".
-  4. Overlay unmounts / sets `pointer-events: none` and `display: none`.
-- Uses `sessionStorage` flag (`ribali_loader_shown`) so it plays once per session, not on every route change.
-- Skipped entirely if `prefersReducedMotion()`.
-
-**Mounted in**: `src/routes/__root.tsx` (above `<Outlet />`, inside a client-only guard since it touches `window`).
-
-## Technical notes
-
-- All new components are client-only (guard with `typeof window !== 'undefined'` or lazy `useEffect`) — safe for TanStack SSR.
-- Reuse existing `gsap` and `ScrollTrigger` imports from `@/lib/gsap`.
-- Every `useEffect` returns cleanup that calls `ScrollTrigger.getById(...)?.kill()` or stores the trigger ref and kills it, so route changes don't leak triggers.
-- No new dependencies (GSAP already installed).
-- No backend/schema changes.
+In `src/components/riboli/Nav.tsx`, remove the `{ label: "Technology", href: "/#tech" }` entry from the `links` array. The nav becomes: Models · About · Dealers · Contact. Mobile menu updates automatically since it maps over the same array.
 
 ## Out of scope
 
-- No changes to configurator, models pages, or Cards/Stats animations.
-- No custom cursor (only button-level magnetism).
-- Loader is minimal-brand (wordmark only), no video/loading progress logic.
+- No layout, color, or copy changes.
+- No changes to the Technology section itself on the homepage (only the nav link is removed).
+- No changes to the loader overlay or magnetic buttons.

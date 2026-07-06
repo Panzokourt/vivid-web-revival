@@ -5,7 +5,6 @@ import { MagneticButton } from "@/components/riboli/MagneticButton";
 const links = [
   { label: "Models", href: "/#models" },
   { label: "About", href: "/about" },
-  { label: "Technology", href: "/#tech" },
   { label: "Dealers", href: "/#dealers" },
   { label: "Contact", href: "/#footer" },
 ];

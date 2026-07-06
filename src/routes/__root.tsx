@@ -13,6 +13,7 @@ import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { ScrollProgress } from "@/components/riboli/ScrollProgress";
 import { LoaderOverlay } from "@/components/riboli/LoaderOverlay";
+import { SmoothScroll } from "@/components/riboli/SmoothScroll";
 
 function NotFoundComponent() {
   return (
@@ -127,6 +128,7 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <LoaderOverlay />
+      <SmoothScroll />
       <ScrollProgress />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
       <Outlet />

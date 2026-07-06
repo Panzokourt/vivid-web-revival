@@ -227,40 +227,69 @@ function AboutPage() {
         </div>
       </section>
 
-      {/* STORY */}
-      <section className="px-6 md:px-10 py-20 md:py-32 border-b border-ink/10">
-        <div className="grid grid-cols-1 md:grid-cols-[1fr_2fr] gap-10 md:gap-16 max-w-6xl">
-          <div className="reveal-up">
-            <div className="text-[10px] uppercase tracking-[0.35em] text-copper mb-3">
-              Our story
+      {/* STORY — pinned chapters (desktop) / stacked (mobile) */}
+      <section className="chapters-section relative bg-paper border-b border-ink/10 md:h-screen md:overflow-hidden">
+        {/* Desktop: pinned, absolutely-stacked crossfade */}
+        <div className="hidden md:grid absolute inset-0 grid-cols-2 gap-0">
+          <div className="relative flex flex-col justify-center px-10 lg:px-16">
+            <div className="text-[10px] uppercase tracking-[0.35em] text-copper mb-6">
+              Our story · three chapters
             </div>
-            <div className="font-display text-5xl md:text-6xl leading-none text-ink/90">
-              27
-              <span className="text-copper">.</span>
+            <div className="relative">
+              {CHAPTERS.map((c, i) => (
+                <div
+                  key={c.year}
+                  className={`chapter-text ${i === 0 ? "relative" : "absolute inset-0"} max-w-md`}
+                >
+                  <div className="font-display text-7xl lg:text-8xl leading-none text-ink/90 mb-4">
+                    {c.year}
+                  </div>
+                  <h3 className="font-display text-3xl lg:text-4xl leading-tight mb-5">
+                    {c.title}
+                  </h3>
+                  <p className="text-ink/70 text-base lg:text-lg leading-relaxed">{c.body}</p>
+                </div>
+              ))}
             </div>
-            <div className="text-[10px] uppercase tracking-[0.3em] text-ink/50 mt-2">
-              Years in the water
+            <div className="mt-10 flex gap-2">
+              {CHAPTERS.map((c) => (
+                <span key={c.year} className="h-[2px] w-10 bg-ink/20" />
+              ))}
             </div>
           </div>
-          <div className="reveal-up space-y-6 text-ink/80 text-base md:text-lg leading-relaxed">
-            <p>
-              RIBALI began in a rented garage in Perama, with two brothers and a single mold
-              recovered from an old fishing coop. The first hull went to a friend of the family
-              who ran charters out of Aegina. He is still on the water. So is the boat.
-            </p>
-            <p>
-              Word traveled the way it does in a small industry — slowly, then all at once. By
-              2004 we had moved to the current shipyard, doubled the team, and started designing
-              our own hulls from scratch. Today RIBALI boats sail from the Cyclades to the
-              Adriatic, from the coasts of Morocco to the fjords of Norway.
-            </p>
-            <p>
-              We are still small on purpose. We build fewer than eighty boats a year, so that
-              every one of them leaves the yard with a person's name attached to it — the
-              craftsman who finished the deck, the designer who signed off the lines, the
-              founder who tested the ride.
-            </p>
+          <div className="relative overflow-hidden">
+            {CHAPTERS.map((c, i) => (
+              <img
+                key={c.year}
+                src={c.image}
+                alt={`${c.year} — ${c.title}`}
+                className={`chapter-image absolute inset-0 h-full w-full object-cover ${i === 0 ? "" : ""}`}
+                style={{ filter: "contrast(1.05) saturate(0.85)" }}
+              />
+            ))}
           </div>
+        </div>
+
+        {/* Mobile: normal stack */}
+        <div className="md:hidden px-6 py-16 space-y-14">
+          <div className="text-[10px] uppercase tracking-[0.35em] text-copper mb-3">
+            Our story
+          </div>
+          {CHAPTERS.map((c) => (
+            <div key={c.year} className="reveal-up space-y-4">
+              <div className="font-display text-6xl leading-none text-ink/90">{c.year}</div>
+              <h3 className="font-display text-2xl leading-tight">{c.title}</h3>
+              <p className="text-ink/70 text-base leading-relaxed">{c.body}</p>
+              <div className="aspect-[4/3] overflow-hidden mt-4">
+                <img
+                  src={c.image}
+                  alt={`${c.year} — ${c.title}`}
+                  className="w-full h-full object-cover"
+                  style={{ filter: "contrast(1.05) saturate(0.85)" }}
+                />
+              </div>
+            </div>
+          ))}
         </div>
       </section>
 

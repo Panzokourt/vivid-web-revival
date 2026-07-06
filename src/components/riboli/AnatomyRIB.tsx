@@ -1,35 +1,35 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
-import anatomyImg from "@/assets/tech-detail.jpg";
+import anatomyImg from "@/assets/anatomy-rib.jpg";
 
 const hotspots = [
   {
     id: "hull",
     title: "Deep-V hull",
     body: "22° deadrise, hand-laid GRP layup — planted through Aegean chop, dry at speed.",
-    x: 52,
+    x: 45,
     y: 78,
   },
   {
     id: "tubes",
     title: "ORCA Hypalon tubes",
     body: "1670 dtex fabric, hot-welded seams, 10-year UV rating. The industry benchmark.",
-    x: 30,
-    y: 55,
+    x: 22,
+    y: 62,
   },
   {
     id: "console",
     title: "Driver-forward console",
     body: "Wraparound windshield, glass helm, leaning-post seat as standard.",
-    x: 60,
-    y: 42,
+    x: 48,
+    y: 48,
   },
   {
     id: "deck",
     title: "Modular deck",
     body: "Bow sunpad, aft bench, stowage bays — reconfigured to how you actually use the boat.",
-    x: 75,
-    y: 62,
+    x: 70,
+    y: 55,
   },
 ] as const;
 

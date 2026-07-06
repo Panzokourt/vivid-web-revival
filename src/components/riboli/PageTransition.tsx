@@ -20,6 +20,7 @@ export function PageTransition() {
   const pathRef = useRef<SVGPathElement>(null);
   const busy = useRef(false);
   const pendingReveal = useRef(false);
+  const safetyTimer = useRef<number | null>(null);
 
   useEffect(() => {
     if (prefersReducedMotion()) return;
@@ -32,7 +33,15 @@ export function PageTransition() {
       overlay.setAttribute("aria-busy", on ? "true" : "false");
     };
 
-    const reveal = (duration = 0.55) => {
+    const clearSafety = () => {
+      if (safetyTimer.current !== null) {
+        window.clearTimeout(safetyTimer.current);
+        safetyTimer.current = null;
+      }
+    };
+
+    const reveal = (duration = 0.9) => {
+      clearSafety();
       busy.current = true;
       setInteractive(true);
       // Instant scroll to top for the new page (behind the cover).
@@ -51,24 +60,33 @@ export function PageTransition() {
     };
 
     const cover = () => {
+      clearSafety();
       busy.current = true;
       setInteractive(true);
       gsap.set(path, { attr: { d: REST_BOTTOM } });
       const tl = gsap.timeline({
         onComplete: () => {
+          // Safety: if the route never resolves (or resolves silently), reveal anyway
+          // so the overlay never gets stuck as a black page.
+          safetyTimer.current = window.setTimeout(() => {
+            pendingReveal.current = false;
+            reveal();
+          }, 900);
+
           if (pendingReveal.current) {
             pendingReveal.current = false;
+            clearSafety();
             reveal();
           }
         },
       });
       tl.to(path, {
         attr: { d: WAVE_COVER },
-        duration: 0.35,
+        duration: 0.55,
         ease: "power2.in",
       }).to(path, {
         attr: { d: FLAT_COVER },
-        duration: 0.2,
+        duration: 0.35,
         ease: "power1.out",
       });
     };
@@ -81,41 +99,44 @@ export function PageTransition() {
     try {
       if (!sessionStorage.getItem(SESSION_KEY)) {
         sessionStorage.setItem(SESSION_KEY, "1");
-        reveal(0.75);
+        gsap.set(path, { attr: { d: FLAT_COVER } });
+        // slight delay so user sees the reveal
+        window.setTimeout(() => reveal(1.1), 120);
       }
     } catch {
       // sessionStorage may be blocked; skip intro silently.
     }
 
     let lastPath = router.state.location.pathname;
-    let coveringFor = lastPath;
 
     const unsubBefore = router.subscribe("onBeforeNavigate", (e) => {
       const from = e.fromLocation?.pathname;
       const to = e.toLocation?.pathname;
       if (!to || from === to) return;
-      coveringFor = to;
       pendingReveal.current = false;
       cover();
     });
 
     const unsubResolved = router.subscribe("onResolved", (e) => {
       const to = e.toLocation?.pathname;
-      if (!to || to === lastPath) return;
+      const from = e.fromLocation?.pathname;
+      if (!to || from === to) return;
       lastPath = to;
       if (busy.current) {
         // Cover still in flight — reveal after it completes.
         pendingReveal.current = true;
-      } else if (coveringFor === to) {
+      } else {
         reveal();
       }
     });
 
     return () => {
+      clearSafety();
       unsubBefore();
       unsubResolved();
     };
   }, [router]);
+
 
   return (
     <div

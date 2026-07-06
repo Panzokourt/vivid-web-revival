@@ -130,7 +130,7 @@ export function DealersMap({ pins }: { pins: DealerPin[] }) {
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-0 border border-ink/10 bg-paper overflow-hidden">
-      <div className="relative aspect-[4/3] lg:aspect-auto lg:h-[560px] bg-paper-soft">
+      <div className="relative aspect-[4/3] lg:aspect-auto lg:h-[560px] bg-paper-2/40">
         <div ref={mapEl} className="absolute inset-0" />
         {!ready && (
           <div className="absolute inset-0 grid place-items-center text-[10px] uppercase tracking-[0.35em] text-ink/50">

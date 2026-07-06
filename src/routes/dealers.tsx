@@ -235,7 +235,7 @@ function DealersPage() {
       </section>
 
       {/* INTERACTIVE MAP */}
-      <section className="px-6 md:px-10 py-16 md:py-24 border-b border-ink/10 bg-paper-soft">
+      <section className="px-6 md:px-10 py-16 md:py-24 border-b border-ink/10 bg-paper-2/40">
         <div className="max-w-[1600px] mx-auto">
           <div className="reveal-up flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10 md:mb-14">
             <div>

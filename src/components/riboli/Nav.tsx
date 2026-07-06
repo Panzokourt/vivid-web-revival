@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { MagneticButton } from "@/components/riboli/MagneticButton";
 
 const links = [
   { label: "Models", href: "/#models" },

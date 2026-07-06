@@ -50,10 +50,10 @@ export function ModelRelated({ currentSlug }: { currentSlug: string }) {
           {related.map((m) => (
             <Link
               key={m.slug}
-              to="/models/$slug"
-              params={{ slug: m.slug }}
+              to={routeMap[m.slug]}
               className="mr-item group relative block h-[60vh] overflow-hidden bg-paper-2"
             >
+
               <img
                 src={resolveAsset(m.hero_image)}
                 alt={m.name}

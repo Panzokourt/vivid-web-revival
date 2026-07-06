@@ -1,102 +1,56 @@
-# Configurator Page — Plan
+# About Page — Plan
 
-Νέα route `/configurator` σε editorial-light στυλ (ίδια design language με το υπόλοιπο site) με live 3D preview που αλλάζει χρώματα σε real-time, επιλογή μοντέλου/εξοπλισμού/κινητήρα, και form για request quote που αποθηκεύεται στο DB.
+Νέα route `/about` σε editorial-light στυλ, αγγλικά, με placeholder copy για fictional RIBALI shipyard.
 
-## Layout
+## Route
 
-Split-screen desktop, stack σε mobile:
+- `src/routes/about.tsx` — createFileRoute("/about"), unique head() (title "About RIBALI — Handcrafted RIBs", description, og:title/description/type=website, og:url, canonical)
+- Nav.tsx: αλλαγή "Contact" → "About" link, ή προσθήκη νέου link "About" (`/about`). Θα ενημερώσουμε τα `links` σε absolute paths `/about`.
 
-```text
-┌──────────────────────────────┬───────────────────────┐
-│                              │  01 · MODEL           │
-│                              │  [R-520][R-680][R-950]│
-│                              │                       │
-│        3D CANVAS             │  02 · HULL COLOR      │
-│        (sticky, ~60%)        │  ○ ○ ○ ○ ○ ○          │
-│                              │                       │
-│        rotate on drag        │  03 · TUBE COLOR      │
-│                              │  ○ ○ ○ ○ ○            │
-│  giant outline number        │                       │
-│  bottom-left overlay         │  04 · CANOPY          │
-│                              │  ○ ○ ○ ○              │
-│                              │                       │
-│                              │  05 · ENGINE          │
-│                              │  [150HP][200HP][250HP]│
-│                              │                       │
-│                              │  06 · EQUIPMENT       │
-│                              │  ☐ Sunbed ☐ VHF …    │
-│                              │                       │
-│                              │  ── SUMMARY ──        │
-│                              │  [Request Quote →]    │
-└──────────────────────────────┴───────────────────────┘
+## Sections
+
+**1. Editorial Hero**
+- Eyebrow: "Since 1998 · Piraeus, Greece"
+- Giant serif: "A boat is a promise."
+- Sub-copy paragraph (150-200 words) για το story της εταιρίας — origin, γιατί ξεκίνησαν, τι κάνει τα RIBALI ξεχωριστά.
+- Large editorial image (workshop/craft) με parallax GSAP scroll
+
+**2. Story block**
+- Two-column layout: αριστερά ένα quote/eyebrow ("Our story"), δεξιά flowing paragraphs (~300 words) — history, ίδρυση, growth, present.
+
+**3. Craft & Values**
+- Section title "The craft"
+- 4 values σε grid (Craft, Sea, Precision, Endurance) — κάθε card με μεγάλο index (01/02/03/04), title, 2-3 lines description.
+- Παράλληλα intro paragraph για το process (hand-laid, aegean-tested).
+
+**4. Team + CTA**
+- Section title "The people"
+- 3 team member cards (placeholder names — Founder / Head of Design / Master Craftsman) με portrait placeholder (colored block ή unsplash-style solid color με initials), όνομα, ρόλο, 1-line bio.
+- Κάτω-κάτω closing CTA band: "Visit our shipyard →" links σε `/#dealers` και secondary "Configure yours →" στο `/configurator`.
+
+## Components (single file)
+
+Όλα σε `src/routes/about.tsx` (μία σελίδα, δεν χρειάζεται καινούριο components folder — απλά inline subcomponents όπως στο Hero.tsx).
+
+## GSAP animations
+
+- Hero eyebrow + giant title stagger reveal
+- Story paragraphs fade-up σε scroll (ScrollTrigger)
+- Values cards stagger reveal
+- Team cards stagger reveal
+- Hero image parallax (yPercent scrub) — ίδιο pattern με Hero.tsx
+
+## Head metadata
+
+```
+title: "About RIBALI — Handcrafted RIBs from the Aegean"
+description: "Since 1998, RIBALI has been building rigid inflatable boats by hand in Piraeus. Discover our story, craft, and the people behind every hull."
+og:title, og:description, og:type=website, og:url=https://vivid-web-revival.lovable.app/about
+canonical: https://vivid-web-revival.lovable.app/about
 ```
 
-Editorial hero band πάνω-πάνω με "CONFIGURE / 2026 COLLECTION" + giant serif heading "Build yours."
+## Out of scope
 
-## 3D Preview
-
-- Three.js scene σε `<Canvas>` (react-three-fiber + drei), OrbitControls (rotate only, no zoom/pan), soft studio HDRI lighting, contact shadow.
-- Placeholder geometry: stylized RIB shape χτισμένη από primitives — extruded hull (curved BufferGeometry), tube torus rings πλάι, canopy box πάνω, small console — αρκετά αναγνωρίσιμο ως σκάφος χωρίς GLB asset.
-- 3 materials με refs (`hullMat`, `tubeMat`, `canopyMat`); state change → `material.color.set(hex)` χωρίς re-render της σκηνής.
-- Equipment items ως toggle-able meshes (sunbed cushion, bimini frame, GPS pod, VHF antenna, sport steering).
-- GSAP camera intro (dolly-in on mount) και smooth camera pan όταν αλλάζει model (διαφορετικό length ratio για R-520/R-680/R-950).
-
-## Sections & Data
-
-**Configurator state** (client-side, Zustand ή απλό `useState`):
-- `modelSlug`: 'r-520' | 'r-680' | 'r-950'
-- `hullColor`: hex (default `#0A1628`)
-- `tubeColor`: hex (default `#808080`)
-- `canopyColor`: hex (default `#424949`)
-- `engineHp`: 150 | 200 | 250 | 300
-- `equipment`: string[] (ids)
-
-**Palettes** (hardcoded σε `src/lib/configurator-options.ts`):
-- Hull: 8 editorial colors (deep navy, graphite, oyster white, moss, sand, terracotta, bordeaux, midnight)
-- Tube: 6 (grey, black, white, sand, navy, red)
-- Canopy: 4 (charcoal, cream, navy, olive)
-- Engine options per model (μικρά models = χαμηλότερα HP)
-- Equipment catalog: Sunbed, VHF Radio, GPS Plotter, Bimini Top, Sport Steering, Passenger Seat, Freshwater Shower, Teak Deck
-
-## Backend (Lovable Cloud)
-
-Νέο table `quote_requests`:
-- `id`, `model_slug`, `hull_color`, `tube_color`, `canopy_color`, `engine_hp`, `equipment` (jsonb array), `full_name`, `email`, `phone`, `country`, `message`, `created_at`, `status` (default 'new')
-- RLS: anon INSERT policy (public form), authenticated SELECT μόνο (admin future); GRANT INSERT TO anon, ALL TO service_role.
-
-Server function `submitQuoteRequest` (`src/lib/quote.functions.ts`):
-- Zod validation (name/email/phone limits, hex color pattern, allowed slugs/HP, whitelist equipment ids)
-- Insert μέσω server publishable client
-- Return `{ ok: true, id }` ή validation errors.
-
-## UI Components
-
-`src/components/riboli/configurator/`:
-- `ConfiguratorPage.tsx` — layout wrapper, state provider
-- `BoatCanvas.tsx` — three.js scene + materials
-- `ModelSelector.tsx` — 3 pill buttons με specs preview
-- `ColorSwatchGroup.tsx` — reusable για hull/tube/canopy
-- `EngineSelector.tsx` — HP options με torque/max speed indicator
-- `EquipmentChecklist.tsx` — checkbox list με μικρά icons
-- `QuoteDialog.tsx` — modal με form (name/email/phone/country/message), dispatches server fn, success screen με reference id
-- `SummaryBar.tsx` — sticky bottom-of-panel με current config summary + CTA
-
-## Route & Navigation
-
-- `src/routes/configurator.tsx` — public route, unique `head()` metadata (title "Configure your Riboli", description, og tags)
-- Nav.tsx: προσθήκη "Configure" CTA button (top-right, distinct από τα άλλα links, editorial black pill)
-- Homepage hero: secondary CTA "Configure yours →" δίπλα στο υπάρχον primary CTA
-
-## GSAP Animations
-
-- Section number labels (`01 · MODEL` κτλ.) fade-in stagger on scroll
-- Color swatches scale/glow στο hover
-- Canvas: intro camera dolly + gentle idle float
-- Panel sections reveal με ScrollTrigger καθώς scroll-άρει ο δεξιός πίνακας
-
-## Out of Scope
-
-- Δεν κάνουμε import GLB μοντέλα (placeholder geometry)
-- Δεν στέλνουμε email notifications (μόνο DB insert· admin flow μελλοντικά)
-- Δεν persistάρουμε το config σε URL query string (καμία shareable link σε αυτό το iteration)
-- Δεν φτιάχνουμε admin panel για να δει τα quote requests
+- Δεν φτιάχνουμε backend/CMS για το about content (hardcoded copy — user θα το αλλάξει μετά)
+- Δεν βάζουμε πραγματικές φωτογραφίες προσωπικού (colored placeholders με initials)
+- Δεν αλλάζουμε το homepage

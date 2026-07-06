@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ModelsRouteImport } from './routes/models'
 import { Route as DealersRouteImport } from './routes/dealers'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -19,6 +20,11 @@ import { Route as ModelsR950RouteImport } from './routes/models.r-950'
 import { Route as ModelsR680RouteImport } from './routes/models.r-680'
 import { Route as ModelsR520RouteImport } from './routes/models.r-520'
 
+const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
+  id: '/sitemap.xml',
+  path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ModelsRoute = ModelsRouteImport.update({
   id: '/models',
   path: '/models',
@@ -72,6 +78,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/dealers': typeof DealersRoute
   '/models': typeof ModelsRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
@@ -83,6 +90,7 @@ export interface FileRoutesByTo {
   '/contact': typeof ContactRoute
   '/dealers': typeof DealersRoute
   '/models': typeof ModelsRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
@@ -95,6 +103,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/dealers': typeof DealersRoute
   '/models': typeof ModelsRouteWithChildren
+  '/sitemap.xml': typeof SitemapDotxmlRoute
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
@@ -108,6 +117,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dealers'
     | '/models'
+    | '/sitemap.xml'
     | '/models/r-520'
     | '/models/r-680'
     | '/models/r-950'
@@ -119,6 +129,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dealers'
     | '/models'
+    | '/sitemap.xml'
     | '/models/r-520'
     | '/models/r-680'
     | '/models/r-950'
@@ -130,6 +141,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dealers'
     | '/models'
+    | '/sitemap.xml'
     | '/models/r-520'
     | '/models/r-680'
     | '/models/r-950'
@@ -142,10 +154,18 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   DealersRoute: typeof DealersRoute
   ModelsRoute: typeof ModelsRouteWithChildren
+  SitemapDotxmlRoute: typeof SitemapDotxmlRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/sitemap.xml': {
+      id: '/sitemap.xml'
+      path: '/sitemap.xml'
+      fullPath: '/sitemap.xml'
+      preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/models': {
       id: '/models'
       path: '/models'
@@ -234,6 +254,7 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   DealersRoute: DealersRoute,
   ModelsRoute: ModelsRouteWithChildren,
+  SitemapDotxmlRoute: SitemapDotxmlRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

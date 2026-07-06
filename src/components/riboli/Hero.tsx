@@ -85,7 +85,10 @@ export function Hero() {
           alt="RIBALI handcrafted RIB on the Aegean sea"
           className="h-full w-full object-cover object-center"
           style={{ filter: "contrast(1.05) saturate(0.9)" }}
+          fetchPriority="high"
+          decoding="async"
         />
+
         {/* Legibility gradients */}
         <div
           className="absolute inset-0"

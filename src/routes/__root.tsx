@@ -88,12 +88,14 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
         content:
           "RIBALI — Greek atelier of handcrafted RIB boats. Editorial performance craft, Deep-V hulls, ORCA Hypalon tubes, dealer network across the Mediterranean.",
       },
+      { property: "og:site_name", content: "RIBALI" },
       { property: "og:title", content: "RIBALI — Handcrafted RIBs" },
       {
         property: "og:description",
         content: "Editorial performance craft. Handcrafted RIBs from Greece.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:locale", content: "en_GB" },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "RIBALI — Handcrafted RIBs" },
       { name: "twitter:description", content: "Editorial performance craft. Handcrafted RIBs from Greece." },
@@ -102,7 +104,52 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
     ],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@graph": [
+            {
+              "@type": "Organization",
+              "@id": "https://vivid-web-revival.lovable.app/#organization",
+              name: "RIBALI",
+              url: "https://vivid-web-revival.lovable.app/",
+              logo: "https://vivid-web-revival.lovable.app/favicon.ico",
+              foundingDate: "1998",
+              foundingLocation: "Piraeus, Greece",
+              contactPoint: [
+                {
+                  "@type": "ContactPoint",
+                  telephone: "+30 210 000 0000",
+                  contactType: "customer service",
+                  email: "hello@ribali.gr",
+                  areaServed: ["GR", "IT", "FR", "ES", "HR", "AE"],
+                  availableLanguage: ["en", "el"],
+                },
+              ],
+              address: {
+                "@type": "PostalAddress",
+                streetAddress: "Akti Themistokleous 142",
+                addressLocality: "Piraeus",
+                postalCode: "18538",
+                addressCountry: "GR",
+              },
+            },
+            {
+              "@type": "WebSite",
+              "@id": "https://vivid-web-revival.lovable.app/#website",
+              url: "https://vivid-web-revival.lovable.app/",
+              name: "RIBALI",
+              publisher: { "@id": "https://vivid-web-revival.lovable.app/#organization" },
+              inLanguage: "en",
+            },
+          ],
+        }),
+      },
+    ],
   }),
+
 
   shellComponent: RootShell,
   component: RootComponent,

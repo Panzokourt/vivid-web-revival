@@ -82,6 +82,27 @@ const TEAM = [
   },
 ];
 
+const CHAPTERS = [
+  {
+    year: "1998",
+    title: "The first hull.",
+    body: "RIBALI begins in a rented garage in Perama. Two brothers, one salvaged mold, and a friend from Aegina who needed a boat. He is still on the water. So is the boat.",
+    image: heroImg,
+  },
+  {
+    year: "2010",
+    title: "Open-sea DNA.",
+    body: "The shipyard doubles. We stop copying and start designing — Deep-V hulls, welded tubes, and a stubborn refusal to hurry. Word travels the way it does in a small industry: slowly, then all at once.",
+    image: r680,
+  },
+  {
+    year: "2026",
+    title: "The RIBALI line.",
+    body: "R-520, R-680, R-950 — three hulls, one philosophy. Fewer than eighty boats a year, each one carrying the name of the person who finished her deck.",
+    image: r950,
+  },
+];
+
 function AboutPage() {
   const root = useRef<HTMLDivElement>(null);
 

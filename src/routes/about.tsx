@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
 import { Nav } from "@/components/riboli/Nav";
 import { Footer } from "@/components/riboli/Footer";

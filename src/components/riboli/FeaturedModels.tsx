@@ -66,7 +66,7 @@ export function FeaturedModels() {
           <Link
             key={m.to}
             to={m.to}
-            className="model-slide relative shrink-0 w-[85vw] md:w-[70vw] lg:w-[70vw] h-full bg-paper-2 overflow-hidden group block"
+            className="model-slide relative shrink-0 w-[85vw] md:w-[70vw] lg:w-[70vw] h-full bg-paper-2 overflow-hidden group block isolate"
           >
 
             <img
@@ -76,7 +76,7 @@ export function FeaturedModels() {
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
               style={{ filter: "contrast(1.02) saturate(0.85)" }}
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-ink/50 via-transparent to-transparent" />
+            <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-ink/40 to-transparent" />
 
             <div className="absolute top-6 left-6 md:top-10 md:left-10 text-paper text-[11px] uppercase tracking-[0.3em] flex items-center gap-3">
               <span className="w-2 h-2 rounded-full bg-copper" /> {m.tag}
@@ -89,7 +89,7 @@ export function FeaturedModels() {
 
             <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-paper">
               <div className="text-[11px] uppercase tracking-[0.3em] text-paper/70">{m.name}</div>
-              <div className="font-display text-[22vw] md:text-[14vw] lg:text-[11vw] leading-[0.85] text-outline text-paper">
+              <div className="font-display text-[22vw] md:text-[14vw] lg:text-[11vw] leading-[0.85] text-invert-blend">
                 {m.number}
               </div>
             </div>

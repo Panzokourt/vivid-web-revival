@@ -2,7 +2,7 @@ import { Link } from "@tanstack/react-router";
 
 export function Footer() {
   return (
-    <footer id="footer" className="relative bg-ink text-paper overflow-hidden">
+    <footer id="footer" className="relative bg-ink text-paper overflow-hidden isolate">
       <div className="max-w-[1600px] mx-auto px-6 md:px-10 py-16 md:py-20">
         <div className="grid md:grid-cols-4 gap-10 border-b border-paper/15 pb-12">
           <div>

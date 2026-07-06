@@ -176,7 +176,10 @@ export function DealersMap({ pins }: { pins: DealerPin[] }) {
         </div>
       </div>
 
-      <aside className="border-t lg:border-t-0 lg:border-l border-ink/10 max-h-[560px] overflow-y-auto">
+      <aside
+        ref={asideEl}
+        className="border-t lg:border-t-0 lg:border-l border-ink/10 max-h-[560px] overflow-y-auto overscroll-contain"
+      >
         <div className="sticky top-0 bg-paper border-b border-ink/10 px-6 py-4 text-[10px] uppercase tracking-[0.35em] text-ink/50">
           Select a dealer
         </div>

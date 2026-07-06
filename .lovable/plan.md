@@ -1,72 +1,44 @@
-## Page transition — SVG wave sweep
 
-A full-viewport `ink`-colored SVG wave sweeps up over the screen, holds briefly, then sweeps out of the top. On route change: cover → swap route → reveal. On first visit only (per session): a one-shot intro reveal (no cover, just the wave sliding out from the top).
+## 1. Hero redesign (`src/components/riboli/Hero.tsx`)
 
-Total duration ~1.1s (cover ~0.55s, reveal ~0.55s). Level 4 on the slider.
+Replace the model-specific "R-680 / 1450 $ per hour / In St. Petersburg" hero with a generic brand hero.
 
-## How it works
+- **Image**: full-viewport, full-width (edge-to-edge, no `max-w-6xl` padding). Fills 100vw × 100vh. Slight dark overlay + subtle vignette so text stays legible.
+- **Headline (generic)**: display type "HANDCRAFTED / ON THE AEGEAN" (two lines, Bebas Neue, ~14vw). Character-stagger GSAP reveal on load.
+- **Sub-copy**: short paragraph, e.g. "Editorial performance RIBs, built one at a time in Greece."
+- **Corner meta**: keep the 4 corner labels but generic — top-left `RIBALI / EST. GREECE`, top-right `SINCE / 2004`, bottom-right `AEGEAN / SEA`. Remove price and city.
+- **CTA**: single centered `EXPLORE MODELS` magnetic button linking to `#models`, plus a small scroll-hint chevron.
 
-Single overlay component mounted once in `__root.tsx`, above all page content, fixed to viewport, `pointer-events-none` at rest, `pointer-events-auto` during animation to swallow clicks.
+## 2. Floating graphic elements (new: `src/components/riboli/HeroGraphics.tsx`)
 
-Structure:
+Layered decorative SVG/DIV elements over the hero, split into two tiers:
 
-```text
-<div class="fixed inset-0 z-[100]">
-  <svg preserveAspectRatio="none" viewBox="0 0 100 100">
-    <path d="..." fill="var(--ink)" />
-  </svg>
-</div>
-```
+- **Subtle tier**: thin ink grid lines, small crosshair marks in corners, a faint concentric-circle "radar" SVG, a hairline horizon rule. Barely visible (`opacity 0.15–0.25`).
+- **Bold tier**: an oversized outlined numeral "04" (nod to est. 2004) bleeding off the right edge, a copper-filled circle top-left, a thin diagonal copper line crossing lower third.
 
-The path uses two SVG cubic-bezier curves to draw a wave crest on the leading edge. GSAP animates the path's `d` attribute between three states — flat off-screen (bottom), wave covering full screen, flat off-screen (top) — using GSAP's `attr` plugin. This gives the actual liquid morph, not just a translate.
+Motion:
+- **Scroll parallax** via GSAP ScrollTrigger — each element gets a different `yPercent` (`-5` to `-25`) so they drift at different speeds.
+- **Mouse parallax** — `mousemove` on the hero moves each element by `translate(x*k, y*k)` with `k` ranging `0.01` (subtle tier) to `0.04` (bold tier), smoothed with `gsap.quickTo`. Disabled on coarse pointers and reduced-motion.
 
-## Route change flow
+## 3. Custom cursor (new: `src/components/riboli/Cursor.tsx`, mounted in `__root.tsx`)
 
-1. Intercept navigation with TanStack Router's `router.subscribe('onBeforeNavigate', ...)` — cover the screen (0.55s ease-in wave rising from bottom).
-2. When `onResolved` fires (new route mounted), scroll to top instantly, then play the reveal (0.55s ease-out wave sliding off the top).
-3. During the cover phase, block clicks and set `aria-busy="true"` on the overlay.
+Two-part cursor replacing the OS pointer site-wide (desktop only):
 
-If `onResolved` fires before the cover finishes (fast navigation), we chain: wait for cover completion → hold 1 frame → reveal.
+- **Dot** — 6px solid ink circle, follows mouse 1:1.
+- **Ring** — 36px hollow circle, trails with `gsap.quickTo` (ease/lag ~0.15s).
+- **Hover state** — on `a`, `button`, `[data-cursor="hover"]` the ring scales to 1.8× and fills with copper at low opacity; on `[data-cursor="drag"]` shows a small "DRAG" label inside.
+- **CSS**: `html { cursor: none }` and same on interactive elements; fallback: on coarse pointers / reduced-motion the component renders nothing and native cursor stays.
+- Uses `position: fixed`, `pointer-events: none`, `mix-blend-mode: difference` so it reads on both dark and light areas.
 
-## First-visit intro
+## 4. Wiring
 
-On mount of the overlay component:
-- Read `sessionStorage.getItem('ribali:visited')`.
-- If null: start the overlay in "covered" state and immediately play the reveal animation (~0.7s, slightly slower, more cinematic). Then set the flag.
-- If set: overlay starts hidden, does nothing.
+- Mount `<HeroGraphics />` inside `Hero.tsx` behind the headline (z-index between image and text).
+- Mount `<Cursor />` once in `src/routes/__root.tsx`, alongside `<PageTransition />`.
+- No new dependencies — reuses existing `gsap` + `ScrollTrigger`.
 
-This means direct-loading `/models/r-680` in a new tab also gets the wave intro — the effect is tied to the session, not the route.
+## Technical notes
 
-## Reduced motion
-
-If `prefers-reduced-motion: reduce`:
-- No cover on route change — the overlay stays hidden.
-- No intro on first visit.
-- Navigation is instant.
-
-## SectionSnap interaction
-
-`SectionSnap` on the home page uses its own scroll behavior. The overlay sits above it visually (`z-100`) so no conflict; but during the cover phase we lock body scroll via `document.body.style.overflow = 'hidden'` to prevent jitter, then restore.
-
-## Files
-
-New:
-- `src/components/riboli/PageTransition.tsx` — overlay + GSAP timeline + router subscription.
-
-Edited:
-- `src/routes/__root.tsx` — mount `<PageTransition />` once inside the root layout, above `<Outlet />`.
-
-No new dependencies. Uses the existing `gsap` from `@/lib/gsap` (registerPlugin for `AttrPlugin` added to that file).
-
-## Technical details
-
-- Wave path: two states — `covered` = `M 0 0 L 100 0 L 100 100 L 0 100 Z` (rectangle), `uncovered-bottom` = `M 0 100 C 30 100, 70 100, 100 100 L 100 100 L 0 100 Z` (flat line at bottom), `uncovered-top` = flat line at top. The `covered` state morphs from a wave crest (`C 30 40, 70 40, 100 0` on top edge) into a flat top over 200ms mid-timeline so the shape reads as a wave then a fill.
-- Actually simpler: three keyframes on the SVG path's `d`:
-  1. Rest (below screen, wave crest visible): `M0,100 C25,100 25,100 50,100 C75,100 75,100 100,100 L100,100 L0,100 Z` — invisible.
-  2. Cover with wave leading edge: `M0,0 C25,20 75,-20 100,0 L100,100 L0,100 Z`.
-  3. Settle flat cover: `M0,0 L100,0 L100,100 L0,100 Z`.
-  4. Exit through top: `M0,-100 C25,-80 75,-120 100,-100 L100,-100 L0,-100 Z`.
-- Router hooks: `router.subscribe('onBeforeLoad', cover)` and `router.subscribe('onResolved', reveal)`. Access via `useRouter()` inside the client-only component.
-- Component is client-only: wrap render in a `useEffect` mount gate so SSR emits nothing.
-- Register `AttrPlugin`: `gsap.registerPlugin(AttrPlugin)` inside `src/lib/gsap.ts`.
-- Colors: wave fill uses the `ink` token (`hsl` from theme via inline `fill` bound to CSS var).
+- All animations gated by `prefersReducedMotion()` and `matchMedia("(pointer: coarse)")`.
+- Hero image container becomes `absolute inset-0` (full-bleed) instead of the current `max-w-6xl` framed layout.
+- Corner meta z-index raised above graphics; graphics sit at `z-5`, image at `z-0`, text at `z-20`.
+- Cursor component is `client-only` (mount gate via `useEffect`) to avoid SSR mismatch.

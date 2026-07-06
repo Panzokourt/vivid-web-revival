@@ -1,89 +1,85 @@
-import { motion } from "framer-motion";
+import { useLayoutEffect, useRef } from "react";
+import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import techImg from "@/assets/tech-detail.jpg";
 
-const steps = [
-  {
-    n: "01",
-    title: "ORCA Hypalon Fabric",
-    body: "Χρησιμοποιούμε αποκλειστικά τα καλύτερα υφάσματα παγκοσμίως για μέγιστη αντοχή στον ήλιο και τη θάλασσα.",
-  },
-  {
-    n: "02",
-    title: "Deep-V Hull Design",
-    body: "Γάστρες σχεδιασμένες για απόλυτη ευστάθεια και οικονομία καυσίμου ακόμα και σε δύσκολες συνθήκες.",
-  },
-  {
-    n: "03",
-    title: "Custom Engineering",
-    body: "Κάθε σκάφος RIBOLI είναι μοναδικό, προσαρμοσμένο στις δικές σας ανάγκες και αισθητική.",
-  },
+const params = [
+  { k: "Total length", v: "19.96" },
+  { k: "Width", v: "5.72", suffix: "M" },
+  { k: "Engine", v: "Volvo IPS" },
+  { k: "Power", v: "1 350", suffix: "HP" },
+  { k: "Berths", v: "6" },
+  { k: "Layout", v: "three cabins and three latrines" },
 ];
 
 export function TechConstruction() {
-  return (
-    <section id="tech" className="relative py-24 md:py-32 px-6 md:px-10">
-      <div className="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-16 items-center">
-        <motion.div
-          initial={{ opacity: 0, x: -30 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-        >
-          <span className="text-brand-red font-bold text-xs uppercase tracking-[0.2em] mb-4 block">
-            Τεχνολογία & Κατασκευή
-          </span>
-          <h2 className="text-3xl md:text-5xl font-display uppercase text-white mb-10 leading-tight">
-            Κατασκευή Χωρίς <br />
-            Συμβιβασμούς
-          </h2>
-          <div className="space-y-8">
-            {steps.map((s, i) => (
-              <motion.div
-                key={s.n}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.5, delay: 0.2 + i * 0.15 }}
-                className="flex gap-6"
-              >
-                <div className="shrink-0 w-12 h-12 bg-brand-red text-white grid place-items-center font-display font-bold">
-                  {s.n}
-                </div>
-                <div>
-                  <h4 className="font-bold uppercase tracking-wider mb-2 text-white">
-                    {s.title}
-                  </h4>
-                  <p className="text-white/60 text-sm leading-relaxed">
-                    {s.body}
-                  </p>
-                </div>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
+  const root = useRef<HTMLElement>(null);
 
-        <motion.div
-          initial={{ opacity: 0, x: 30 }}
-          whileInView={{ opacity: 1, x: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.7 }}
-          className="relative"
-        >
+  useLayoutEffect(() => {
+    if (prefersReducedMotion()) return;
+    const ctx = gsap.context(() => {
+      gsap.from(".tech-eyebrow, .tech-outline, .tech-hero", {
+        y: 40,
+        opacity: 0,
+        duration: 0.9,
+        stagger: 0.1,
+        ease: "power3.out",
+        scrollTrigger: { trigger: root.current, start: "top 75%" },
+      });
+      gsap.from(".tech-param", {
+        y: 24,
+        opacity: 0,
+        duration: 0.6,
+        stagger: 0.08,
+        ease: "power2.out",
+        scrollTrigger: { trigger: root.current, start: "top 60%" },
+      });
+    }, root);
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <section ref={root} id="tech" className="relative bg-ink text-paper overflow-hidden">
+      <div className="max-w-[1600px] mx-auto px-6 md:px-10 py-28 md:py-40">
+        <header className="grid md:grid-cols-3 gap-8 mb-16">
+          <div className="tech-eyebrow">
+            <div className="text-[11px] uppercase tracking-[0.3em] text-paper/60">Technical</div>
+            <div className="text-[11px] uppercase tracking-[0.3em] text-paper/60">parameters</div>
+          </div>
+          <div className="tech-eyebrow text-[11px] uppercase tracking-[0.3em] text-paper/60">
+            The width of the yacht 5.72 M
+          </div>
+          <div className="tech-eyebrow font-display text-4xl md:text-5xl text-outline text-paper text-right">
+            engine
+          </div>
+        </header>
+
+        <div className="relative">
           <img
             src={techImg}
-            alt="Λεπτομέρεια κατασκευής γάστρας RIBOLI"
+            alt="RIBOLI hull construction detail"
             loading="lazy"
-            width={1024}
-            height={1024}
-            className="w-full aspect-square object-cover"
+            className="tech-hero w-full h-[50vh] md:h-[70vh] object-cover opacity-70 mix-blend-luminosity"
           />
-          <div className="absolute -bottom-6 -left-6 bg-brand-red text-white p-6 md:p-8">
-            <div className="text-3xl md:text-4xl font-display">25+</div>
-            <div className="text-[10px] font-bold uppercase tracking-widest mt-1">
-              Χρόνια Εμπειρίας
-            </div>
+          <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-ink/40 via-transparent to-ink" />
+          <div className="tech-outline pointer-events-none absolute top-1/2 -translate-y-1/2 left-4 md:left-10 font-display text-[22vw] md:text-[16vw] leading-none text-outline text-paper/80">
+            1 350
           </div>
-        </motion.div>
+          <div className="tech-outline pointer-events-none absolute bottom-6 right-6 md:bottom-10 md:right-10 font-display text-5xl md:text-7xl text-outline text-paper">
+            berthve
+          </div>
+        </div>
+
+        <dl className="mt-16 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-x-8 gap-y-10 border-t border-paper/15 pt-10">
+          {params.map((p) => (
+            <div key={p.k} className="tech-param">
+              <dt className="text-[10px] uppercase tracking-[0.3em] text-paper/50 mb-3">{p.k}</dt>
+              <dd className="font-display text-3xl md:text-4xl leading-none">
+                {p.v}
+                {p.suffix && <span className="text-paper/60 text-lg ml-2">{p.suffix}</span>}
+              </dd>
+            </div>
+          ))}
+        </dl>
       </div>
     </section>
   );

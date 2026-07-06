@@ -77,35 +77,28 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "RIBOLI — Χειροποίητα σκάφη RIB για την Ελληνική Θάλασσα" },
+      { title: "RIBOLI — Handcrafted RIBs" },
       {
         name: "description",
         content:
-          "RIBOLI — Ελληνική κατασκευή φουσκωτών σκαφών RIB υψηλών επιδόσεων. Χειροποίητη ναυπηγική, ORCA Hypalon, Deep-V γάστρες, δίκτυο dealers σε όλη την Ελλάδα.",
+          "RIBOLI — Greek atelier of handcrafted RIB boats. Editorial performance craft, Deep-V hulls, ORCA Hypalon tubes, dealer network across the Mediterranean.",
       },
-      { property: "og:title", content: "RIBOLI — Χειροποίητα σκάφη RIB για την Ελληνική Θάλασσα" },
+      { property: "og:title", content: "RIBOLI — Handcrafted RIBs" },
       {
         property: "og:description",
-        content: "Premium φουσκωτά σκάφη RIB, χειροποίητα στην Ελλάδα.",
+        content: "Editorial performance craft. Handcrafted RIBs from Greece.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "RIBOLI — Χειροποίητα σκάφη RIB για την Ελληνική Θάλασσα" },
-      { name: "description", content: "Riboli Reimagined is a website redesign that enhances user experience with rich content and dynamic visuals." },
-      { property: "og:description", content: "Riboli Reimagined is a website redesign that enhances user experience with rich content and dynamic visuals." },
-      { name: "twitter:description", content: "Riboli Reimagined is a website redesign that enhances user experience with rich content and dynamic visuals." },
+      { name: "twitter:title", content: "RIBOLI — Handcrafted RIBs" },
+      { name: "twitter:description", content: "Editorial performance craft. Handcrafted RIBs from Greece." },
     ],
     links: [
       { rel: "stylesheet", href: appCss },
       { rel: "icon", href: "/favicon.ico", type: "image/x-icon" },
-      { rel: "preconnect", href: "https://fonts.googleapis.com" },
-      { rel: "preconnect", href: "https://fonts.gstatic.com", crossOrigin: "anonymous" },
-      {
-        rel: "stylesheet",
-        href: "https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Syncopate:wght@400;700&display=swap",
-      },
     ],
   }),
+
   shellComponent: RootShell,
   component: RootComponent,
   notFoundComponent: NotFoundComponent,

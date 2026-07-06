@@ -1,105 +1,115 @@
-import { motion } from "framer-motion";
+import { useLayoutEffect, useRef } from "react";
+import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import heroImg from "@/assets/hero.jpg";
 
-const line1 = "Η ΑΠΟΔΟΣΗ";
-const line2 = "ΕΠΑΝΑΠΡΟΣΔΙΟΡΙΖΕΤΑΙ";
-
 export function Hero() {
+  const root = useRef<HTMLElement>(null);
+
+  useLayoutEffect(() => {
+    if (prefersReducedMotion()) return;
+    const ctx = gsap.context(() => {
+      const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
+      tl.from(".hero-eyebrow", { y: 20, opacity: 0, duration: 0.6 })
+        .from(".hero-title span", {
+          y: 80,
+          opacity: 0,
+          duration: 0.9,
+          stagger: 0.06,
+        }, "-=0.3")
+        .from(".hero-corner", {
+          y: 20,
+          opacity: 0,
+          duration: 0.6,
+          stagger: 0.08,
+        }, "-=0.5")
+        .from(".hero-media", {
+          scale: 1.08,
+          opacity: 0,
+          duration: 1.2,
+          ease: "power2.out",
+        }, "-=1.1");
+
+      gsap.to(".hero-media", {
+        yPercent: -15,
+        ease: "none",
+        scrollTrigger: {
+          trigger: root.current,
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+    }, root);
+    return () => ctx.revert();
+  }, []);
+
+  const title = "R-680".split("");
+
   return (
-    <section className="relative h-screen min-h-[640px] flex items-center justify-center overflow-hidden">
-      <img
-        src={heroImg}
-        alt="RIB σκάφος RIBOLI στην ελληνική θάλασσα"
-        width={1920}
-        height={1088}
-        className="absolute inset-0 w-full h-full object-cover opacity-40"
-      />
-      <div className="absolute inset-0 bg-gradient-to-b from-brand-navy/60 via-transparent to-brand-navy/80" />
-
-
-      <div className="relative z-10 text-center px-4 max-w-5xl">
-        <motion.span
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 0.2 }}
-          className="block text-[11px] font-semibold uppercase tracking-[0.4em] text-brand-red mb-6"
-        >
-          Inflatable Boats · RIB
-        </motion.span>
-
-        <h1 className="text-4xl md:text-6xl lg:text-7xl font-display text-white uppercase leading-[1.05] mb-8">
-          <RevealLine text={line1} delay={0.3} />
-          <br />
-          <span className="text-brand-red">
-            <RevealLine text={line2} delay={0.9} />
-          </span>
-        </h1>
-
-        <motion.p
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 1.6 }}
-          className="text-white/80 max-w-xl mx-auto mb-10 text-base md:text-lg font-light leading-relaxed"
-        >
-          Χειροποίητα σκάφη RIB κορυφαίας ποιότητας, σχεδιασμένα για να δαμάζουν
-          τα κύματα του Αιγαίου.
-        </motion.p>
-
-        <motion.div
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.6, delay: 1.8 }}
-          className="flex flex-col sm:flex-row gap-4 justify-center"
-        >
-          <a
-            href="#models"
-            className="bg-brand-red text-white px-10 py-4 font-bold uppercase tracking-widest text-xs hover:bg-brand-red/85 transition-colors"
-          >
-            ΔΕΙΤΕ ΤΗ ΣΕΙΡΑ
-          </a>
-          <a
-            href="#tech"
-            className="bg-white/10 backdrop-blur-md text-white border border-white/20 px-10 py-4 font-bold uppercase tracking-widest text-xs hover:bg-white/20 transition-colors"
-          >
-            ΤΕΧΝΙΚΑ ΧΑΡΑΚΤΗΡΙΣΤΙΚΑ
-          </a>
-        </motion.div>
+    <section
+      ref={root}
+      className="relative h-screen min-h-[720px] w-full overflow-hidden bg-paper text-ink"
+    >
+      {/* corner labels */}
+      <div className="hero-corner absolute top-24 left-6 md:left-10 z-20 text-[11px] uppercase tracking-[0.3em] text-ink/60">
+        <div>Handcrafted RIBs</div>
+        <div className="mt-1 text-ink/40">In the Aegean</div>
+      </div>
+      <div className="hero-corner absolute top-24 right-6 md:right-10 z-20 text-[11px] uppercase tracking-[0.3em] text-ink/60 text-right">
+        <div>Yacht</div>
+        <div>Rental</div>
       </div>
 
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{ duration: 1, delay: 2.2 }}
-        className="absolute bottom-8 left-1/2 -translate-x-1/2 flex flex-col items-center gap-2 z-10"
-      >
-        <motion.div
-          animate={{ scaleY: [0.4, 1, 0.4] }}
-          transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          className="w-[1px] h-12 bg-white/40 origin-top"
-        />
-        <span className="text-[10px] text-white/50 uppercase tracking-[0.3em]">
-          Scroll
-        </span>
-      </motion.div>
-    </section>
-  );
-}
+      {/* headline */}
+      <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-between px-6 md:px-16 pointer-events-none">
+        <h1 className="hero-title font-display text-[18vw] md:text-[13vw] leading-[0.85] tracking-tight text-outline text-ink/90 select-none">
+          {title.map((c, i) => (
+            <span key={i} className="inline-block">
+              {c}
+            </span>
+          ))}
+        </h1>
+        <div className="hero-corner hidden md:block font-display text-[13vw] leading-[0.85] tracking-tight text-ink/90 text-right">
+          680
+        </div>
+      </div>
 
-function RevealLine({ text, delay = 0 }: { text: string; delay?: number }) {
-  return (
-    <span className="inline-block">
-      {text.split("").map((ch, i) => (
-        <motion.span
-          key={i}
-          initial={{ opacity: 0, y: 40 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: delay + i * 0.035, ease: "easeOut" }}
-          className="inline-block"
-          style={{ whiteSpace: "pre" }}
+      {/* hero media */}
+      <div className="hero-media absolute inset-x-0 bottom-0 top-40 z-10 mx-auto max-w-6xl px-6">
+        <img
+          src={heroImg}
+          alt="RIBOLI R-680 handcrafted RIB on the Aegean sea"
+          width={1920}
+          height={1088}
+          className="h-full w-full object-cover object-center rounded-sm shadow-[0_40px_120px_-40px_rgba(26,26,26,0.5)]"
+          style={{ filter: "contrast(1.05) saturate(0.85)" }}
+        />
+      </div>
+
+      {/* bottom row */}
+      <div className="absolute bottom-8 left-0 right-0 z-30 flex items-end justify-between px-6 md:px-10">
+        <a
+          href="#models"
+          className="hero-corner group inline-flex items-center gap-3 bg-ink text-paper px-8 py-4 text-[11px] uppercase tracking-[0.3em] hover:bg-copper transition-colors"
         >
-          {ch === " " ? "\u00A0" : ch}
-        </motion.span>
-      ))}
-    </span>
+          Book
+          <span className="text-lg leading-none group-hover:rotate-90 transition-transform">+</span>
+        </a>
+        <div className="hero-corner text-center hidden md:block">
+          <div className="font-display text-6xl leading-none">1450</div>
+          <div className="text-[10px] uppercase tracking-[0.3em] text-ink/60 mt-2">$ per hour</div>
+        </div>
+        <div className="hero-corner text-[11px] uppercase tracking-[0.3em] text-ink/60 text-right">
+          <div>In St. Petersburg</div>
+          <div className="text-ink/40">Boat Group ·</div>
+        </div>
+      </div>
+
+      {/* corner slash */}
+      <div className="hero-corner absolute bottom-8 left-1/2 -translate-x-1/2 z-30 text-ink/40 md:hidden">
+        <div className="font-display text-4xl leading-none">1450</div>
+        <div className="text-[10px] uppercase tracking-[0.3em] mt-1">$ per hour</div>
+      </div>
+    </section>
   );
 }

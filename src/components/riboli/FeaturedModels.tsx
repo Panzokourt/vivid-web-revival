@@ -1,94 +1,102 @@
-import { motion } from "framer-motion";
+import { useLayoutEffect, useRef } from "react";
+import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
 import r680 from "@/assets/model-r680.jpg";
 import r950 from "@/assets/model-r950.jpg";
 import r520 from "@/assets/model-r520.jpg";
 
 const models = [
-  {
-    img: r680,
-    name: "R-680 SPORT",
-    specs: "6.8m | 250HP Max | 12 Pax",
-    tag: "Best Seller",
-  },
-  {
-    img: r950,
-    name: "R-950 CRUISE",
-    specs: "9.5m | 600HP Max | 16 Pax",
-    tag: "Flagship",
-  },
-  {
-    img: r520,
-    name: "R-520 EXPLORE",
-    specs: "5.2m | 115HP Max | 8 Pax",
-    tag: "Compact",
-  },
+  { img: r680, number: "680", name: "R-680 Sport", length: "6.8 M", power: "250 HP", pax: "12", tag: "Best Seller" },
+  { img: r950, number: "950", name: "R-950 Cruise", length: "9.5 M", power: "600 HP", pax: "16", tag: "Flagship" },
+  { img: r520, number: "520", name: "R-520 Explore", length: "5.2 M", power: "115 HP", pax: "8", tag: "Compact" },
 ];
 
 export function FeaturedModels() {
-  return (
-    <section id="models" className="relative py-24 md:py-32 px-6 md:px-10">
-      <div className="max-w-7xl mx-auto">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ duration: 0.6 }}
-          className="flex flex-col md:flex-row justify-between md:items-end gap-6 mb-16"
-        >
-          <div>
-            <span className="text-brand-red font-bold text-xs uppercase tracking-[0.2em] mb-4 block">
-              Η ΣΥΛΛΟΓΗ ΜΑΣ
-            </span>
-            <h2 className="text-3xl md:text-5xl font-display uppercase text-white leading-tight">
-              ΜΟΝΤΕΛΑ
-            </h2>
-          </div>
-          <a
-            href="#"
-            className="self-start text-xs font-bold uppercase tracking-widest border-b-2 border-brand-red pb-1 text-white hover:text-brand-red transition-colors"
-          >
-            ΌΛΑ ΤΑ ΣΚΑΦΗ →
-          </a>
-        </motion.div>
+  const root = useRef<HTMLElement>(null);
+  const track = useRef<HTMLDivElement>(null);
 
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {models.map((m, i) => (
-            <motion.a
-              key={m.name}
-              href="#"
-              initial={{ opacity: 0, y: 40 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true, margin: "-80px" }}
-              transition={{ duration: 0.6, delay: i * 0.12 }}
-              className="group cursor-pointer block"
-            >
-              <div className="overflow-hidden mb-6 relative bg-brand-navy/40 backdrop-blur-sm border border-white/5">
-                <img
-                  src={m.img}
-                  alt={m.name}
-                  loading="lazy"
-                  width={800}
-                  height={1024}
-                  className="w-full aspect-[4/5] object-cover group-hover:scale-105 transition-transform duration-700"
-                />
-                <span className="absolute top-4 left-4 bg-brand-red text-white px-3 py-1 text-[10px] font-bold uppercase tracking-widest">
-                  {m.tag}
-                </span>
-              </div>
-              <div className="flex justify-between items-start">
-                <div>
-                  <h3 className="font-display text-xl text-white mb-1">
-                    {m.name}
-                  </h3>
-                  <p className="text-white/60 text-sm">{m.specs}</p>
-                </div>
-                <span className="text-brand-red font-bold text-xl group-hover:translate-x-1 transition-transform">
-                  →
-                </span>
-              </div>
-            </motion.a>
-          ))}
+  useLayoutEffect(() => {
+    if (prefersReducedMotion()) return;
+    const ctx = gsap.context(() => {
+      const slides = gsap.utils.toArray<HTMLElement>(".model-slide");
+      const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+      if (isDesktop && track.current && slides.length > 1) {
+        const totalScroll = () => track.current!.scrollWidth - window.innerWidth;
+        gsap.to(track.current, {
+          x: () => -totalScroll(),
+          ease: "none",
+          scrollTrigger: {
+            trigger: root.current,
+            start: "top top",
+            end: () => `+=${totalScroll()}`,
+            scrub: 1,
+            pin: true,
+            invalidateOnRefresh: true,
+          },
+        });
+      }
+      gsap.from(".models-eyebrow", {
+        y: 30,
+        opacity: 0,
+        duration: 0.7,
+        scrollTrigger: { trigger: root.current, start: "top 80%" },
+      });
+    }, root);
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <section ref={root} id="models" className="relative bg-paper text-ink overflow-hidden">
+      <div className="px-6 md:px-10 pt-24 pb-10">
+        <div className="models-eyebrow flex items-end justify-between gap-6 max-w-[1600px] mx-auto">
+          <div>
+            <div className="text-[11px] uppercase tracking-[0.3em] text-ink/50">The Collection</div>
+            <h2 className="font-display text-6xl md:text-8xl leading-none mt-3">Models</h2>
+          </div>
+          <div className="text-[11px] uppercase tracking-[0.3em] text-ink/50 hidden md:block">
+            Scroll <span className="text-ink/80">→</span>
+          </div>
         </div>
+      </div>
+
+      <div ref={track} className="flex gap-6 md:gap-10 px-6 md:px-10 pb-24 will-change-transform">
+        {models.map((m) => (
+          <article
+            key={m.number}
+            className="model-slide relative shrink-0 w-[85vw] md:w-[70vw] lg:w-[75vw] h-[80vh] lg:h-[85vh] bg-paper-2 overflow-hidden group"
+          >
+            <img
+              src={m.img}
+              alt={m.name}
+              loading="lazy"
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
+              style={{ filter: "contrast(1.02) saturate(0.85)" }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-ink/50 via-transparent to-transparent" />
+
+            <div className="absolute top-6 left-6 md:top-10 md:left-10 text-paper text-[11px] uppercase tracking-[0.3em] flex items-center gap-3">
+              <span className="w-2 h-2 rounded-full bg-copper" /> {m.tag}
+            </div>
+            <div className="absolute top-6 right-6 md:top-10 md:right-10 text-paper/70 text-[11px] uppercase tracking-[0.3em] text-right">
+              <div>Length {m.length}</div>
+              <div>Power {m.power}</div>
+              <div>Pax {m.pax}</div>
+            </div>
+
+            <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-paper">
+              <div className="text-[11px] uppercase tracking-[0.3em] text-paper/70">{m.name}</div>
+              <div className="font-display text-[22vw] md:text-[14vw] lg:text-[11vw] leading-[0.85] text-outline text-paper">
+                {m.number}
+              </div>
+            </div>
+
+            <a
+              href="#"
+              className="absolute bottom-6 right-6 md:bottom-10 md:right-10 inline-flex items-center gap-3 border border-paper/60 text-paper px-6 py-3 text-[11px] uppercase tracking-[0.3em] hover:bg-paper hover:text-ink transition-colors"
+            >
+              View <span>+</span>
+            </a>
+          </article>
+        ))}
       </div>
     </section>
   );

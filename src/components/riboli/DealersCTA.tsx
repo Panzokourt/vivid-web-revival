@@ -44,7 +44,7 @@ export function DealersCTA() {
           Dealers Network
         </div>
         <h2 className="cta-el font-display text-5xl md:text-7xl leading-[0.9] mt-4">
-          Step aboard <br /> the RIBOLI family
+          Step aboard <br /> the RIBALI family
         </h2>
         <p className="cta-el mt-8 max-w-xl mx-auto text-ink/70 leading-relaxed">
           Find your nearest authorised partner and schedule a private sea trial

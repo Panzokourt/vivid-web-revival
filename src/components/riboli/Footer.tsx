@@ -4,7 +4,7 @@ export function Footer() {
       <div className="max-w-[1600px] mx-auto px-6 md:px-10 py-16 md:py-20">
         <div className="grid md:grid-cols-4 gap-10 border-b border-paper/15 pb-12">
           <div>
-            <div className="font-display text-3xl tracking-widest">RIBOLI</div>
+            <div className="font-display text-3xl tracking-widest">RIBALI</div>
             <p className="mt-4 text-sm text-paper/60 max-w-xs leading-relaxed">
               Handcrafted RIBs for those who read the sea before the map.
             </p>
@@ -37,10 +37,10 @@ export function Footer() {
 
         <div className="pt-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
           <div className="text-[10px] uppercase tracking-[0.3em] text-paper/40">
-            © {new Date().getFullYear()} RIBOLI Marine · Built in Greece
+            © {new Date().getFullYear()} RIBALI Marine · Built in Greece
           </div>
           <div className="font-display text-[18vw] md:text-[12vw] leading-[0.8] text-outline text-paper/40 select-none">
-            RIBOLI
+            RIBALI
           </div>
         </div>
       </div>

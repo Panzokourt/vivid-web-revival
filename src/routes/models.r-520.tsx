@@ -1,5 +1,5 @@
 import { createFileRoute, useRouter, Link } from "@tanstack/react-router";
-import { ModelPage } from "@/components/riboli/model/ModelPage";
+import { ModelPage } from "@/components/ribali/model/ModelPage";
 import {
   modelDetailQueryOptions,
   modelsListQueryOptions,
@@ -15,13 +15,13 @@ export const Route = createFileRoute("/models/r-520")({
   },
   head: () => ({
     meta: [
-      { title: "RIBOLI R-520 Explore — 5.2m Compact RIB" },
+      { title: "RIBALI R-520 Explore — 5.2m Compact RIB" },
       {
         name: "description",
         content:
-          "The R-520 Explore is RIBOLI's compact 5.2m RIB — nimble, dry, and easy to trailer. Same handcrafted standard as the larger boats.",
+          "The R-520 Explore is RIBALI's compact 5.2m RIB — nimble, dry, and easy to trailer. Same handcrafted standard as the larger boats.",
       },
-      { property: "og:title", content: "RIBOLI R-520 Explore — Compact 5.2m RIB" },
+      { property: "og:title", content: "RIBALI R-520 Explore — Compact 5.2m RIB" },
       {
         property: "og:description",
         content: "Compact RIB for beach runs and tender duty. Handcrafted in Greece.",
@@ -29,7 +29,7 @@ export const Route = createFileRoute("/models/r-520")({
       { property: "og:type", content: "product" },
       { property: "og:url", content: CANONICAL },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "RIBOLI R-520 Explore" },
+      { name: "twitter:title", content: "RIBALI R-520 Explore" },
     ],
     links: [{ rel: "canonical", href: CANONICAL }],
   }),

@@ -77,20 +77,20 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "RIBOLI — Handcrafted RIBs" },
+      { title: "RIBALI — Handcrafted RIBs" },
       {
         name: "description",
         content:
-          "RIBOLI — Greek atelier of handcrafted RIB boats. Editorial performance craft, Deep-V hulls, ORCA Hypalon tubes, dealer network across the Mediterranean.",
+          "RIBALI — Greek atelier of handcrafted RIB boats. Editorial performance craft, Deep-V hulls, ORCA Hypalon tubes, dealer network across the Mediterranean.",
       },
-      { property: "og:title", content: "RIBOLI — Handcrafted RIBs" },
+      { property: "og:title", content: "RIBALI — Handcrafted RIBs" },
       {
         property: "og:description",
         content: "Editorial performance craft. Handcrafted RIBs from Greece.",
       },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
-      { name: "twitter:title", content: "RIBOLI — Handcrafted RIBs" },
+      { name: "twitter:title", content: "RIBALI — Handcrafted RIBs" },
       { name: "twitter:description", content: "Editorial performance craft. Handcrafted RIBs from Greece." },
     ],
     links: [

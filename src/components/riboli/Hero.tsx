@@ -163,7 +163,7 @@ export function Hero() {
           style={{ filter: DISPLAY_SHADOW }}
           aria-hidden
         >
-          {chars("Riboli")}
+          {chars("Ribali")}
         </div>
       </div>
 

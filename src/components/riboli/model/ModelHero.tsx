@@ -28,7 +28,7 @@ export function ModelHero({ model }: { model: ModelDetail }) {
   return (
     <section
       ref={root}
-      className="relative h-screen min-h-[720px] w-full overflow-hidden bg-paper text-ink"
+      className="relative h-screen min-h-[720px] w-full overflow-hidden bg-paper text-ink isolate"
     >
       <div className="mh-corner absolute top-24 left-6 md:left-10 z-20 text-[11px] uppercase tracking-[0.3em] text-ink/60">
         <Link to="/" className="hover:text-copper transition-colors">← Back to models</Link>

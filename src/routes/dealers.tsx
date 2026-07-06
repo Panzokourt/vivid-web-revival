@@ -4,6 +4,7 @@ import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { Nav } from "@/components/riboli/Nav";
 import { Footer } from "@/components/riboli/Footer";
 import { MagneticButton } from "@/components/riboli/MagneticButton";
+import { DealersMap, type DealerPin } from "@/components/riboli/DealersMap";
 
 export const Route = createFileRoute("/dealers")({
   head: () => ({

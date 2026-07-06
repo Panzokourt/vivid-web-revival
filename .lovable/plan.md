@@ -1,99 +1,102 @@
-## Στόχος
+# Configurator Page — Plan
 
-Ξεχωριστή σελίδα ανά RIB μοντέλο (R-680, R-950, R-520) στο ίδιο editorial ύφος με το home, με δεδομένα που τραβιούνται από τη βάση της Lovable Cloud.
+Νέα route `/configurator` σε editorial-light στυλ (ίδια design language με το υπόλοιπο site) με live 3D preview που αλλάζει χρώματα σε real-time, επιλογή μοντέλου/εξοπλισμού/κινητήρα, και form για request quote που αποθηκεύεται στο DB.
 
-## Routing
+## Layout
 
-Ξεχωριστό αρχείο route ανά μοντέλο ώστε το head() να είναι μοναδικό και το URL SEO-friendly:
+Split-screen desktop, stack σε mobile:
 
-- `/models/r-680` → `src/routes/models.r-680.tsx`
-- `/models/r-950` → `src/routes/models.r-950.tsx`
-- `/models/r-520` → `src/routes/models.r-520.tsx`
+```text
+┌──────────────────────────────┬───────────────────────┐
+│                              │  01 · MODEL           │
+│                              │  [R-520][R-680][R-950]│
+│                              │                       │
+│        3D CANVAS             │  02 · HULL COLOR      │
+│        (sticky, ~60%)        │  ○ ○ ○ ○ ○ ○          │
+│                              │                       │
+│        rotate on drag        │  03 · TUBE COLOR      │
+│                              │  ○ ○ ○ ○ ○            │
+│  giant outline number        │                       │
+│  bottom-left overlay         │  04 · CANOPY          │
+│                              │  ○ ○ ○ ○              │
+│                              │                       │
+│                              │  05 · ENGINE          │
+│                              │  [150HP][200HP][250HP]│
+│                              │                       │
+│                              │  06 · EQUIPMENT       │
+│                              │  ☐ Sunbed ☐ VHF …    │
+│                              │                       │
+│                              │  ── SUMMARY ──        │
+│                              │  [Request Quote →]    │
+└──────────────────────────────┴───────────────────────┘
+```
 
-Κάθε αρχείο ορίζει το δικό του `head()` (title, description, og:title, og:description, og:image = το hero image του μοντέλου) και ένα `loader` που φορτώνει τα δεδομένα.
+Editorial hero band πάνω-πάνω με "CONFIGURE / 2026 COLLECTION" + giant serif heading "Build yours."
 
-Στο home, τα cards των Featured Models γίνονται πραγματικά `<Link to="/models/...">`.
+## 3D Preview
+
+- Three.js scene σε `<Canvas>` (react-three-fiber + drei), OrbitControls (rotate only, no zoom/pan), soft studio HDRI lighting, contact shadow.
+- Placeholder geometry: stylized RIB shape χτισμένη από primitives — extruded hull (curved BufferGeometry), tube torus rings πλάι, canopy box πάνω, small console — αρκετά αναγνωρίσιμο ως σκάφος χωρίς GLB asset.
+- 3 materials με refs (`hullMat`, `tubeMat`, `canopyMat`); state change → `material.color.set(hex)` χωρίς re-render της σκηνής.
+- Equipment items ως toggle-able meshes (sunbed cushion, bimini frame, GPS pod, VHF antenna, sport steering).
+- GSAP camera intro (dolly-in on mount) και smooth camera pan όταν αλλάζει model (διαφορετικό length ratio για R-520/R-680/R-950).
+
+## Sections & Data
+
+**Configurator state** (client-side, Zustand ή απλό `useState`):
+- `modelSlug`: 'r-520' | 'r-680' | 'r-950'
+- `hullColor`: hex (default `#0A1628`)
+- `tubeColor`: hex (default `#808080`)
+- `canopyColor`: hex (default `#424949`)
+- `engineHp`: 150 | 200 | 250 | 300
+- `equipment`: string[] (ids)
+
+**Palettes** (hardcoded σε `src/lib/configurator-options.ts`):
+- Hull: 8 editorial colors (deep navy, graphite, oyster white, moss, sand, terracotta, bordeaux, midnight)
+- Tube: 6 (grey, black, white, sand, navy, red)
+- Canopy: 4 (charcoal, cream, navy, olive)
+- Engine options per model (μικρά models = χαμηλότερα HP)
+- Equipment catalog: Sunbed, VHF Radio, GPS Plotter, Bimini Top, Sport Steering, Passenger Seat, Freshwater Shower, Teak Deck
 
 ## Backend (Lovable Cloud)
 
-Ενεργοποίηση Lovable Cloud και δημιουργία δύο πινάκων μέσω migration:
+Νέο table `quote_requests`:
+- `id`, `model_slug`, `hull_color`, `tube_color`, `canopy_color`, `engine_hp`, `equipment` (jsonb array), `full_name`, `email`, `phone`, `country`, `message`, `created_at`, `status` (default 'new')
+- RLS: anon INSERT policy (public form), authenticated SELECT μόνο (admin future); GRANT INSERT TO anon, ALL TO service_role.
 
-**`public.models`**
-- `id uuid pk`
-- `slug text unique not null` (π.χ. `r-680`)
-- `code text` (`R-680`)
-- `name text` (`R-680 Sport`)
-- `number text` (`680`)
-- `tag text` (Best Seller / Flagship / Compact)
-- `tagline text`
-- `description text`
-- `length_m numeric`, `beam_m numeric`, `max_hp int`, `pax int`, `fuel_l int`, `weight_kg int`, `hull_type text`, `tube_material text`
-- `hero_image text`, `order_index int`
-- `created_at timestamptz default now()`
+Server function `submitQuoteRequest` (`src/lib/quote.functions.ts`):
+- Zod validation (name/email/phone limits, hex color pattern, allowed slugs/HP, whitelist equipment ids)
+- Insert μέσω server publishable client
+- Return `{ ok: true, id }` ή validation errors.
 
-**`public.model_gallery`**
-- `id uuid pk`
-- `model_id uuid references public.models(id) on delete cascade`
-- `image_url text not null`
-- `caption text`
-- `order_index int`
+## UI Components
 
-Και οι δύο πίνακες: `GRANT SELECT ... TO anon, authenticated`, `ENABLE ROW LEVEL SECURITY` και public SELECT policy (`USING (true)`), γιατί είναι δημόσιο catalog. Insert/update μόνο μέσω migrations/service role προς το παρόν (χωρίς admin UI σε αυτό το scope).
+`src/components/riboli/configurator/`:
+- `ConfiguratorPage.tsx` — layout wrapper, state provider
+- `BoatCanvas.tsx` — three.js scene + materials
+- `ModelSelector.tsx` — 3 pill buttons με specs preview
+- `ColorSwatchGroup.tsx` — reusable για hull/tube/canopy
+- `EngineSelector.tsx` — HP options με torque/max speed indicator
+- `EquipmentChecklist.tsx` — checkbox list με μικρά icons
+- `QuoteDialog.tsx` — modal με form (name/email/phone/country/message), dispatches server fn, success screen με reference id
+- `SummaryBar.tsx` — sticky bottom-of-panel με current config summary + CTA
 
-Seed data για τα 3 μοντέλα μπαίνει στο ίδιο migration, χρησιμοποιώντας τις υπάρχουσες εικόνες (`hero.jpg`, `model-r680/r950/r520.jpg`, `tech-detail.jpg`) ως gallery frames.
+## Route & Navigation
 
-## Server functions
+- `src/routes/configurator.tsx` — public route, unique `head()` metadata (title "Configure your Riboli", description, og tags)
+- Nav.tsx: προσθήκη "Configure" CTA button (top-right, distinct από τα άλλα links, editorial black pill)
+- Homepage hero: secondary CTA "Configure yours →" δίπλα στο υπάρχον primary CTA
 
-`src/lib/models.functions.ts` (client-safe path, publishable key server client μέσα στους handlers — public read-only Data API):
+## GSAP Animations
 
-- `listModels()` — για το home & related grid· επιστρέφει array με βασικά πεδία.
-- `getModelBySlug({ slug })` — για τη detail page· επιστρέφει το μοντέλο μαζί με το gallery του (join σε `model_gallery` ταξινομημένο κατά `order_index`). Αν δεν βρεθεί, `throw notFound()`.
+- Section number labels (`01 · MODEL` κτλ.) fade-in stagger on scroll
+- Color swatches scale/glow στο hover
+- Canvas: intro camera dolly + gentle idle float
+- Panel sections reveal με ScrollTrigger καθώς scroll-άρει ο δεξιός πίνακας
 
-Χρησιμοποιούμε `queryOptions` + `ensureQueryData` στους loaders και `useSuspenseQuery` στα components σύμφωνα με το template pattern. Οι routes ορίζουν `errorComponent` + `notFoundComponent`.
+## Out of Scope
 
-## UI (νέα components)
-
-`src/components/riboli/model/` (shared σε όλες τις model pages, GSAP animations όπως στο home):
-
-- **`ModelHero.tsx`** — full-screen hero: eyebrow (Model · tag), giant outline number (π.χ. `680`), hero image parallax, corner labels (Length / Power / Pax / Hull), CTA `Book +` και `↓ Explore`.
-- **`ModelSpecs.tsx`** — dark band (`bg-ink`) όπως το Tech section: αριστερά περιγραφή + 3–4 highlights (Deep-V Hull, ORCA Hypalon, T-Top canopy, κτλ.), δεξιά specs grid (length, beam, HP, pax, fuel, weight, hull, tubes) με GSAP stagger reveal.
-- **`ModelGallery.tsx`** — horizontal-scroll gallery με GSAP `ScrollTrigger` pin (ίδιο pattern με τα Featured Models). Κάθε slide: μεγάλη φωτογραφία + caption + counter (`01 / 04`).
-- **`ModelCTA.tsx`** — light band: `Book a sea trial` heading + CTA button προς `#dealers` του home ή mailto placeholder.
-- **`ModelRelated.tsx`** — τα άλλα 2 μοντέλα ως cards με hover copper underline, `<Link>` προς το detail route του καθενός.
-
-Το κοινό template render layout:
-
-```
-<Nav />
-<ModelHero />
-<ModelSpecs />
-<ModelGallery />
-<ModelCTA />
-<ModelRelated />
-<Footer />
-```
-
-Οι 3 σελίδες μοντέλων είναι thin wrappers που δίνουν slug + head metadata· όλο το UI ζει στα shared components και τραβά δεδομένα από τα `useSuspenseQuery` hooks.
-
-## Home integration
-
-`FeaturedModels.tsx`: αντικατάσταση του hard-coded array με `useSuspenseQuery(listModelsQueryOptions())` και τύλιγμα κάθε slide σε `<Link to="/models/$slug" params={{ slug }}>`. Το route του home προσθέτει `ensureQueryData(listModelsQueryOptions())` στον loader του.
-
-## Nav
-
-Το `Models` link του nav γίνεται `<Link to="/">` με hash `#models` όταν είμαστε σε άλλη σελίδα, αλλιώς παραμένει anchor. Θα προσθέσω και δευτερεύον submenu (dropdown) με τα 3 μοντέλα σε desktop hover.
-
-## Deliverables
-
-1. `supabase--enable` και migration για `models` + `model_gallery` + GRANTs + RLS + seed.
-2. `src/lib/models.functions.ts` με τις δύο public server fns.
-3. `src/components/riboli/model/*` (Hero/Specs/Gallery/CTA/Related).
-4. `src/routes/models.r-680.tsx`, `models.r-950.tsx`, `models.r-520.tsx`.
-5. Update `FeaturedModels.tsx` + `routes/index.tsx` loader.
-6. Update `Nav.tsx` με models submenu.
-
-## Εκτός scope
-
-- Admin UI για επεξεργασία μοντέλων (τα δεδομένα ζουν στη DB, αλλά η επεξεργασία γίνεται προς το παρόν με migrations).
-- Booking/quote form με backend (μόνο CTA link).
-- 4ο μοντέλο ή variants.
+- Δεν κάνουμε import GLB μοντέλα (placeholder geometry)
+- Δεν στέλνουμε email notifications (μόνο DB insert· admin flow μελλοντικά)
+- Δεν persistάρουμε το config σε URL query string (καμία shareable link σε αυτό το iteration)
+- Δεν φτιάχνουμε admin panel για να δει τα quote requests

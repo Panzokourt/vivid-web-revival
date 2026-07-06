@@ -102,4 +102,9 @@
     background: var(--color-ink);
     color: var(--color-paper);
   }
+  html.cursor-none-root,
+  html.cursor-none-root body,
+  html.cursor-none-root * {
+    cursor: none !important;
+  }
 }

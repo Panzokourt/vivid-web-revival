@@ -15,6 +15,7 @@ import { ScrollProgress } from "@/components/riboli/ScrollProgress";
 import { LoaderOverlay } from "@/components/riboli/LoaderOverlay";
 import { SmoothScroll } from "@/components/riboli/SmoothScroll";
 import { PageTransition } from "@/components/riboli/PageTransition";
+import { Cursor } from "@/components/riboli/Cursor";
 
 function NotFoundComponent() {
   return (
@@ -130,6 +131,7 @@ function RootComponent() {
     <QueryClientProvider client={queryClient}>
       <LoaderOverlay />
       <PageTransition />
+      <Cursor />
       <SmoothScroll />
       <ScrollProgress />
       {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}

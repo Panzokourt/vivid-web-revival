@@ -8,6 +8,7 @@ import { Stats } from "@/components/riboli/Stats";
 import { DealersCTA } from "@/components/riboli/DealersCTA";
 import { Footer } from "@/components/riboli/Footer";
 import { ThreeBackground } from "@/components/riboli/ThreeBackground";
+import { SectionSnap } from "@/components/riboli/SectionSnap";
 
 export const Route = createFileRoute("/")({
   component: Index,
@@ -20,15 +21,17 @@ function Index() {
   return (
     <main className="relative bg-paper min-h-screen text-ink">
       {mounted && <ThreeBackground />}
+      <SectionSnap />
       <div className="relative z-10">
         <Nav />
-        <Hero />
-        <FeaturedModels />
-        <TechConstruction />
-        <Stats />
-        <DealersCTA />
-        <Footer />
+        <div data-snap><Hero /></div>
+        <div data-snap><FeaturedModels /></div>
+        <div data-snap><TechConstruction /></div>
+        <div data-snap><Stats /></div>
+        <div data-snap><DealersCTA /></div>
+        <div data-snap><Footer /></div>
       </div>
     </main>
   );
 }
+

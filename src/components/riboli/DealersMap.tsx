@@ -53,12 +53,26 @@ function loadMapsScript(): Promise<void> {
 }
 
 export function DealersMap({ pins }: { pins: DealerPin[] }) {
+  const wrapperEl = useRef<HTMLDivElement>(null);
   const mapEl = useRef<HTMLDivElement>(null);
   const mapRef = useRef<any>(null);
   const infoRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
   const [active, setActive] = useState<string>(pins[0]?.id ?? "");
   const [ready, setReady] = useState(false);
+
+  // Block page scroll while wheel happens over the whole map+sidebar block.
+  // React's onWheel is passive, so we bind a native non-passive listener.
+  useEffect(() => {
+    const el = wrapperEl.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
+
 
   useEffect(() => {
     let cancelled = false;

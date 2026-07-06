@@ -115,6 +115,57 @@ export type Database = {
         }
         Relationships: []
       }
+      quote_requests: {
+        Row: {
+          canopy_color: string
+          country: string | null
+          created_at: string
+          email: string
+          engine_hp: number
+          equipment: Json
+          full_name: string
+          hull_color: string
+          id: string
+          message: string | null
+          model_slug: string
+          phone: string | null
+          status: string
+          tube_color: string
+        }
+        Insert: {
+          canopy_color: string
+          country?: string | null
+          created_at?: string
+          email: string
+          engine_hp: number
+          equipment?: Json
+          full_name: string
+          hull_color: string
+          id?: string
+          message?: string | null
+          model_slug: string
+          phone?: string | null
+          status?: string
+          tube_color: string
+        }
+        Update: {
+          canopy_color?: string
+          country?: string | null
+          created_at?: string
+          email?: string
+          engine_hp?: number
+          equipment?: Json
+          full_name?: string
+          hull_color?: string
+          id?: string
+          message?: string | null
+          model_slug?: string
+          phone?: string | null
+          status?: string
+          tube_color?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

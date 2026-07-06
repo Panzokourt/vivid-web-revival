@@ -23,7 +23,7 @@ export function Hero() {
         .from(".h-book", { scale: 0.9, opacity: 0, duration: 0.6, ease: "back.out(1.6)" }, "-=0.6")
         .from(".h-mark", { rotate: -90, opacity: 0, duration: 0.9, ease: "power2.out" }, "-=1");
 
-      // Scroll parallax
+      // Scroll parallax (gentle — keep words inside viewport)
       gsap.to(".h-media img", {
         yPercent: -10,
         scale: 1.06,
@@ -31,22 +31,22 @@ export function Hero() {
         scrollTrigger: { trigger: root.current, start: "top top", end: "bottom top", scrub: true },
       });
       gsap.to(".h-display-aegean", {
-        yPercent: -6,
+        yPercent: -3,
         ease: "none",
         scrollTrigger: { trigger: root.current, start: "top top", end: "bottom top", scrub: true },
       });
       gsap.to(".h-display-sea", {
-        yPercent: -12,
+        yPercent: -5,
         ease: "none",
         scrollTrigger: { trigger: root.current, start: "top top", end: "bottom top", scrub: true },
       });
 
-      // Mouse parallax on display words
+      // Mouse parallax on display words — clamped so nothing exits the frame
       if (!window.matchMedia("(pointer: coarse)").matches) {
+        const clamp = (v: number, max: number) => Math.max(-max, Math.min(max, v));
         const targets = Array.from(root.current!.querySelectorAll<HTMLElement>("[data-hover-parallax]"));
         const setters = targets.map((el) => ({
-          el,
-          strength: Number(el.dataset.hoverParallax ?? "0.02"),
+          strength: Number(el.dataset.hoverParallax ?? "0.01"),
           xTo: gsap.quickTo(el, "x", { duration: 0.7, ease: "power3.out" }),
           yTo: gsap.quickTo(el, "y", { duration: 0.7, ease: "power3.out" }),
         }));
@@ -55,8 +55,8 @@ export function Hero() {
           const relX = e.clientX - rect.left - rect.width / 2;
           const relY = e.clientY - rect.top - rect.height / 2;
           setters.forEach(({ strength, xTo, yTo }) => {
-            xTo(relX * strength);
-            yTo(relY * strength);
+            xTo(clamp(relX * strength, 20));
+            yTo(clamp(relY * strength, 20));
           });
         };
         root.current!.addEventListener("mousemove", onMove);
@@ -103,6 +103,9 @@ export function Hero() {
         />
       </div>
 
+      {/* Top scrim to keep nav readable over the photo */}
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-[15] h-28 bg-gradient-to-b from-black/50 to-transparent" />
+
       {/* Minimal decorative graphics (grid + crosshairs + horizon) */}
       <HeroGraphics containerRef={root} variant="minimal" />
 
@@ -111,13 +114,13 @@ export function Hero() {
         className="h-corner absolute top-24 left-6 md:left-10 z-20 text-[11px] uppercase tracking-[0.3em] text-paper/90"
         style={{ textShadow: TEXT_SHADOW }}
       >
-        Territory
+        Handcrafted
       </div>
 
       {/* 2. Top-center mark */}
       <div
         className="h-corner h-mark absolute top-24 left-1/2 -translate-x-1/2 z-20 text-paper/80"
-        data-hover-parallax="0.015"
+        data-hover-parallax="0.008"
         style={{ filter: DISPLAY_SHADOW }}
       >
         <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
@@ -126,19 +129,19 @@ export function Hero() {
         </svg>
       </div>
 
-      {/* 3. Top-right — display "The" + edit glyph */}
-      <div className="absolute top-16 right-6 md:right-14 z-20 flex items-start gap-3">
+      {/* 3. Top-right — display "Rib" + edit glyph */}
+      <div className="absolute top-28 md:top-24 right-6 md:right-14 z-20 flex items-start gap-3">
         <div
-          className="h-display-the font-display leading-[0.85] text-paper text-[9vw] md:text-[6vw]"
-          data-hover-parallax="0.02"
+          className="h-display-the font-display leading-[0.85] text-paper text-[7vw] md:text-[5vw]"
+          data-hover-parallax="0.01"
           style={{ filter: DISPLAY_SHADOW }}
           aria-hidden
         >
-          {chars("The")}
+          {chars("Rib")}
         </div>
         <svg
-          className="h-corner mt-3 text-paper/70"
-          width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"
+          className="h-corner mt-2 text-paper/70"
+          width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"
         >
           <path d="M4 20l4-1 12-12-3-3L5 16l-1 4z" />
         </svg>
@@ -149,29 +152,29 @@ export function Hero() {
         className="h-body absolute left-6 md:left-10 top-1/2 -translate-y-1/2 z-20 max-w-[220px] text-paper/95 text-sm md:text-base leading-snug"
         style={{ textShadow: TEXT_SHADOW }}
       >
-        A short walk<br />along the<br />coastline
+        Built by hand<br />on the shores<br />of Greece
       </div>
 
-      {/* 5. Mid — outlined "Aegean" */}
+      {/* 5. Mid — outlined "Riboli" */}
       <div className="absolute inset-x-0 top-[46%] -translate-y-1/2 z-10 flex items-center justify-center pointer-events-none px-6">
         <div
-          className="h-display-aegean font-display leading-[0.85] tracking-tight text-[16vw] md:text-[13vw] text-outline-thick text-paper"
-          data-hover-parallax="0.018"
+          className="h-display-aegean font-display leading-[0.85] tracking-tight text-[14vw] md:text-[11vw] text-outline-thick text-paper max-w-full"
+          data-hover-parallax="0.01"
           style={{ filter: DISPLAY_SHADOW }}
           aria-hidden
         >
-          {chars("Aegean")}
+          {chars("Riboli")}
         </div>
       </div>
 
-      {/* 6. Mid-right — solid "Sea" bleeding off */}
-      <div className="absolute top-[54%] -translate-y-1/2 -right-[6%] md:-right-[4%] z-20 pointer-events-none">
+      {/* 6. Mid-right — solid "680", anchored inside the viewport */}
+      <div className="absolute top-[54%] -translate-y-1/2 right-6 md:right-10 z-20 pointer-events-none max-w-[45vw]">
         <div
-          className="h-display-sea font-display leading-[0.85] tracking-tight text-paper text-[20vw] md:text-[15vw]"
-          data-hover-parallax="0.028"
+          className="h-display-sea font-display leading-[0.85] tracking-tight text-paper text-[16vw] md:text-[12vw]"
+          data-hover-parallax="0.014"
           style={{ filter: DISPLAY_SHADOW }}
         >
-          {chars("Sea")}
+          {chars("680")}
         </div>
       </div>
 
@@ -202,10 +205,10 @@ export function Hero() {
         style={{ textShadow: TEXT_SHADOW }}
       >
         <div className="text-xs md:text-sm uppercase tracking-[0.25em] font-semibold text-paper/80">
-          Rivers and
+          Performance
         </div>
         <div className="mt-2 text-base md:text-xl uppercase tracking-[0.15em] font-semibold leading-tight">
-          Islands of<br />the Cyclades
+          Deep-V<br />Hulls
         </div>
       </div>
 
@@ -214,7 +217,7 @@ export function Hero() {
         className="h-body absolute bottom-10 right-6 md:right-10 z-20 max-w-[220px] text-right text-paper/95 text-sm md:text-base leading-snug"
         style={{ textShadow: TEXT_SHADOW }}
       >
-        Long cruises through<br />the Aegean archipelago
+        Editorial performance craft<br />for open water
       </div>
     </section>
   );

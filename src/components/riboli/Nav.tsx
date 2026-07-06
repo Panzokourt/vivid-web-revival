@@ -9,6 +9,8 @@ const links = [
   { label: "Contact", href: "/#footer" },
 ];
 
+const NAV_TEXT_SHADOW = "0 2px 12px rgba(0,0,0,0.6), 0 0 2px rgba(0,0,0,0.4)";
+
 export function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
@@ -20,13 +22,18 @@ export function Nav() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  const overHero = !scrolled;
+  const textCls = overHero ? "text-paper" : "text-ink";
+  const linkCls = overHero ? "text-paper/85 hover:text-copper" : "text-ink/70 hover:text-copper";
+  const shadow = overHero ? { textShadow: NAV_TEXT_SHADOW } : undefined;
+
   return (
     <nav
-      className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-10 py-5 text-ink transition-colors duration-300 ${
-        scrolled ? "bg-paper/80 backdrop-blur-md border-b border-ink/10" : ""
+      className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-10 py-5 transition-colors duration-300 ${textCls} ${
+        scrolled ? "bg-paper/85 backdrop-blur-md border-b border-ink/10" : ""
       }`}
     >
-      <Link to="/" className="font-display text-2xl tracking-widest">
+      <Link to="/" className="font-display text-2xl tracking-widest" style={shadow}>
         RIBALI
       </Link>
       <div className="hidden md:flex space-x-8 lg:space-x-10 text-[11px] uppercase tracking-[0.25em]">
@@ -34,7 +41,8 @@ export function Nav() {
           <a
             key={l.href}
             href={l.href}
-            className="text-ink/70 hover:text-copper transition-colors"
+            className={`transition-colors ${linkCls}`}
+            style={shadow}
           >
             {l.label}
           </a>
@@ -44,7 +52,11 @@ export function Nav() {
         <MagneticButton
           as={Link}
           to="/configurator"
-          className="hidden sm:inline-flex items-center gap-2 bg-ink text-paper px-4 py-2.5 text-[10px] uppercase tracking-[0.25em] hover:bg-copper transition-colors"
+          className={`hidden sm:inline-flex items-center gap-2 px-4 py-2.5 text-[10px] uppercase tracking-[0.25em] transition-colors ${
+            overHero
+              ? "bg-paper text-ink hover:bg-copper hover:text-paper"
+              : "bg-ink text-paper hover:bg-copper"
+          }`}
         >
           Configure
           <span className="text-base leading-none">+</span>
@@ -52,11 +64,11 @@ export function Nav() {
         <button
           aria-label="Menu"
           onClick={() => setOpen((v) => !v)}
-          className="md:hidden p-2 border border-ink/20"
+          className={`md:hidden p-2 border ${overHero ? "border-paper/40" : "border-ink/20"}`}
         >
-          <div className="w-5 h-[2px] bg-ink mb-1" />
-          <div className="w-5 h-[2px] bg-ink mb-1" />
-          <div className="w-5 h-[2px] bg-ink" />
+          <div className={`w-5 h-[2px] mb-1 ${overHero ? "bg-paper" : "bg-ink"}`} />
+          <div className={`w-5 h-[2px] mb-1 ${overHero ? "bg-paper" : "bg-ink"}`} />
+          <div className={`w-5 h-[2px] ${overHero ? "bg-paper" : "bg-ink"}`} />
         </button>
       </div>
 

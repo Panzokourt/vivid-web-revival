@@ -4,9 +4,12 @@ import {
   modelDetailQueryOptions,
   modelsListQueryOptions,
 } from "@/lib/models.functions";
+import modelImg from "@/assets/model-r680.jpg";
 
 const SLUG = "r-680";
-const CANONICAL = "https://vivid-web-revival.lovable.app/models/r-680";
+const SITE = "https://vivid-web-revival.lovable.app";
+const CANONICAL = `${SITE}/models/r-680`;
+const IMG = `${SITE}${modelImg}`;
 
 export const Route = createFileRoute("/models/r-680")({
   loader: ({ context }) => {
@@ -28,15 +31,35 @@ export const Route = createFileRoute("/models/r-680")({
       },
       { property: "og:type", content: "product" },
       { property: "og:url", content: CANONICAL },
+      { property: "og:image", content: IMG },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "RIBALI R-680 Sport" },
+      { name: "twitter:image", content: IMG },
     ],
     links: [{ rel: "canonical", href: CANONICAL }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: "RIBALI R-680 Sport",
+          image: IMG,
+          description:
+            "6.8m handcrafted RIB with Deep-V hull and ORCA Hypalon tubes. Driver-forward console tuned for long Aegean runs.",
+          brand: { "@type": "Brand", name: "RIBALI" },
+          manufacturer: { "@id": `${SITE}/#organization` },
+          category: "Rigid Inflatable Boat",
+          url: CANONICAL,
+        }),
+      },
+    ],
   }),
   component: () => <ModelPage slug={SLUG} />,
   errorComponent: ModelError,
   notFoundComponent: ModelMissing,
 });
+
 
 function ModelError({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();

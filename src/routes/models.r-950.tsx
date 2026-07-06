@@ -4,9 +4,12 @@ import {
   modelDetailQueryOptions,
   modelsListQueryOptions,
 } from "@/lib/models.functions";
+import modelImg from "@/assets/model-r950.jpg";
 
 const SLUG = "r-950";
-const CANONICAL = "https://vivid-web-revival.lovable.app/models/r-950";
+const SITE = "https://vivid-web-revival.lovable.app";
+const CANONICAL = `${SITE}/models/r-950`;
+const IMG = `${SITE}${modelImg}`;
 
 export const Route = createFileRoute("/models/r-950")({
   loader: ({ context }) => {
@@ -28,15 +31,35 @@ export const Route = createFileRoute("/models/r-950")({
       },
       { property: "og:type", content: "product" },
       { property: "og:url", content: CANONICAL },
+      { property: "og:image", content: IMG },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "RIBALI R-950 Cruise" },
+      { name: "twitter:image", content: IMG },
     ],
     links: [{ rel: "canonical", href: CANONICAL }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: "RIBALI R-950 Cruise",
+          image: IMG,
+          description:
+            "9.5m flagship stepped Deep-V RIB with twin outboards up to 600HP and a forward cabin. Handcrafted in Piraeus, Greece.",
+          brand: { "@type": "Brand", name: "RIBALI" },
+          manufacturer: { "@id": `${SITE}/#organization` },
+          category: "Rigid Inflatable Boat",
+          url: CANONICAL,
+        }),
+      },
+    ],
   }),
   component: () => <ModelPage slug={SLUG} />,
   errorComponent: ModelError,
   notFoundComponent: ModelMissing,
 });
+
 
 function ModelError({ error, reset }: { error: Error; reset: () => void }) {
   const router = useRouter();

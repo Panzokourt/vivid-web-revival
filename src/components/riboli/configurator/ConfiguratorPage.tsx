@@ -66,7 +66,7 @@ export function ConfiguratorPage() {
           Build yours.
         </h1>
         <p className="mt-6 max-w-xl text-ink/60 text-sm md:text-base">
-          Compose your Riboli in real time. Hull, tubes, canopy, engine and extras — every
+          Compose your Ribali in real time. Hull, tubes, canopy, engine and extras — every
           choice reflects on the model beside you.
         </p>
       </section>

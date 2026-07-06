@@ -27,7 +27,7 @@ export function Nav() {
       }`}
     >
       <a href="#" className="font-display text-2xl tracking-widest">
-        RIBOLI
+        RIBALI
       </a>
       <div className="hidden md:flex space-x-8 lg:space-x-10 text-[11px] uppercase tracking-[0.25em]">
         {links.map((l) => (

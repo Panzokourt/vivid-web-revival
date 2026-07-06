@@ -56,7 +56,7 @@ export function TechConstruction() {
         <div className="relative">
           <img
             src={techImg}
-            alt="RIBOLI hull construction detail"
+            alt="RIBALI hull construction detail"
             loading="lazy"
             className="tech-hero w-full h-[50vh] md:h-[70vh] object-cover opacity-70 mix-blend-luminosity"
           />

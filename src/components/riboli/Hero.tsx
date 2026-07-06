@@ -78,7 +78,7 @@ export function Hero() {
       <div className="hero-media absolute inset-x-0 bottom-0 top-40 z-10 mx-auto max-w-6xl px-6">
         <img
           src={heroImg}
-          alt="RIBOLI R-680 handcrafted RIB on the Aegean sea"
+          alt="RIBALI R-680 handcrafted RIB on the Aegean sea"
           width={1920}
           height={1088}
           className="h-full w-full object-cover object-center rounded-sm shadow-[0_40px_120px_-40px_rgba(26,26,26,0.5)]"

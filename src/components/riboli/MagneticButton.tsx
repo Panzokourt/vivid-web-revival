@@ -16,7 +16,7 @@ export function MagneticButton({
   strength = 0.35,
   ...rest
 }: MagneticButtonProps) {
-  const Tag = (as ?? "a") as ElementType;
+  const Tag: ElementType = as ?? "a";
   const ref = useRef<HTMLElement | null>(null);
   const innerRef = useRef<HTMLSpanElement | null>(null);
 
@@ -54,11 +54,12 @@ export function MagneticButton({
     };
   }, [strength]);
 
-  return (
-    <Tag ref={ref as never} className={className} {...rest}>
-      <span ref={innerRef} className="inline-flex items-center gap-3">
-        {children}
-      </span>
-    </Tag>
+  return createElement(
+    Tag,
+    { ref, className, ...rest },
+    <span ref={innerRef} className="inline-flex items-center gap-3">
+      {children}
+    </span>,
   );
 }
+

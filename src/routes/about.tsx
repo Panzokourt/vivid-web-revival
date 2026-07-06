@@ -1,11 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
 import { useLayoutEffect, useRef } from "react";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
 import { Nav } from "@/components/riboli/Nav";
 import { Footer } from "@/components/riboli/Footer";
+import { MagneticButton } from "@/components/riboli/MagneticButton";
 import techImg from "@/assets/tech-detail.jpg";
 import heroImg from "@/assets/hero.jpg";
+import r520 from "@/assets/model-r520.jpg";
+import r680 from "@/assets/model-r680.jpg";
+import r950 from "@/assets/model-r950.jpg";
 
 export const Route = createFileRoute("/about")({
   head: () => ({

@@ -49,7 +49,7 @@ export function Hero() {
   return (
     <section
       ref={root}
-      className="relative h-screen min-h-[720px] w-full overflow-hidden bg-paper text-ink"
+      className="relative h-screen min-h-[720px] w-full overflow-hidden bg-paper text-ink isolate"
     >
       {/* corner labels */}
       <div className="hero-corner absolute top-24 left-6 md:left-10 z-20 text-[11px] uppercase tracking-[0.3em] text-ink/60">
@@ -63,14 +63,14 @@ export function Hero() {
 
       {/* headline */}
       <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-between px-6 md:px-16 pointer-events-none">
-        <h1 className="hero-title font-display text-[18vw] md:text-[13vw] leading-[0.85] tracking-tight text-outline text-ink/90 select-none">
+        <h1 className="hero-title font-display text-[18vw] md:text-[13vw] leading-[0.85] tracking-tight text-invert-blend select-none">
           {title.map((c, i) => (
             <span key={i} className="inline-block">
               {c}
             </span>
           ))}
         </h1>
-        <div className="hero-corner hidden md:block font-display text-[13vw] leading-[0.85] tracking-tight text-ink/90 text-right">
+        <div className="hero-corner hidden md:block font-display text-[13vw] leading-[0.85] tracking-tight text-invert-blend text-right">
           680
         </div>
       </div>

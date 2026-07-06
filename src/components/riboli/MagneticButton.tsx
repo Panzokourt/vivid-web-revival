@@ -1,4 +1,4 @@
-import { useEffect, useRef, type ElementType, type ReactNode } from "react";
+import { createElement, useEffect, useRef, type ElementType, type ReactNode } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 
 type MagneticButtonProps = {

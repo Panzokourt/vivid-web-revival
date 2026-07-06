@@ -1,0 +1,120 @@
+import { useLayoutEffect, useRef } from "react";
+import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import img1 from "@/assets/hero.jpg";
+import img2 from "@/assets/model-r680.jpg";
+import img3 from "@/assets/model-r950.jpg";
+import img4 from "@/assets/model-r520.jpg";
+
+const experiences = [
+  { img: img1, eyebrow: "01 — Day Charter", title: "Sunrise-to-sunset island runs", body: "Skip the crowds. Hop three coves before lunch, anchor where the ferries can't reach." },
+  { img: img2, eyebrow: "02 — Family Cruise", title: "Shaded, quiet, easy on-board", body: "Bimini top, low freeboard, walk-around deck — designed for kids and grandparents alike." },
+  { img: img3, eyebrow: "03 — Dive & Snorkel", title: "A working platform under you", body: "Fold-down ladder, rinse shower, tank stowage. Back on-board without the drama." },
+  { img: img4, eyebrow: "04 — Sunset Aperitivo", title: "The best table in the Aegean", body: "Bow sunpad, cooler drawer, ambient deck lights. Cast off at seven, back by ten." },
+];
+
+export function Experiences() {
+  const root = useRef<HTMLElement>(null);
+  const track = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (prefersReducedMotion()) return;
+    const ctx = gsap.context(() => {
+      const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
+      if (isDesktop && track.current) {
+        const totalScroll = () => track.current!.scrollWidth - window.innerWidth;
+        gsap.to(track.current, {
+          x: () => -totalScroll(),
+          ease: "none",
+          scrollTrigger: {
+            trigger: root.current,
+            start: "top top",
+            end: () => `+=${totalScroll()}`,
+            scrub: 1,
+            pin: true,
+            invalidateOnRefresh: true,
+          },
+        });
+      }
+
+      gsap.utils.toArray<HTMLElement>(".exp-img").forEach((el) => {
+        gsap.fromTo(
+          el,
+          { yPercent: -8 },
+          {
+            yPercent: 8,
+            ease: "none",
+            scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true },
+          },
+        );
+      });
+
+      gsap.from(".exp-eyebrow", {
+        y: 24,
+        opacity: 0,
+        duration: 0.7,
+        scrollTrigger: { trigger: root.current, start: "top 80%" },
+      });
+    }, root);
+    return () => ctx.revert();
+  }, []);
+
+  return (
+    <section
+      ref={root}
+      id="experiences"
+      className="relative bg-paper text-ink overflow-hidden h-screen flex flex-col"
+    >
+      <div className="px-6 md:px-10 pt-16 md:pt-20 pb-6 shrink-0">
+        <div className="exp-eyebrow flex items-end justify-between gap-6 max-w-[1600px] mx-auto">
+          <div>
+            <div className="text-[11px] uppercase tracking-[0.3em] text-ink/50">
+              How it's used
+            </div>
+            <h2 className="font-display text-5xl md:text-7xl leading-none mt-2">
+              Experiences
+            </h2>
+          </div>
+          <div className="text-[11px] uppercase tracking-[0.3em] text-ink/50 hidden md:block">
+            Scroll <span className="text-ink/80">→</span>
+          </div>
+        </div>
+      </div>
+
+      <div
+        ref={track}
+        className="flex gap-6 md:gap-10 px-6 md:px-10 pb-10 will-change-transform flex-1 min-h-0 items-stretch"
+      >
+        {experiences.map((e) => (
+          <article
+            key={e.eyebrow}
+            className="relative shrink-0 w-[85vw] md:w-[60vw] lg:w-[55vw] h-full bg-paper-2 overflow-hidden isolate"
+          >
+            <div className="absolute inset-0 overflow-hidden">
+              <img
+                src={e.img}
+                alt={e.title}
+                loading="lazy"
+                className="exp-img absolute inset-0 h-[120%] w-full object-cover"
+                style={{ filter: "contrast(1.02) saturate(0.85)" }}
+              />
+            </div>
+            <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/10 to-transparent" />
+
+            <div className="absolute top-6 left-6 md:top-10 md:left-10 text-paper text-[11px] uppercase tracking-[0.3em]">
+              {e.eyebrow}
+            </div>
+
+            <div className="absolute bottom-6 left-6 right-6 md:bottom-10 md:left-10 md:right-10 text-paper">
+              <div className="font-display text-3xl md:text-5xl leading-tight max-w-xl">
+                {e.title}
+              </div>
+              <p className="mt-3 text-paper/80 max-w-md text-sm md:text-base leading-relaxed">
+                {e.body}
+              </p>
+            </div>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}

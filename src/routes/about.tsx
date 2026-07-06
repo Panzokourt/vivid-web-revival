@@ -157,6 +157,38 @@ function AboutPage() {
         ease: "power2.out",
         scrollTrigger: { trigger: ".team-grid", start: "top 80%" },
       });
+
+      // Pinned chapters crossfade — desktop only
+      const isDesktop = window.matchMedia("(min-width: 768px)").matches;
+      if (isDesktop) {
+        const section = root.current?.querySelector<HTMLElement>(".chapters-section");
+        const images = gsap.utils.toArray<HTMLElement>(".chapter-image");
+        const texts = gsap.utils.toArray<HTMLElement>(".chapter-text");
+        if (section && images.length) {
+          // start states
+          gsap.set(images.slice(1), { opacity: 0 });
+          gsap.set(texts.slice(1), { opacity: 0, y: 20 });
+
+          const steps = images.length;
+          const tl = gsap.timeline({
+            scrollTrigger: {
+              trigger: section,
+              start: "top top",
+              end: () => `+=${window.innerHeight * (steps - 1) * 1.2}`,
+              pin: true,
+              scrub: 0.6,
+            },
+          });
+          for (let i = 1; i < steps; i++) {
+            tl.to(images[i - 1], { opacity: 0, duration: 1 }, i - 1)
+              .to(images[i], { opacity: 1, duration: 1 }, i - 1)
+              .to(texts[i - 1], { opacity: 0, y: -20, duration: 1 }, i - 1)
+              .to(texts[i], { opacity: 1, y: 0, duration: 1 }, i - 1);
+          }
+        }
+      }
+
+      ScrollTrigger.refresh();
     }, root);
     return () => ctx.revert();
   }, []);

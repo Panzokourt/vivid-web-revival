@@ -1,14 +1,16 @@
 import { useLayoutEffect, useRef } from "react";
-import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
+import { Link } from "@tanstack/react-router";
+import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import r680 from "@/assets/model-r680.jpg";
 import r950 from "@/assets/model-r950.jpg";
 import r520 from "@/assets/model-r520.jpg";
 
 const models = [
-  { img: r680, number: "680", name: "R-680 Sport", length: "6.8 M", power: "250 HP", pax: "12", tag: "Best Seller" },
-  { img: r950, number: "950", name: "R-950 Cruise", length: "9.5 M", power: "600 HP", pax: "16", tag: "Flagship" },
-  { img: r520, number: "520", name: "R-520 Explore", length: "5.2 M", power: "115 HP", pax: "8", tag: "Compact" },
+  { slug: "r-680", img: r680, number: "680", name: "R-680 Sport", length: "6.8 M", power: "250 HP", pax: "12", tag: "Best Seller" },
+  { slug: "r-950", img: r950, number: "950", name: "R-950 Cruise", length: "9.5 M", power: "600 HP", pax: "16", tag: "Flagship" },
+  { slug: "r-520", img: r520, number: "520", name: "R-520 Explore", length: "5.2 M", power: "115 HP", pax: "8", tag: "Compact" },
 ];
+
 
 export function FeaturedModels() {
   const root = useRef<HTMLElement>(null);

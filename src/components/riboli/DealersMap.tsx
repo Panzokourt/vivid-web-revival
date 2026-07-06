@@ -53,11 +53,13 @@ function loadMapsScript(): Promise<void> {
 }
 
 export function DealersMap({ pins }: { pins: DealerPin[] }) {
+  const mapWrapEl = useRef<HTMLDivElement>(null);
   const mapEl = useRef<HTMLDivElement>(null);
   const asideEl = useRef<HTMLElement>(null);
   const mapRef = useRef<any>(null);
   const infoRef = useRef<any>(null);
   const markersRef = useRef<any[]>([]);
+  const zoomDeltaRef = useRef(0);
   const [active, setActive] = useState<string>(pins[0]?.id ?? "");
   const [ready, setReady] = useState(false);
 
@@ -79,7 +81,31 @@ export function DealersMap({ pins }: { pins: DealerPin[] }) {
       aside.removeEventListener("wheel", onWheel, { capture: true } as any);
   }, []);
 
+  useEffect(() => {
+    const mapWrap = mapWrapEl.current;
+    if (!mapWrap) return;
 
+    const onWheel = (e: WheelEvent) => {
+      e.preventDefault();
+      e.stopPropagation();
+      e.stopImmediatePropagation();
+
+      if (!mapRef.current || (!e.metaKey && !e.ctrlKey)) return;
+
+      zoomDeltaRef.current += e.deltaY;
+      if (Math.abs(zoomDeltaRef.current) < 80) return;
+
+      const currentZoom = mapRef.current.getZoom() ?? 4;
+      const direction = zoomDeltaRef.current > 0 ? -1 : 1;
+      const nextZoom = Math.max(3, Math.min(14, currentZoom + direction));
+      mapRef.current.setZoom(nextZoom);
+      zoomDeltaRef.current = 0;
+    };
+
+    mapWrap.addEventListener("wheel", onWheel, { passive: false, capture: true });
+    return () =>
+      mapWrap.removeEventListener("wheel", onWheel, { capture: true } as any);
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -91,7 +117,8 @@ export function DealersMap({ pins }: { pins: DealerPin[] }) {
         zoom: 4,
         disableDefaultUI: true,
         zoomControl: true,
-        gestureHandling: "cooperative",
+        gestureHandling: "none",
+        scrollwheel: false,
         styles: MAP_STYLE,
         backgroundColor: "#efece5",
       });
@@ -153,7 +180,7 @@ export function DealersMap({ pins }: { pins: DealerPin[] }) {
     <div
       className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-0 border border-ink/10 bg-paper overflow-hidden overscroll-contain"
     >
-      <div className="relative aspect-[4/3] lg:aspect-auto lg:h-[560px] bg-paper-2/40">
+      <div ref={mapWrapEl} className="relative aspect-[4/3] lg:aspect-auto lg:h-[560px] bg-paper-2/40 overscroll-contain">
         <div ref={mapEl} className="absolute inset-0" />
         {!ready && (
           <div className="absolute inset-0 grid place-items-center text-[10px] uppercase tracking-[0.35em] text-ink/50">
@@ -161,7 +188,7 @@ export function DealersMap({ pins }: { pins: DealerPin[] }) {
           </div>
         )}
         <div className="pointer-events-none absolute top-4 left-4 text-[10px] uppercase tracking-[0.35em] text-ink/60 bg-paper/80 px-3 py-2 backdrop-blur-sm">
-          {pins.length} authorised locations
+          {pins.length} locations · ⌘/Ctrl + scroll to zoom
         </div>
       </div>
 

@@ -1,36 +1,62 @@
-import { motion } from "framer-motion";
+import { useLayoutEffect, useRef } from "react";
+import { gsap, prefersReducedMotion } from "@/lib/gsap";
 
 export function DealersCTA() {
+  const root = useRef<HTMLElement>(null);
+
+  useLayoutEffect(() => {
+    if (prefersReducedMotion()) return;
+    const ctx = gsap.context(() => {
+      gsap.from(".cta-el", {
+        y: 40,
+        opacity: 0,
+        duration: 0.8,
+        stagger: 0.1,
+        ease: "power3.out",
+        scrollTrigger: { trigger: root.current, start: "top 75%" },
+      });
+      gsap.to(".cta-outline", {
+        xPercent: -8,
+        ease: "none",
+        scrollTrigger: {
+          trigger: root.current,
+          start: "top bottom",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+    }, root);
+    return () => ctx.revert();
+  }, []);
+
   return (
     <section
+      ref={root}
       id="dealers"
-      className="relative py-24 md:py-32 px-6 md:px-10 text-center overflow-hidden"
+      className="relative overflow-hidden bg-paper-2 text-ink py-32 md:py-48"
     >
-      <div className="absolute inset-0 opacity-[0.04] bg-[linear-gradient(to_right,#ffffff_1px,transparent_1px),linear-gradient(to_bottom,#ffffff_1px,transparent_1px)] bg-[size:60px_60px]" />
-      <motion.div
-        initial={{ opacity: 0, y: 30 }}
-        whileInView={{ opacity: 1, y: 0 }}
-        viewport={{ once: true }}
-        transition={{ duration: 0.7 }}
-        className="relative max-w-3xl mx-auto"
-      >
-        <span className="text-brand-red font-bold text-xs uppercase tracking-[0.3em] mb-6 block">
+      <div className="cta-outline pointer-events-none absolute -top-6 left-0 right-0 font-display text-[26vw] leading-none text-outline text-ink/25 whitespace-nowrap">
+        FIND A DEALER · FIND A DEALER ·
+      </div>
+
+      <div className="relative max-w-4xl mx-auto text-center px-6">
+        <div className="cta-el text-[11px] uppercase tracking-[0.3em] text-ink/60">
           Dealers Network
-        </span>
-        <h2 className="text-white text-3xl md:text-5xl font-display uppercase mb-6 leading-tight">
-          Γίνετε Μέλος της Οικογένειας RIBOLI
+        </div>
+        <h2 className="cta-el font-display text-5xl md:text-7xl leading-[0.9] mt-4">
+          Step aboard <br /> the RIBOLI family
         </h2>
-        <p className="text-white/60 mb-10 max-w-xl mx-auto">
-          Βρείτε τον πλησιέστερο εξουσιοδοτημένο συνεργάτη και προγραμματίστε
-          ένα test drive σήμερα.
+        <p className="cta-el mt-8 max-w-xl mx-auto text-ink/70 leading-relaxed">
+          Find your nearest authorised partner and schedule a private sea trial
+          across the Mediterranean and beyond.
         </p>
         <a
           href="#"
-          className="inline-block bg-brand-red text-white px-12 py-5 font-bold uppercase tracking-[0.2em] text-xs hover:bg-white hover:text-brand-navy transition-all"
+          className="cta-el mt-10 inline-flex items-center gap-3 bg-ink text-paper px-10 py-5 text-[11px] uppercase tracking-[0.3em] hover:bg-copper transition-colors"
         >
-          Δίκτυο Συνεργατών
+          Find a dealer <span className="text-lg leading-none">+</span>
         </a>
-      </motion.div>
+      </div>
     </section>
   );
 }

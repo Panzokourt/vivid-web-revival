@@ -25,7 +25,7 @@ export function ThreeBackground() {
     const height = window.innerHeight;
 
     const scene = new THREE.Scene();
-    scene.fog = new THREE.FogExp2(0x0a1f30, 0.045);
+    scene.fog = new THREE.FogExp2(0xedeae4, 0.03);
 
     const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 200);
     camera.position.set(0, 2, 9);
@@ -36,24 +36,24 @@ export function ThreeBackground() {
     renderer.setClearColor(0x000000, 0);
     mount.appendChild(renderer.domElement);
 
-    // Lights for the solid shading phase
-    const hemi = new THREE.HemisphereLight(0x9ec7de, 0x0a1f30, 0.9);
+    // Lights for editorial light-scene shading
+    const hemi = new THREE.HemisphereLight(0xffffff, 0xc9c4bc, 1.05);
     scene.add(hemi);
-    const key = new THREE.DirectionalLight(0xffffff, 1.1);
+    const key = new THREE.DirectionalLight(0xffffff, 1.0);
     key.position.set(4, 6, 3);
     scene.add(key);
-    const rim = new THREE.DirectionalLight(0xe63946, 0.5);
+    const rim = new THREE.DirectionalLight(0xb87a5a, 0.55);
     rim.position.set(-4, 2, -3);
     scene.add(rim);
 
-    // ---- Wave-displaced ocean grid (kept) ----
+    // ---- Wave-displaced ocean grid (subtle stone lines) ----
     const gridGeom = new THREE.PlaneGeometry(80, 80, 70, 70);
     const basePositions = gridGeom.attributes.position.array.slice() as Float32Array;
     const gridMat = new THREE.MeshBasicMaterial({
-      color: 0x2b6a94,
+      color: 0x1a1a1a,
       wireframe: true,
       transparent: true,
-      opacity: 0.22,
+      opacity: 0.08,
     });
     const gridMesh = new THREE.Mesh(gridGeom, gridMat);
     gridMesh.rotation.x = -Math.PI / 2;
@@ -61,14 +61,15 @@ export function ThreeBackground() {
     scene.add(gridMesh);
 
     // ============================================================
-    //  RIB parts
+    //  RIB parts — editorial ink + copper palette
     // ============================================================
 
-    const NAVY = 0x1e3a56;
-    const NAVY_DARK = 0x14283d;
-    const RED = 0xe63946;
-    const TUBE_GRAY = 0x2c3e50;
-    const WIRE_COLOR = 0x7fb3d5;
+    const NAVY = 0x1a1a1a;
+    const NAVY_DARK = 0x0d0d0d;
+    const RED = 0xb87a5a;
+    const TUBE_GRAY = 0x2b2b2b;
+    const WIRE_COLOR = 0x1a1a1a;
+
 
     type Part = {
       group: THREE.Group;
@@ -702,8 +703,9 @@ export function ThreeBackground() {
   return (
     <div
       ref={mountRef}
-      className="fixed inset-0 pointer-events-none z-0"
+      className="fixed inset-0 pointer-events-none z-0 opacity-70 mix-blend-multiply"
       aria-hidden="true"
     />
   );
 }
+

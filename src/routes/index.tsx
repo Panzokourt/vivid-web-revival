@@ -2,7 +2,6 @@ import { createFileRoute } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Nav } from "@/components/riboli/Nav";
 import { Hero } from "@/components/riboli/Hero";
-import { Pillars } from "@/components/riboli/Pillars";
 import { FeaturedModels } from "@/components/riboli/FeaturedModels";
 import { TechConstruction } from "@/components/riboli/TechConstruction";
 import { Stats } from "@/components/riboli/Stats";
@@ -19,12 +18,11 @@ function Index() {
   useEffect(() => setMounted(true), []);
 
   return (
-    <main className="relative bg-brand-navy min-h-screen">
+    <main className="relative bg-paper min-h-screen text-ink">
       {mounted && <ThreeBackground />}
       <div className="relative z-10">
         <Nav />
         <Hero />
-        <Pillars />
         <FeaturedModels />
         <TechConstruction />
         <Stats />

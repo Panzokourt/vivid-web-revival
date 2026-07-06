@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 
-export function HeroGraphics({ containerRef }: { containerRef: React.RefObject<HTMLElement | null> }) {
+export function HeroGraphics({ containerRef, variant = "full" }: { containerRef: React.RefObject<HTMLElement | null>; variant?: "full" | "minimal" }) {
   const root = useRef<HTMLDivElement>(null);
 
   useEffect(() => {

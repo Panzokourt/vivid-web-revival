@@ -1,7 +1,7 @@
 import { useEffect, useRef } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 
-export function HeroGraphics({ containerRef }: { containerRef: React.RefObject<HTMLElement | null> }) {
+export function HeroGraphics({ containerRef, variant = "full" }: { containerRef: React.RefObject<HTMLElement | null>; variant?: "full" | "minimal" }) {
   const root = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -133,50 +133,54 @@ export function HeroGraphics({ containerRef }: { containerRef: React.RefObject<H
         className="absolute left-0 right-0 top-[62%] h-px bg-ink/20"
       />
 
-      {/* Bold tier: giant outlined "04" bleeding right */}
-      <div
-        data-parallax="20"
-        data-mouse="0.035"
-        className="absolute -right-16 bottom-8 select-none font-display text-[26vw] leading-none text-outline-thick text-ink/50"
-        aria-hidden
-      >
-        04
-      </div>
+      {variant === "full" && (
+        <>
+          {/* Bold tier: giant outlined "04" bleeding right */}
+          <div
+            data-parallax="20"
+            data-mouse="0.035"
+            className="absolute -right-16 bottom-8 select-none font-display text-[26vw] leading-none text-outline-thick text-ink/50"
+            aria-hidden
+          >
+            04
+          </div>
 
-      {/* Bold tier: copper filled circle */}
-      <div
-        data-parallax="25"
-        data-mouse="0.04"
-        className="absolute left-[6%] top-[38%] h-24 w-24 rounded-full"
-        style={{ background: "var(--color-copper)", opacity: 0.85 }}
-      />
+          {/* Bold tier: copper filled circle */}
+          <div
+            data-parallax="25"
+            data-mouse="0.04"
+            className="absolute left-[6%] top-[38%] h-24 w-24 rounded-full"
+            style={{ background: "var(--color-copper)", opacity: 0.85 }}
+          />
 
-      {/* Bold tier: diagonal copper line */}
-      <svg
-        data-parallax="16"
-        data-mouse="0.025"
-        className="absolute inset-0 h-full w-full"
-        viewBox="0 0 1000 1000"
-        preserveAspectRatio="none"
-        fill="none"
-      >
-        <line
-          x1="-50"
-          y1="780"
-          x2="1050"
-          y2="620"
-          stroke="var(--color-copper)"
-          strokeWidth="1.2"
-          opacity="0.55"
-        />
-      </svg>
+          {/* Bold tier: diagonal copper line */}
+          <svg
+            data-parallax="16"
+            data-mouse="0.025"
+            className="absolute inset-0 h-full w-full"
+            viewBox="0 0 1000 1000"
+            preserveAspectRatio="none"
+            fill="none"
+          >
+            <line
+              x1="-50"
+              y1="780"
+              x2="1050"
+              y2="620"
+              stroke="var(--color-copper)"
+              strokeWidth="1.2"
+              opacity="0.55"
+            />
+          </svg>
 
-      {/* Bold tier: small solid ink square top-right */}
-      <div
-        data-parallax="22"
-        data-mouse="0.03"
-        className="absolute right-[14%] top-[30%] h-3 w-3 bg-ink"
-      />
+          {/* Bold tier: small solid ink square top-right */}
+          <div
+            data-parallax="22"
+            data-mouse="0.03"
+            className="absolute right-[14%] top-[30%] h-3 w-3 bg-ink"
+          />
+        </>
+      )}
     </div>
   );
 }

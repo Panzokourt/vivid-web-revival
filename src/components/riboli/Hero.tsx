@@ -1,9 +1,12 @@
-import { useRef } from "react";
-import { useLayoutEffect } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { MagneticButton } from "@/components/riboli/MagneticButton";
 import { HeroGraphics } from "@/components/riboli/HeroGraphics";
 import heroImg from "@/assets/hero.jpg";
+
+// Text-shadow that keeps every label legible on both sky and hull
+const TEXT_SHADOW = "0 2px 24px rgba(0,0,0,0.55), 0 0 2px rgba(0,0,0,0.35)";
+const DISPLAY_SHADOW = "drop-shadow(0 4px 30px rgba(0,0,0,0.45))";
 
 export function Hero() {
   const root = useRef<HTMLElement>(null);
@@ -12,136 +15,206 @@ export function Hero() {
     if (prefersReducedMotion()) return;
     const ctx = gsap.context(() => {
       const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
-      tl.from(".hero-eyebrow", { y: 20, opacity: 0, duration: 0.6 })
-        .from(".hero-title-line span", {
-          y: 100,
-          opacity: 0,
-          duration: 0.9,
-          stagger: 0.04,
-        }, "-=0.3")
-        .from(".hero-sub", { y: 20, opacity: 0, duration: 0.7 }, "-=0.6")
-        .from(".hero-corner", {
-          y: 20,
-          opacity: 0,
-          duration: 0.6,
-          stagger: 0.08,
-        }, "-=0.5")
-        .from(".hero-media", {
-          scale: 1.12,
-          opacity: 0,
-          duration: 1.3,
-          ease: "power2.out",
-        }, "-=1.2");
+      tl.from(".h-corner", { y: 20, opacity: 0, duration: 0.6, stagger: 0.06 })
+        .from(".h-display-aegean span", { y: 90, opacity: 0, duration: 0.9, stagger: 0.04 }, "-=0.3")
+        .from(".h-display-sea span", { y: 90, opacity: 0, duration: 0.9, stagger: 0.04 }, "-=0.8")
+        .from(".h-display-the span", { y: 60, opacity: 0, duration: 0.7, stagger: 0.04 }, "-=0.8")
+        .from(".h-body", { y: 16, opacity: 0, duration: 0.6, stagger: 0.08 }, "-=0.5")
+        .from(".h-book", { scale: 0.9, opacity: 0, duration: 0.6, ease: "back.out(1.6)" }, "-=0.6")
+        .from(".h-mark", { rotate: -90, opacity: 0, duration: 0.9, ease: "power2.out" }, "-=1");
 
-      gsap.to(".hero-media img", {
-        yPercent: -12,
-        scale: 1.08,
+      // Scroll parallax
+      gsap.to(".h-media img", {
+        yPercent: -10,
+        scale: 1.06,
         ease: "none",
-        scrollTrigger: {
-          trigger: root.current,
-          start: "top top",
-          end: "bottom top",
-          scrub: true,
-        },
+        scrollTrigger: { trigger: root.current, start: "top top", end: "bottom top", scrub: true },
       });
+      gsap.to(".h-display-aegean", {
+        yPercent: -6,
+        ease: "none",
+        scrollTrigger: { trigger: root.current, start: "top top", end: "bottom top", scrub: true },
+      });
+      gsap.to(".h-display-sea", {
+        yPercent: -12,
+        ease: "none",
+        scrollTrigger: { trigger: root.current, start: "top top", end: "bottom top", scrub: true },
+      });
+
+      // Mouse parallax on display words
+      if (!window.matchMedia("(pointer: coarse)").matches) {
+        const targets = Array.from(root.current!.querySelectorAll<HTMLElement>("[data-hover-parallax]"));
+        const setters = targets.map((el) => ({
+          el,
+          strength: Number(el.dataset.hoverParallax ?? "0.02"),
+          xTo: gsap.quickTo(el, "x", { duration: 0.7, ease: "power3.out" }),
+          yTo: gsap.quickTo(el, "y", { duration: 0.7, ease: "power3.out" }),
+        }));
+        const onMove = (e: MouseEvent) => {
+          const rect = root.current!.getBoundingClientRect();
+          const relX = e.clientX - rect.left - rect.width / 2;
+          const relY = e.clientY - rect.top - rect.height / 2;
+          setters.forEach(({ strength, xTo, yTo }) => {
+            xTo(relX * strength);
+            yTo(relY * strength);
+          });
+        };
+        root.current!.addEventListener("mousemove", onMove);
+        return () => root.current?.removeEventListener("mousemove", onMove);
+      }
     }, root);
     return () => ctx.revert();
   }, []);
 
-  const line1 = "HANDCRAFTED".split("");
-  const line2 = "ON THE AEGEAN".split("");
+  const chars = (s: string) =>
+    s.split("").map((c, i) => (
+      <span key={i} className="inline-block">
+        {c === " " ? "\u00A0" : c}
+      </span>
+    ));
 
   return (
     <section
       ref={root}
-      className="relative h-screen min-h-[720px] w-full overflow-hidden bg-paper text-ink isolate"
+      className="relative h-screen min-h-[720px] w-full overflow-hidden bg-ink text-paper isolate"
     >
       {/* Full-bleed hero media */}
-      <div className="hero-media absolute inset-0 z-0">
+      <div className="h-media absolute inset-0 z-0">
         <img
           src={heroImg}
           alt="RIBALI handcrafted RIB on the Aegean sea"
           className="h-full w-full object-cover object-center"
           style={{ filter: "contrast(1.05) saturate(0.9)" }}
         />
-        {/* readability overlays */}
+        {/* Legibility gradients */}
         <div
           className="absolute inset-0"
           style={{
             background:
-              "linear-gradient(180deg, rgba(237,234,228,0.55) 0%, rgba(237,234,228,0.15) 30%, rgba(26,26,26,0.15) 70%, rgba(26,26,26,0.55) 100%)",
+              "linear-gradient(180deg, rgba(0,0,0,0.35) 0%, rgba(0,0,0,0.05) 30%, rgba(0,0,0,0.15) 65%, rgba(0,0,0,0.55) 100%)",
           }}
         />
         <div
           className="absolute inset-0"
           style={{
             background:
-              "radial-gradient(ellipse at center, transparent 50%, rgba(26,26,26,0.35) 100%)",
+              "radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.4) 100%)",
           }}
         />
       </div>
 
-      {/* Decorative graphics */}
-      <HeroGraphics containerRef={root} />
+      {/* Minimal decorative graphics (grid + crosshairs + horizon) */}
+      <HeroGraphics containerRef={root} variant="minimal" />
 
-      {/* Corner meta */}
-      <div className="hero-corner absolute top-24 left-6 md:left-10 z-20 text-[11px] uppercase tracking-[0.3em] text-ink/70">
-        <div>Ribali</div>
-        <div className="mt-1 text-ink/50">Est. Greece</div>
-      </div>
-      <div className="hero-corner absolute top-24 right-6 md:right-10 z-20 text-[11px] uppercase tracking-[0.3em] text-ink/70 text-right">
-        <div>Since</div>
-        <div className="text-ink/50">2004</div>
+      {/* 1. Top-left */}
+      <div
+        className="h-corner absolute top-24 left-6 md:left-10 z-20 text-[11px] uppercase tracking-[0.3em] text-paper/90"
+        style={{ textShadow: TEXT_SHADOW }}
+      >
+        Territory
       </div>
 
-      {/* Centered headline */}
-      <div className="absolute inset-0 z-20 flex flex-col items-center justify-center px-6 text-center pointer-events-none">
-        <div className="hero-eyebrow mb-6 flex items-center gap-3 text-[11px] uppercase tracking-[0.4em] text-ink/70">
-          <span className="h-px w-8 bg-ink/40" />
-          Handcrafted RIBs
-          <span className="h-px w-8 bg-ink/40" />
+      {/* 2. Top-center mark */}
+      <div
+        className="h-corner h-mark absolute top-24 left-1/2 -translate-x-1/2 z-20 text-paper/80"
+        data-hover-parallax="0.015"
+        style={{ filter: DISPLAY_SHADOW }}
+      >
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+          <path d="M12 2v20M2 12h20M4.9 4.9l14.2 14.2M19.1 4.9L4.9 19.1" />
+          <circle cx="12" cy="12" r="2.2" fill="currentColor" stroke="none" />
+        </svg>
+      </div>
+
+      {/* 3. Top-right — display "The" + edit glyph */}
+      <div className="absolute top-16 right-6 md:right-14 z-20 flex items-start gap-3">
+        <div
+          className="h-display-the font-display leading-[0.85] text-paper text-[9vw] md:text-[6vw]"
+          data-hover-parallax="0.02"
+          style={{ filter: DISPLAY_SHADOW }}
+          aria-hidden
+        >
+          {chars("The")}
         </div>
-        <h1 className="font-display leading-[0.85] tracking-tight text-ink">
-          <div className="hero-title-line block text-[14vw] md:text-[11vw]">
-            {line1.map((c, i) => (
-              <span key={i} className="inline-block">{c}</span>
-            ))}
-          </div>
-          <div className="hero-title-line block text-[14vw] md:text-[11vw] text-copper">
-            {line2.map((c, i) => (
-              <span key={i} className="inline-block">{c === " " ? "\u00A0" : c}</span>
-            ))}
-          </div>
-        </h1>
-        <p className="hero-sub mt-8 max-w-md text-sm md:text-base text-ink/70 leading-relaxed">
-          Editorial performance craft, built one at a time on the shores of Greece.
-        </p>
-        <div className="hero-corner mt-10 pointer-events-auto">
-          <MagneticButton
-            as="a"
-            href="#models"
-            className="group inline-flex items-center gap-3 bg-ink text-paper px-8 py-4 text-[11px] uppercase tracking-[0.3em] hover:bg-copper transition-colors"
-          >
-            Explore Models
-            <span className="text-lg leading-none group-hover:translate-x-1 transition-transform">→</span>
-          </MagneticButton>
+        <svg
+          className="h-corner mt-3 text-paper/70"
+          width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2"
+        >
+          <path d="M4 20l4-1 12-12-3-3L5 16l-1 4z" />
+        </svg>
+      </div>
+
+      {/* 4. Mid-left body triad */}
+      <div
+        className="h-body absolute left-6 md:left-10 top-1/2 -translate-y-1/2 z-20 max-w-[220px] text-paper/95 text-sm md:text-base leading-snug"
+        style={{ textShadow: TEXT_SHADOW }}
+      >
+        A short walk<br />along the<br />coastline
+      </div>
+
+      {/* 5. Mid — outlined "Aegean" */}
+      <div className="absolute inset-x-0 top-[46%] -translate-y-1/2 z-10 flex items-center justify-center pointer-events-none px-6">
+        <div
+          className="h-display-aegean font-display leading-[0.85] tracking-tight text-[16vw] md:text-[13vw] text-outline-thick text-paper"
+          data-hover-parallax="0.018"
+          style={{ filter: DISPLAY_SHADOW }}
+          aria-hidden
+        >
+          {chars("Aegean")}
         </div>
       </div>
 
-      {/* Bottom meta + scroll hint */}
-      <div className="absolute bottom-8 left-0 right-0 z-30 flex items-end justify-between px-6 md:px-10">
-        <div className="hero-corner text-[11px] uppercase tracking-[0.3em] text-ink/60">
-          <div>Aegean</div>
-          <div className="text-ink/40">Sea</div>
+      {/* 6. Mid-right — solid "Sea" bleeding off */}
+      <div className="absolute top-[54%] -translate-y-1/2 -right-[6%] md:-right-[4%] z-20 pointer-events-none">
+        <div
+          className="h-display-sea font-display leading-[0.85] tracking-tight text-paper text-[20vw] md:text-[15vw]"
+          data-hover-parallax="0.028"
+          style={{ filter: DISPLAY_SHADOW }}
+        >
+          {chars("Sea")}
         </div>
-        <div className="hero-corner flex flex-col items-center gap-2 text-ink/50">
-          <span className="text-[10px] uppercase tracking-[0.3em]">Scroll</span>
-          <span className="h-8 w-px bg-ink/30 animate-pulse" />
+      </div>
+
+      {/* 7. Bottom-left — BOOK + arrow */}
+      <div className="absolute bottom-10 left-6 md:left-10 z-30 flex flex-col items-start gap-6">
+        <MagneticButton
+          as="a"
+          href="#models"
+          className="h-book group inline-flex items-center gap-3 bg-paper text-ink px-8 py-4 text-[11px] uppercase tracking-[0.3em] hover:bg-copper hover:text-paper transition-colors"
+        >
+          Book
+          <span className="text-lg leading-none group-hover:rotate-90 transition-transform">+</span>
+        </MagneticButton>
+        <div
+          className="h-corner text-paper/60"
+          style={{ filter: DISPLAY_SHADOW }}
+          aria-hidden
+        >
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.2">
+            <path d="M18 6L6 18M6 18h9M6 18v-9" />
+          </svg>
         </div>
-        <div className="hero-corner text-[11px] uppercase tracking-[0.3em] text-ink/60 text-right">
-          <div>Boat</div>
-          <div className="text-ink/40">Group · 00</div>
+      </div>
+
+      {/* 8. Bottom-center caps stack */}
+      <div
+        className="h-body absolute bottom-10 left-1/2 -translate-x-1/2 z-20 text-center text-paper"
+        style={{ textShadow: TEXT_SHADOW }}
+      >
+        <div className="text-xs md:text-sm uppercase tracking-[0.25em] font-semibold text-paper/80">
+          Rivers and
         </div>
+        <div className="mt-2 text-base md:text-xl uppercase tracking-[0.15em] font-semibold leading-tight">
+          Islands of<br />the Cyclades
+        </div>
+      </div>
+
+      {/* 9. Bottom-right body */}
+      <div
+        className="h-body absolute bottom-10 right-6 md:right-10 z-20 max-w-[220px] text-right text-paper/95 text-sm md:text-base leading-snug"
+        style={{ textShadow: TEXT_SHADOW }}
+      >
+        Long cruises through<br />the Aegean archipelago
       </div>
     </section>
   );

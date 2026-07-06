@@ -15,6 +15,9 @@ export function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const hasHero = pathname === "/";
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     onScroll();
@@ -22,7 +25,7 @@ export function Nav() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const overHero = !scrolled;
+  const overHero = hasHero && !scrolled;
   const textCls = overHero ? "text-paper" : "text-ink";
   const linkCls = overHero ? "text-paper/85 hover:text-copper" : "text-ink/70 hover:text-copper";
   const shadow = overHero ? { textShadow: NAV_TEXT_SHADOW } : undefined;

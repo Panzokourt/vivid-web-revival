@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ConfiguratorRouteImport } from './routes/configurator'
+import { Route as AboutRouteImport } from './routes/about'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as ModelsR950RouteImport } from './routes/models.r-950'
 import { Route as ModelsR680RouteImport } from './routes/models.r-680'
@@ -18,6 +19,11 @@ import { Route as ModelsR520RouteImport } from './routes/models.r-520'
 const ConfiguratorRoute = ConfiguratorRouteImport.update({
   id: '/configurator',
   path: '/configurator',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const AboutRoute = AboutRouteImport.update({
+  id: '/about',
+  path: '/about',
   getParentRoute: () => rootRouteImport,
 } as any)
 const IndexRoute = IndexRouteImport.update({
@@ -43,6 +49,7 @@ const ModelsR520Route = ModelsR520RouteImport.update({
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/configurator': typeof ConfiguratorRoute
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
@@ -50,6 +57,7 @@ export interface FileRoutesByFullPath {
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/configurator': typeof ConfiguratorRoute
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
@@ -58,6 +66,7 @@ export interface FileRoutesByTo {
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/about': typeof AboutRoute
   '/configurator': typeof ConfiguratorRoute
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
@@ -67,6 +76,7 @@ export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/about'
     | '/configurator'
     | '/models/r-520'
     | '/models/r-680'
@@ -74,6 +84,7 @@ export interface FileRouteTypes {
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/about'
     | '/configurator'
     | '/models/r-520'
     | '/models/r-680'
@@ -81,6 +92,7 @@ export interface FileRouteTypes {
   id:
     | '__root__'
     | '/'
+    | '/about'
     | '/configurator'
     | '/models/r-520'
     | '/models/r-680'
@@ -89,6 +101,7 @@ export interface FileRouteTypes {
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  AboutRoute: typeof AboutRoute
   ConfiguratorRoute: typeof ConfiguratorRoute
   ModelsR520Route: typeof ModelsR520Route
   ModelsR680Route: typeof ModelsR680Route
@@ -102,6 +115,13 @@ declare module '@tanstack/react-router' {
       path: '/configurator'
       fullPath: '/configurator'
       preLoaderRoute: typeof ConfiguratorRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/about': {
+      id: '/about'
+      path: '/about'
+      fullPath: '/about'
+      preLoaderRoute: typeof AboutRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/': {
@@ -137,6 +157,7 @@ declare module '@tanstack/react-router' {
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  AboutRoute: AboutRoute,
   ConfiguratorRoute: ConfiguratorRoute,
   ModelsR520Route: ModelsR520Route,
   ModelsR680Route: ModelsR680Route,

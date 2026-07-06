@@ -1,10 +1,12 @@
+import { Link } from "@tanstack/react-router";
+
 export function Footer() {
   return (
     <footer id="footer" className="relative bg-ink text-paper overflow-hidden">
       <div className="max-w-[1600px] mx-auto px-6 md:px-10 py-16 md:py-20">
         <div className="grid md:grid-cols-4 gap-10 border-b border-paper/15 pb-12">
           <div>
-            <div className="font-display text-3xl tracking-widest">RIBALI</div>
+            <Link to="/" className="font-display text-3xl tracking-widest inline-block hover:text-copper transition-colors">RIBALI</Link>
             <p className="mt-4 text-sm text-paper/60 max-w-xs leading-relaxed">
               Handcrafted RIBs for those who read the sea before the map.
             </p>

@@ -26,9 +26,9 @@ export function Nav() {
         scrolled ? "bg-paper/80 backdrop-blur-md border-b border-ink/10" : ""
       }`}
     >
-      <a href="#" className="font-display text-2xl tracking-widest">
+      <Link to="/" className="font-display text-2xl tracking-widest">
         RIBALI
-      </a>
+      </Link>
       <div className="hidden md:flex space-x-8 lg:space-x-10 text-[11px] uppercase tracking-[0.25em]">
         {links.map((l) => (
           <a

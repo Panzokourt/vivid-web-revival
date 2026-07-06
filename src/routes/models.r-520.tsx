@@ -1,5 +1,5 @@
 import { createFileRoute, useRouter, Link } from "@tanstack/react-router";
-import { ModelPage } from "@/components/ribali/model/ModelPage";
+import { ModelPage } from "@/components/riboli/model/ModelPage";
 import {
   modelDetailQueryOptions,
   modelsListQueryOptions,

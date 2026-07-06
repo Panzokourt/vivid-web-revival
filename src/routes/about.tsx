@@ -387,7 +387,8 @@ function AboutPage() {
               next hull taking shape. Or start yours from the configurator.
             </p>
             <div className="flex flex-wrap gap-4">
-              <a
+              <MagneticButton
+                as="a"
                 href="/#dealers"
                 className="group inline-flex items-center gap-3 bg-ink text-paper px-8 py-4 text-[11px] uppercase tracking-[0.3em] hover:bg-copper transition-colors"
               >
@@ -395,8 +396,9 @@ function AboutPage() {
                 <span className="text-lg leading-none group-hover:translate-x-1 transition-transform">
                   →
                 </span>
-              </a>
-              <Link
+              </MagneticButton>
+              <MagneticButton
+                as={Link}
                 to="/configurator"
                 className="group inline-flex items-center gap-3 border border-ink text-ink px-8 py-4 text-[11px] uppercase tracking-[0.3em] hover:bg-ink hover:text-paper transition-colors"
               >
@@ -404,7 +406,7 @@ function AboutPage() {
                 <span className="text-lg leading-none group-hover:translate-x-1 transition-transform">
                   →
                 </span>
-              </Link>
+              </MagneticButton>
             </div>
           </div>
 

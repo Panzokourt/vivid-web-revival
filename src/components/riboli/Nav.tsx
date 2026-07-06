@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Link } from "@tanstack/react-router";
+import { Link, useRouterState } from "@tanstack/react-router";
 import { MagneticButton } from "@/components/riboli/MagneticButton";
 
 const links = [
@@ -15,6 +15,9 @@ export function Nav() {
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
+  const pathname = useRouterState({ select: (s) => s.location.pathname });
+  const hasHero = pathname === "/";
+
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
     onScroll();
@@ -22,7 +25,7 @@ export function Nav() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const overHero = !scrolled;
+  const overHero = hasHero && !scrolled;
   const textCls = overHero ? "text-paper" : "text-ink";
   const linkCls = overHero ? "text-paper/85 hover:text-copper" : "text-ink/70 hover:text-copper";
   const shadow = overHero ? { textShadow: NAV_TEXT_SHADOW } : undefined;
@@ -30,7 +33,7 @@ export function Nav() {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-10 py-5 transition-colors duration-300 ${textCls} ${
-        scrolled ? "bg-paper/85 backdrop-blur-md border-b border-ink/10" : ""
+        !overHero ? "bg-paper/85 backdrop-blur-md border-b border-ink/10" : ""
       }`}
     >
       <Link to="/" className="font-display text-2xl tracking-widest" style={shadow}>

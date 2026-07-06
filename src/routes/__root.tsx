@@ -11,6 +11,8 @@ import { useEffect, type ReactNode } from "react";
 
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
+import { ScrollProgress } from "@/components/riboli/ScrollProgress";
+import { LoaderOverlay } from "@/components/riboli/LoaderOverlay";
 
 function NotFoundComponent() {
   return (

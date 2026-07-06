@@ -1,14 +1,17 @@
 import { useLayoutEffect, useRef } from "react";
-import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
+import { Link } from "@tanstack/react-router";
+import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import r680 from "@/assets/model-r680.jpg";
 import r950 from "@/assets/model-r950.jpg";
 import r520 from "@/assets/model-r520.jpg";
 
 const models = [
-  { img: r680, number: "680", name: "R-680 Sport", length: "6.8 M", power: "250 HP", pax: "12", tag: "Best Seller" },
-  { img: r950, number: "950", name: "R-950 Cruise", length: "9.5 M", power: "600 HP", pax: "16", tag: "Flagship" },
-  { img: r520, number: "520", name: "R-520 Explore", length: "5.2 M", power: "115 HP", pax: "8", tag: "Compact" },
-];
+  { to: "/models/r-680", img: r680, number: "680", name: "R-680 Sport", length: "6.8 M", power: "250 HP", pax: "12", tag: "Best Seller" },
+  { to: "/models/r-950", img: r950, number: "950", name: "R-950 Cruise", length: "9.5 M", power: "600 HP", pax: "16", tag: "Flagship" },
+  { to: "/models/r-520", img: r520, number: "520", name: "R-520 Explore", length: "5.2 M", power: "115 HP", pax: "8", tag: "Compact" },
+] as const;
+
+
 
 export function FeaturedModels() {
   const root = useRef<HTMLElement>(null);
@@ -60,10 +63,12 @@ export function FeaturedModels() {
 
       <div ref={track} className="flex gap-6 md:gap-10 px-6 md:px-10 pb-24 will-change-transform">
         {models.map((m) => (
-          <article
-            key={m.number}
-            className="model-slide relative shrink-0 w-[85vw] md:w-[70vw] lg:w-[75vw] h-[80vh] lg:h-[85vh] bg-paper-2 overflow-hidden group"
+          <Link
+            key={m.to}
+            to={m.to}
+            className="model-slide relative shrink-0 w-[85vw] md:w-[70vw] lg:w-[75vw] h-[80vh] lg:h-[85vh] bg-paper-2 overflow-hidden group block"
           >
+
             <img
               src={m.img}
               alt={m.name}
@@ -89,15 +94,15 @@ export function FeaturedModels() {
               </div>
             </div>
 
-            <a
-              href="#"
-              className="absolute bottom-6 right-6 md:bottom-10 md:right-10 inline-flex items-center gap-3 border border-paper/60 text-paper px-6 py-3 text-[11px] uppercase tracking-[0.3em] hover:bg-paper hover:text-ink transition-colors"
+            <span
+              className="absolute bottom-6 right-6 md:bottom-10 md:right-10 inline-flex items-center gap-3 border border-paper/60 text-paper px-6 py-3 text-[11px] uppercase tracking-[0.3em] group-hover:bg-paper group-hover:text-ink transition-colors"
             >
               View <span>+</span>
-            </a>
-          </article>
+            </span>
+          </Link>
         ))}
       </div>
+
     </section>
   );
 }

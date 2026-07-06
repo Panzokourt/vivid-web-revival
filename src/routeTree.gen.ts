@@ -10,33 +10,63 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ModelsR950RouteImport } from './routes/models.r-950'
+import { Route as ModelsR680RouteImport } from './routes/models.r-680'
+import { Route as ModelsR520RouteImport } from './routes/models.r-520'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ModelsR950Route = ModelsR950RouteImport.update({
+  id: '/models/r-950',
+  path: '/models/r-950',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModelsR680Route = ModelsR680RouteImport.update({
+  id: '/models/r-680',
+  path: '/models/r-680',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ModelsR520Route = ModelsR520RouteImport.update({
+  id: '/models/r-520',
+  path: '/models/r-520',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/models/r-520': typeof ModelsR520Route
+  '/models/r-680': typeof ModelsR680Route
+  '/models/r-950': typeof ModelsR950Route
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/models/r-520': typeof ModelsR520Route
+  '/models/r-680': typeof ModelsR680Route
+  '/models/r-950': typeof ModelsR950Route
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/models/r-520': typeof ModelsR520Route
+  '/models/r-680': typeof ModelsR680Route
+  '/models/r-950': typeof ModelsR950Route
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths: '/' | '/models/r-520' | '/models/r-680' | '/models/r-950'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to: '/' | '/models/r-520' | '/models/r-680' | '/models/r-950'
+  id: '__root__' | '/' | '/models/r-520' | '/models/r-680' | '/models/r-950'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  ModelsR520Route: typeof ModelsR520Route
+  ModelsR680Route: typeof ModelsR680Route
+  ModelsR950Route: typeof ModelsR950Route
 }
 
 declare module '@tanstack/react-router' {
@@ -48,11 +78,35 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/models/r-950': {
+      id: '/models/r-950'
+      path: '/models/r-950'
+      fullPath: '/models/r-950'
+      preLoaderRoute: typeof ModelsR950RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/models/r-680': {
+      id: '/models/r-680'
+      path: '/models/r-680'
+      fullPath: '/models/r-680'
+      preLoaderRoute: typeof ModelsR680RouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/models/r-520': {
+      id: '/models/r-520'
+      path: '/models/r-520'
+      fullPath: '/models/r-520'
+      preLoaderRoute: typeof ModelsR520RouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  ModelsR520Route: ModelsR520Route,
+  ModelsR680Route: ModelsR680Route,
+  ModelsR950Route: ModelsR950Route,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

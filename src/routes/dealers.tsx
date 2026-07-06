@@ -234,6 +234,30 @@ function DealersPage() {
         </p>
       </section>
 
+      {/* INTERACTIVE MAP */}
+      <section className="px-6 md:px-10 py-16 md:py-24 border-b border-ink/10 bg-paper-soft">
+        <div className="max-w-[1600px] mx-auto">
+          <div className="reveal-up flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10 md:mb-14">
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.35em] text-copper mb-4">
+                Global network
+              </div>
+              <h2 className="font-display text-4xl md:text-6xl leading-[0.95] tracking-tight max-w-2xl">
+                Explore the map.
+              </h2>
+            </div>
+            <p className="text-ink/60 text-sm md:text-base max-w-md md:text-right">
+              Pick a location to reveal contact details. Every pin is a hand-picked partner.
+            </p>
+          </div>
+          <div className="reveal-up">
+            <DealersMap pins={ALL_PINS} />
+          </div>
+        </div>
+      </section>
+
+
+
       {/* REGIONS */}
       <section className="px-6 md:px-10 py-16 md:py-24 border-b border-ink/10">
         <div className="max-w-[1600px] mx-auto space-y-20 md:space-y-28">

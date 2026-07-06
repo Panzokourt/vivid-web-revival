@@ -1,48 +1,77 @@
-## Auto-invert για μεγάλα κείμενα (mix-blend difference)
+## Homepage restructure
 
-Θα προσθέσουμε ένα utility που κάνει τα μεγάλα display texts να αντιστρέφονται αυτόματα ανάλογα με το τι είναι από πίσω τους — σκούρα γράμματα σε ανοιχτό φαίνονται σκούρα, σε σκούρο image γίνονται φωτεινά. Καμία χειροκίνητη ρύθμιση, δουλεύει και όταν αλλάξει η εικόνα.
+New section order on `/`:
 
-### Πώς δουλεύει
-
-`mix-blend-mode: difference` + `color: white` δίνει "photographic negative" εφέ: το κείμενο πάντα γίνεται το αντίθετο του pixel από κάτω. Πάνω σε ανοιχτό paper background → σχεδόν μαύρο. Πάνω σε σκούρη θάλασσα/hero → λευκό. Οι μεταβάσεις (μισό γράμμα σε ένα, μισό στο άλλο) διαβάζονται πάντα.
-
-### Πού εφαρμόζεται
-
-Μόνο στα τεράστια display numerals/wordmarks που "κόβονται" πάνω από εικόνες:
-
-1. **FeaturedModels slides** — τα νούμερα 680 / 950 / 520 πάνω από τις hero εικόνες των μοντέλων.
-2. **ModelHero** — το μεγάλο νούμερο μοντέλου στο hero της σελίδας μοντέλου.
-3. **Footer** — το τεράστιο RIBALI wordmark στο κάτω μέρος (πέφτει πάνω στο ink background — θα το αφήσουμε ως έχει αν είναι ήδη ενιαίο, αλλιώς θα μπει και εκεί).
-4. **Hero** (αρχική) — το κύριο display headline εφόσον υπερβαίνει την εικόνα.
-
-Δεν αγγίζουμε: nav logo, body copy, small labels, buttons, eyebrow text, specs — αυτά έχουν ήδη σταθερό contrast.
-
-### Τεχνικά
-
-**`src/styles.css`** — νέο utility class:
-
-```css
-@utility text-invert-blend {
-  color: #fff;
-  mix-blend-mode: difference;
-  isolation: isolate;
-}
+```text
+Hero → Featured Models → Anatomy of a RIB → Experiences → Heritage → Stats → Dealers CTA → Footer
 ```
 
-`isolation: isolate` στο κοντινότερο container ώστε το blend να "βλέπει" μόνο το section πίσω του, όχι όλη τη σελίδα (αποφεύγει παράξενα χρώματα από overlays/gradients πιο πάνω).
+Removed: `TechConstruction` (the vague "Technical parameters" block). Replaced by three richer, purpose-built sections. Copy stays English, animation intensity kept moderate (level 3): two pinned sequences max, the rest are stagger/parallax/counter reveals.
 
-**Αλλαγές στα components** — αντικατάσταση του υπάρχοντος `text-outline text-paper` (ή σκούρου fill) με `text-invert-blend` στα σημεία της λίστας. Παράλληλα:
-- αφαιρούμε το `bg-gradient-to-t from-ink/50` overlay από πάνω από τους αριθμούς στα FeaturedModels slides γιατί το difference blend το χρειάζεται καθαρό για σωστή αντιστροφή (ή το κρατάμε μόνο κάτω από τα labels, όχι κάτω από τον αριθμό).
-- ορίζουμε `isolation: isolate` στο `.model-slide` και στο `ModelHero` wrapper.
+## 1. `AnatomyRIB` — replaces Technical parameters
 
-### Fallback / edge cases
+Purpose: show what actually makes a RIBALI, not floating numbers.
 
-- `prefers-reduced-transparency` / παλιοί browsers: το `mix-blend-mode` έχει άριστη υποστήριξη· δεν χρειάζεται fallback.
-- Δεν επηρεάζει accessibility tools (screen readers βλέπουν κανονικό κείμενο).
-- Δεν αλλάζει το layout, μόνο το χρώμα rendering.
+Layout: full-viewport section, split into a sticky left column (large hero shot of a boat, top-down or 3/4) and a right column of scroll-driven "hotspot" cards. As the user scrolls, each hotspot activates one at a time.
 
-### Out of scope
+Hotspots (4):
+- **Deep-V hull** — 22° deadrise, hand-laid GRP layup, tuned for Aegean chop.
+- **ORCA Hypalon tubes** — 1670 dtex, hot-welded seams, 10-year UV rating.
+- **Driver-forward console** — wraparound windshield, glass helm, leaning-post seat.
+- **Modular deck** — bow sunpad, aft bench, stowage bays; reconfigurable to spec.
 
-- Δεν αλλάζουμε typography, μεγέθη, ή layout.
-- Δεν εφαρμόζουμε το εφέ σε mικρά κείμενα ή paragraph text — εκεί το difference φαίνεται "νευρικό".
-- Αν αργότερα θέλεις outline stroke ή glow σε άλλα σημεία, το βλέπουμε ξεχωριστά.
+Interaction: circular markers overlaid on the boat image at fixed relative coordinates. Active marker pulses in copper, others dim. Right column shows the matching title + body, animated in. Progress rail on the far right shows 1/4 … 4/4.
+
+GSAP: one `ScrollTrigger` pin on the section (~1.5× viewport). `snap: 1 / (steps - 1)` for tidy step feel. Cross-fade of hotspot copy with `y: 20 → 0`, marker scale/opacity swap. Reduced-motion: no pin, static grid of 4 cards under the image.
+
+## 2. `Experiences` — new section
+
+Purpose: sell the use cases, not the specs.
+
+Layout: horizontal-scrolling strip of 4 tall cards (each 70vw on desktop, 85vw on mobile), similar mechanic to `FeaturedModels` but shorter (60vh cards, not full screen), so it doesn't feel repetitive. Card = large image + eyebrow + short line.
+
+Cards:
+- **Day Charter** — sunrise-to-sunset island runs.
+- **Family Cruise** — shaded bimini, easy boarding, quiet ride.
+- **Dive & Snorkel** — dive-ready platform, ladder, rinse shower.
+- **Sunset Aperitivo** — bow sunpad, cooler, ambient deck lights.
+
+GSAP: horizontal scrub on desktop (pin + `x: -totalScroll`), stagger fade-up on card meta on enter. Mobile: native horizontal snap, no pin. Parallax on each card image (yPercent -8 → 8) inside its frame.
+
+## 3. `Heritage` — new section
+
+Purpose: give the brand depth.
+
+Layout: dark background section (`bg-ink text-paper`), full-width timeline. Left: sticky title "A quarter century on the water". Right: vertical list of 5 milestones with year, headline, body.
+
+Milestones (placeholder, easy to edit later):
+- **2000** Founded on the Saronic coast.
+- **2007** First deep-V RIBALI hull launched.
+- **2013** ORCA Hypalon partnership.
+- **2019** 500th boat delivered.
+- **2025** R-950 flagship debut.
+
+GSAP: on scroll, each milestone slides in from the right with `x: 40, opacity: 0` staggered, the year does a quick number tick-up (reuse pattern from `Stats.tsx`). A vertical progress line fills top-to-bottom based on scroll position within the section using `ScrollTrigger` `scrub`.
+
+## Cleanup
+
+- `src/routes/index.tsx`: swap `<TechConstruction />` for `<AnatomyRIB />` and insert `<Experiences />` and `<Heritage />` in order shown above. Wrap each new one in `<div data-snap>` for existing `SectionSnap`.
+- Leave `TechConstruction.tsx` in place (not deleted) in case it's reused on model pages later, but unimported.
+- Reuse existing tokens: `paper`, `ink`, `copper`, `font-display`, `text-invert-blend` where large numerals sit over imagery.
+- Images: reuse existing assets (`hero.jpg`, `tech-detail.jpg`, model shots) for now with clearly-marked placeholders; no new asset generation in this plan.
+
+## Technical details
+
+New files:
+
+- `src/components/riboli/AnatomyRIB.tsx`
+- `src/components/riboli/Experiences.tsx`
+- `src/components/riboli/Heritage.tsx`
+
+Edited:
+
+- `src/routes/index.tsx` (imports + JSX order)
+
+GSAP usage stays inside `useLayoutEffect` + `gsap.context(...)` with `prefersReducedMotion()` guards, matching the pattern in `Hero.tsx` / `FeaturedModels.tsx` / `Stats.tsx`. No new dependencies. Every pinned trigger uses `invalidateOnRefresh: true`.
+
+Accessibility: hotspot markers get `aria-label`, active state announced via `aria-current="step"`. Horizontal experience strip has a fallback keyboard scroll (native overflow-x on reduced motion).

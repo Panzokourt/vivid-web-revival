@@ -85,8 +85,9 @@ export function DealersMap({ pins }: { pins: DealerPin[] }) {
       // Over the map: block page scroll; Google Maps handles zoom itself.
       e.preventDefault();
     };
-    el.addEventListener("wheel", onWheel, { passive: false });
-    return () => el.removeEventListener("wheel", onWheel);
+    el.addEventListener("wheel", onWheel, { passive: false, capture: true });
+    return () =>
+      el.removeEventListener("wheel", onWheel, { capture: true } as any);
   }, []);
 
 

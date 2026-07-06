@@ -6,6 +6,9 @@ import { Footer } from "@/components/riboli/Footer";
 import { MagneticButton } from "@/components/riboli/MagneticButton";
 import { DealersMap, type DealerPin } from "@/components/riboli/DealersMap";
 
+const SITE = "https://vivid-web-revival.lovable.app";
+const CANONICAL = `${SITE}/dealers`;
+
 export const Route = createFileRoute("/dealers")({
   head: () => ({
     meta: [
@@ -22,6 +25,7 @@ export const Route = createFileRoute("/dealers")({
           "Authorised RIBALI dealers across the Mediterranean and beyond. Book a private sea trial.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: CANONICAL },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "RIBALI Dealers" },
       {
@@ -29,10 +33,22 @@ export const Route = createFileRoute("/dealers")({
         content: "Authorised RIBALI partners across the Mediterranean and beyond.",
       },
     ],
-    links: [{ rel: "canonical", href: "https://vivid-web-revival.lovable.app/dealers" }],
+    links: [{ rel: "canonical", href: CANONICAL }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "RIBALI Authorised Dealers",
+          url: CANONICAL,
+        }),
+      },
+    ],
   }),
   component: DealersPage,
 });
+
 
 const REGIONS = [
   {

@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { MagneticButton } from "@/components/riboli/MagneticButton";
 
 export function DealersCTA() {
   const root = useRef<HTMLElement>(null);

@@ -42,7 +42,7 @@ export function ModelHero({ model }: { model: ModelDetail }) {
         <div className="mh-eyebrow flex items-center gap-3 text-[11px] uppercase tracking-[0.3em] text-copper">
           <span className="w-2 h-2 rounded-full bg-copper" /> {model.tag ?? "Model"}
         </div>
-        <h1 className="mh-title font-display text-[22vw] md:text-[15vw] leading-[0.85] tracking-tight text-ink/90 text-right select-none">
+        <h1 className="mh-title font-display text-[22vw] md:text-[15vw] leading-[0.85] tracking-tight text-invert-blend text-right select-none">
           {model.number.split("").map((c, i) => (
             <span key={i} className="mh-title-char inline-block">{c}</span>
           ))}

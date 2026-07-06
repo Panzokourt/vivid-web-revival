@@ -22,7 +22,7 @@ export function ScrollProgress() {
       start: 0,
       end: () => document.documentElement.scrollHeight - window.innerHeight,
       onUpdate: (self) => {
-        gsap.to(bar, { scaleY: self.progress, duration: 0.15, ease: "power1.out", overwrite: true });
+        gsap.set(bar, { scaleY: self.progress });
         setPct(Math.round(self.progress * 100));
       },
     });

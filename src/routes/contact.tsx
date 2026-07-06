@@ -5,6 +5,9 @@ import { Nav } from "@/components/riboli/Nav";
 import { Footer } from "@/components/riboli/Footer";
 import { MagneticButton } from "@/components/riboli/MagneticButton";
 
+const SITE = "https://vivid-web-revival.lovable.app";
+const CANONICAL = `${SITE}/contact`;
+
 export const Route = createFileRoute("/contact")({
   head: () => ({
     meta: [
@@ -21,6 +24,7 @@ export const Route = createFileRoute("/contact")({
           "Book a sea trial, request a quote, or visit the RIBALI workshop in Piraeus.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: CANONICAL },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "Contact RIBALI — Piraeus Shipyard" },
       {
@@ -28,10 +32,36 @@ export const Route = createFileRoute("/contact")({
         content: "Book a sea trial, request a quote, or visit our workshop.",
       },
     ],
-    links: [{ rel: "canonical", href: "https://vivid-web-revival.lovable.app/contact" }],
+    links: [{ rel: "canonical", href: CANONICAL }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ContactPage",
+          url: CANONICAL,
+          name: "Contact RIBALI",
+          about: { "@id": `${SITE}/#organization` },
+          mainEntity: {
+            "@type": "Organization",
+            name: "RIBALI",
+            telephone: "+30 210 000 0000",
+            email: "hello@ribali.gr",
+            address: {
+              "@type": "PostalAddress",
+              streetAddress: "Akti Themistokleous 142",
+              addressLocality: "Piraeus",
+              postalCode: "18538",
+              addressCountry: "GR",
+            },
+          },
+        }),
+      },
+    ],
   }),
   component: ContactPage,
 });
+
 
 const CHANNELS = [
   {

@@ -11,6 +11,10 @@ import r520 from "@/assets/model-r520.jpg";
 import r680 from "@/assets/model-r680.jpg";
 import r950 from "@/assets/model-r950.jpg";
 
+const SITE = "https://vivid-web-revival.lovable.app";
+const CANONICAL = `${SITE}/about`;
+const ABOUT_IMG = `${SITE}${heroImg}`;
+
 export const Route = createFileRoute("/about")({
   head: () => ({
     meta: [
@@ -27,13 +31,28 @@ export const Route = createFileRoute("/about")({
           "The story, craft, and people behind RIBALI — handcrafted RIBs from Piraeus since 1998.",
       },
       { property: "og:type", content: "website" },
-      { property: "og:url", content: "https://vivid-web-revival.lovable.app/about" },
+      { property: "og:url", content: CANONICAL },
+      { property: "og:image", content: ABOUT_IMG },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:image", content: ABOUT_IMG },
     ],
-    links: [{ rel: "canonical", href: "https://vivid-web-revival.lovable.app/about" }],
+    links: [{ rel: "canonical", href: CANONICAL }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "AboutPage",
+          url: CANONICAL,
+          name: "About RIBALI",
+          mainEntity: { "@id": `${SITE}/#organization` },
+        }),
+      },
+    ],
   }),
   component: AboutPage,
 });
+
 
 const VALUES = [
   {

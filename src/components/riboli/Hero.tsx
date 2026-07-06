@@ -78,14 +78,21 @@ export function Hero() {
       ref={root}
       className="relative h-screen min-h-[720px] w-full overflow-hidden bg-ink text-paper isolate"
     >
+      {/* Semantic H1 for SEO — visually hidden; decorative display words remain aria-hidden */}
+      <h1 className="sr-only">RIBALI — Handcrafted RIB Boats from the Aegean</h1>
+
       {/* Full-bleed hero media */}
       <div className="h-media absolute inset-0 z-0">
+
         <img
           src={heroImg}
           alt="RIBALI handcrafted RIB on the Aegean sea"
           className="h-full w-full object-cover object-center"
           style={{ filter: "contrast(1.05) saturate(0.9)" }}
+          fetchPriority="high"
+          decoding="async"
         />
+
         {/* Legibility gradients */}
         <div
           className="absolute inset-0"

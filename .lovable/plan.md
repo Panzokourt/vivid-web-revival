@@ -1,47 +1,99 @@
-## Vision
+## Στόχος
 
-Editorial, gallery-style single page inspired by the Lexus Yacht Rental references — off-white canvas, oversized outline display type, corner-anchored labels, cinematic product photography, and a scroll-driven 3D showcase with hotspots. Feels like a design magazine spread, not a boat catalog.
+Ξεχωριστή σελίδα ανά RIB μοντέλο (R-680, R-950, R-520) στο ίδιο editorial ύφος με το home, με δεδομένα που τραβιούνται από τη βάση της Lovable Cloud.
 
-## Visual system
+## Routing
 
-- **Palette** (tokens in `src/styles.css`):
-  - `--bg`: `#EDEAE4` (off-white paper)
-  - `--bg-2`: `#C9C4BC` (muted stone)
-  - `--ink`: `#1A1A1A` (near-black text)
-  - `--accent`: `#B87A5A` (copper)
-  - Dark inversion sections use `--ink` as background, `--bg` as foreground for the Technical Specs band (mirrors 3rd reference).
-- **Typography**: display = **Bebas Neue** (condensed, wide-tracking uppercase for oversized numerals like "650", "1450"); body = **Inter Tight**. Add outline-text utility (`-webkit-text-stroke`) for the ghost words ("engine", "berthve"). Loaded via `@fontsource/*` per stack rules.
-- **Layout language**: 12-col grid, generous margins, corner labels (top-left brand, top-right slash mark, bottom-left CTA button, bottom-center price/stat, bottom-right meta). Rotated circular badge (SVG textPath) reused across sections.
-- **Motion**: **GSAP + ScrollTrigger** replacing Framer Motion. Split-text reveals on headings, pinned hero with parallax on the boat, horizontal scroll for the Models gallery, hotspot pulse tweens, numeric counter tweens on Stats.
+Ξεχωριστό αρχείο route ανά μοντέλο ώστε το head() να είναι μοναδικό και το URL SEO-friendly:
 
-## Sections (English copy)
+- `/models/r-680` → `src/routes/models.r-680.tsx`
+- `/models/r-950` → `src/routes/models.r-950.tsx`
+- `/models/r-520` → `src/routes/models.r-520.tsx`
 
-1. **Nav** — minimal top bar: `RIBOLI` mark left, thin center links (MODELS · TECHNOLOGY · SERVICES · DEALERS · CONTACT), slash icon right. Transparent over light, sticky with subtle blur on scroll.
-2. **Hero** — off-white canvas. Ghost outline "RIBOLI" left, "R-680" giant numeral right, "Handcrafted RIBs" small label, hero boat photo center (uses existing `hero.jpg` treated with duotone). Bottom row: `BOOK +` button, centered `1450 / $ per hour` price, right `Aegean Sea`. Pinned with GSAP; boat translates + scales on scroll.
-3. **Showcase (3D)** — keeps the current Three.js RIB but repurposed as a rotating hero product with **4 copper hotspots** (Hull, Tubes, Console, Engine). Clicking a hotspot GSAP-tweens camera + reveals a spec card. Rotated circular badge "RIBOLI · BOAT GROUP ·" top-left, `NEXT →` bottom-right. Assembly-on-scroll behavior preserved but re-timed to this section only.
-4. **Featured Models** — horizontal-scroll gallery (GSAP horizontal pin). Each slide: large model number ("680", "950", "520"), single hero image, thin spec line, `VIEW +` link. Corner meta labels on every slide.
-5. **Technology / Construction** — inverted dark band (`--ink` bg). Two-column: left oversized outline word "engine" / "hull" cycling, right stat blocks (`19.96 total length`, `5.72 M width`, `1350 HP`, `6 berths`). Mirrors 3rd reference exactly.
-6. **Stats** — light band with GSAP counter tweens on large numerals.
-7. **Dealers CTA** — split layout, map illustration left, editorial paragraph + `FIND A DEALER +` right.
-8. **Footer** — bottom slab with brand mark, address, socials, privacy/legal micro-links, oversized outline "RIBOLI" as ghost signature.
+Κάθε αρχείο ορίζει το δικό του `head()` (title, description, og:title, og:description, og:image = το hero image του μοντέλου) και ένα `loader` που φορτώνει τα δεδομένα.
 
-## Technical plan
+Στο home, τα cards των Featured Models γίνονται πραγματικά `<Link to="/models/...">`.
 
-- **Deps**: `bun add gsap @fontsource/bebas-neue @fontsource-variable/inter-tight`. Keep `three` and `framer-motion` installed (remove FM usages incrementally; not strictly required to uninstall).
-- **Tokens**: rewrite `src/styles.css` `@theme` block with new palette + fonts; add `@utility text-outline` for ghost text; keep shadcn semantic tokens mapped via `@theme inline`. Update `:root` so `--background` = `#EDEAE4`, `--foreground` = `#1A1A1A`.
-- **Fonts**: import `@fontsource/bebas-neue` and `@fontsource-variable/inter-tight` in `src/router.tsx` (or root route); no `<link>` needed.
-- **GSAP setup**: create `src/lib/gsap.ts` registering `ScrollTrigger`; SSR-safe (`typeof window !== 'undefined'`). Each section uses its own `useGSAP`-style `useLayoutEffect` with a `gsap.context()` scoped to a ref, cleaned up on unmount.
-- **3D**: refactor `ThreeBackground.tsx` → `BoatShowcase.tsx`, moved inside its own section (no longer full-page fixed). Add hotspot overlay (absolute-positioned buttons projected from 3D positions via `camera.project`). GSAP timeline drives camera + material opacity, replacing manual scroll math.
-- **Rewrites**: `Nav.tsx`, `Hero.tsx`, `FeaturedModels.tsx`, `TechConstruction.tsx`, `Stats.tsx`, `DealersCTA.tsx`, `Footer.tsx`, `Pillars.tsx` (converted into inline strip inside Hero, or removed if it doesn't fit editorial flow). `routes/index.tsx` re-ordered accordingly.
-- **Head metadata**: update `__root.tsx` title/description to "RIBOLI — Handcrafted RIBs" in English; add `og:title`, `og:description`, `twitter:card`.
-- **Accessibility**: keep semantic H1 in Hero, alt text on all images, focus rings on hotspots, `prefers-reduced-motion` disables GSAP timelines.
+## Backend (Lovable Cloud)
 
-## Out of scope
+Ενεργοποίηση Lovable Cloud και δημιουργία δύο πινάκων μέσω migration:
 
-- Content translation beyond UI labels (no CMS, no i18n framework).
-- New photography — reuse existing `hero.jpg`, `model-*.jpg` assets, treated with CSS filters for tonal consistency.
-- Backend, auth, forms.
+**`public.models`**
+- `id uuid pk`
+- `slug text unique not null` (π.χ. `r-680`)
+- `code text` (`R-680`)
+- `name text` (`R-680 Sport`)
+- `number text` (`680`)
+- `tag text` (Best Seller / Flagship / Compact)
+- `tagline text`
+- `description text`
+- `length_m numeric`, `beam_m numeric`, `max_hp int`, `pax int`, `fuel_l int`, `weight_kg int`, `hull_type text`, `tube_material text`
+- `hero_image text`, `order_index int`
+- `created_at timestamptz default now()`
 
-## Deliverable
+**`public.model_gallery`**
+- `id uuid pk`
+- `model_id uuid references public.models(id) on delete cascade`
+- `image_url text not null`
+- `caption text`
+- `order_index int`
 
-Approve this plan and I'll implement all edits in one batch, then run a Playwright smoke check to confirm the redesigned page renders and the GSAP scroll timelines fire.
+Και οι δύο πίνακες: `GRANT SELECT ... TO anon, authenticated`, `ENABLE ROW LEVEL SECURITY` και public SELECT policy (`USING (true)`), γιατί είναι δημόσιο catalog. Insert/update μόνο μέσω migrations/service role προς το παρόν (χωρίς admin UI σε αυτό το scope).
+
+Seed data για τα 3 μοντέλα μπαίνει στο ίδιο migration, χρησιμοποιώντας τις υπάρχουσες εικόνες (`hero.jpg`, `model-r680/r950/r520.jpg`, `tech-detail.jpg`) ως gallery frames.
+
+## Server functions
+
+`src/lib/models.functions.ts` (client-safe path, publishable key server client μέσα στους handlers — public read-only Data API):
+
+- `listModels()` — για το home & related grid· επιστρέφει array με βασικά πεδία.
+- `getModelBySlug({ slug })` — για τη detail page· επιστρέφει το μοντέλο μαζί με το gallery του (join σε `model_gallery` ταξινομημένο κατά `order_index`). Αν δεν βρεθεί, `throw notFound()`.
+
+Χρησιμοποιούμε `queryOptions` + `ensureQueryData` στους loaders και `useSuspenseQuery` στα components σύμφωνα με το template pattern. Οι routes ορίζουν `errorComponent` + `notFoundComponent`.
+
+## UI (νέα components)
+
+`src/components/riboli/model/` (shared σε όλες τις model pages, GSAP animations όπως στο home):
+
+- **`ModelHero.tsx`** — full-screen hero: eyebrow (Model · tag), giant outline number (π.χ. `680`), hero image parallax, corner labels (Length / Power / Pax / Hull), CTA `Book +` και `↓ Explore`.
+- **`ModelSpecs.tsx`** — dark band (`bg-ink`) όπως το Tech section: αριστερά περιγραφή + 3–4 highlights (Deep-V Hull, ORCA Hypalon, T-Top canopy, κτλ.), δεξιά specs grid (length, beam, HP, pax, fuel, weight, hull, tubes) με GSAP stagger reveal.
+- **`ModelGallery.tsx`** — horizontal-scroll gallery με GSAP `ScrollTrigger` pin (ίδιο pattern με τα Featured Models). Κάθε slide: μεγάλη φωτογραφία + caption + counter (`01 / 04`).
+- **`ModelCTA.tsx`** — light band: `Book a sea trial` heading + CTA button προς `#dealers` του home ή mailto placeholder.
+- **`ModelRelated.tsx`** — τα άλλα 2 μοντέλα ως cards με hover copper underline, `<Link>` προς το detail route του καθενός.
+
+Το κοινό template render layout:
+
+```
+<Nav />
+<ModelHero />
+<ModelSpecs />
+<ModelGallery />
+<ModelCTA />
+<ModelRelated />
+<Footer />
+```
+
+Οι 3 σελίδες μοντέλων είναι thin wrappers που δίνουν slug + head metadata· όλο το UI ζει στα shared components και τραβά δεδομένα από τα `useSuspenseQuery` hooks.
+
+## Home integration
+
+`FeaturedModels.tsx`: αντικατάσταση του hard-coded array με `useSuspenseQuery(listModelsQueryOptions())` και τύλιγμα κάθε slide σε `<Link to="/models/$slug" params={{ slug }}>`. Το route του home προσθέτει `ensureQueryData(listModelsQueryOptions())` στον loader του.
+
+## Nav
+
+Το `Models` link του nav γίνεται `<Link to="/">` με hash `#models` όταν είμαστε σε άλλη σελίδα, αλλιώς παραμένει anchor. Θα προσθέσω και δευτερεύον submenu (dropdown) με τα 3 μοντέλα σε desktop hover.
+
+## Deliverables
+
+1. `supabase--enable` και migration για `models` + `model_gallery` + GRANTs + RLS + seed.
+2. `src/lib/models.functions.ts` με τις δύο public server fns.
+3. `src/components/riboli/model/*` (Hero/Specs/Gallery/CTA/Related).
+4. `src/routes/models.r-680.tsx`, `models.r-950.tsx`, `models.r-520.tsx`.
+5. Update `FeaturedModels.tsx` + `routes/index.tsx` loader.
+6. Update `Nav.tsx` με models submenu.
+
+## Εκτός scope
+
+- Admin UI για επεξεργασία μοντέλων (τα δεδομένα ζουν στη DB, αλλά η επεξεργασία γίνεται προς το παρόν με migrations).
+- Booking/quote form με backend (μόνο CTA link).
+- 4ο μοντέλο ή variants.

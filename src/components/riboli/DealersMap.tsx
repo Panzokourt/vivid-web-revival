@@ -53,7 +53,6 @@ function loadMapsScript(): Promise<void> {
 }
 
 export function DealersMap({ pins }: { pins: DealerPin[] }) {
-  const wrapperEl = useRef<HTMLDivElement>(null);
   const mapEl = useRef<HTMLDivElement>(null);
   const asideEl = useRef<HTMLElement>(null);
   const mapRef = useRef<any>(null);
@@ -62,32 +61,22 @@ export function DealersMap({ pins }: { pins: DealerPin[] }) {
   const [active, setActive] = useState<string>(pins[0]?.id ?? "");
   const [ready, setReady] = useState(false);
 
-  // Prevent the page from scrolling while the wheel is over the map/sidebar.
-  // React's onWheel is passive, so bind a native non-passive listener.
-  // If the wheel is over the sidebar, forward the delta to its own scroll.
+  // Keep the dealer list scroll isolated from the page.
+  // Google Maps uses cooperative gestures below, so map zoom only happens with Ctrl/⌘ + wheel.
   useEffect(() => {
-    const el = wrapperEl.current;
-    if (!el) return;
+    const aside = asideEl.current;
+    if (!aside) return;
+
     const onWheel = (e: WheelEvent) => {
-      const aside = asideEl.current;
-      if (aside && aside.contains(e.target as Node)) {
-        const atTop = aside.scrollTop <= 0 && e.deltaY < 0;
-        const atBottom =
-          aside.scrollTop + aside.clientHeight >= aside.scrollHeight - 1 &&
-          e.deltaY > 0;
-        // Always keep the page still; only scroll inside the aside.
-        e.preventDefault();
-        if (!atTop && !atBottom) {
-          aside.scrollTop += e.deltaY;
-        }
-        return;
-      }
-      // Over the map: block page scroll; Google Maps handles zoom itself.
+      // Always keep the page still while the pointer is over the list.
       e.preventDefault();
+      e.stopPropagation();
+      aside.scrollBy({ top: e.deltaY, behavior: "auto" });
     };
-    el.addEventListener("wheel", onWheel, { passive: false, capture: true });
+
+    aside.addEventListener("wheel", onWheel, { passive: false, capture: true });
     return () =>
-      el.removeEventListener("wheel", onWheel, { capture: true } as any);
+      aside.removeEventListener("wheel", onWheel, { capture: true } as any);
   }, []);
 
 
@@ -102,7 +91,7 @@ export function DealersMap({ pins }: { pins: DealerPin[] }) {
         zoom: 4,
         disableDefaultUI: true,
         zoomControl: true,
-        gestureHandling: "greedy",
+        gestureHandling: "cooperative",
         styles: MAP_STYLE,
         backgroundColor: "#efece5",
       });
@@ -162,7 +151,6 @@ export function DealersMap({ pins }: { pins: DealerPin[] }) {
 
   return (
     <div
-      ref={wrapperEl}
       className="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-0 border border-ink/10 bg-paper overflow-hidden overscroll-contain"
     >
       <div className="relative aspect-[4/3] lg:aspect-auto lg:h-[560px] bg-paper-2/40">

@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as ModelsRouteImport } from './routes/models'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConfiguratorRouteImport } from './routes/configurator'
 import { Route as AboutRouteImport } from './routes/about'
@@ -17,6 +18,11 @@ import { Route as ModelsR950RouteImport } from './routes/models.r-950'
 import { Route as ModelsR680RouteImport } from './routes/models.r-680'
 import { Route as ModelsR520RouteImport } from './routes/models.r-520'
 
+const ModelsRoute = ModelsRouteImport.update({
+  id: '/models',
+  path: '/models',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const ContactRoute = ContactRouteImport.update({
   id: '/contact',
   path: '/contact',
@@ -38,19 +44,19 @@ const IndexRoute = IndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const ModelsR950Route = ModelsR950RouteImport.update({
-  id: '/models/r-950',
-  path: '/models/r-950',
-  getParentRoute: () => rootRouteImport,
+  id: '/r-950',
+  path: '/r-950',
+  getParentRoute: () => ModelsRoute,
 } as any)
 const ModelsR680Route = ModelsR680RouteImport.update({
-  id: '/models/r-680',
-  path: '/models/r-680',
-  getParentRoute: () => rootRouteImport,
+  id: '/r-680',
+  path: '/r-680',
+  getParentRoute: () => ModelsRoute,
 } as any)
 const ModelsR520Route = ModelsR520RouteImport.update({
-  id: '/models/r-520',
-  path: '/models/r-520',
-  getParentRoute: () => rootRouteImport,
+  id: '/r-520',
+  path: '/r-520',
+  getParentRoute: () => ModelsRoute,
 } as any)
 
 export interface FileRoutesByFullPath {
@@ -58,6 +64,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/configurator': typeof ConfiguratorRoute
   '/contact': typeof ContactRoute
+  '/models': typeof ModelsRouteWithChildren
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
@@ -67,6 +74,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/configurator': typeof ConfiguratorRoute
   '/contact': typeof ContactRoute
+  '/models': typeof ModelsRouteWithChildren
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
@@ -77,6 +85,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/configurator': typeof ConfiguratorRoute
   '/contact': typeof ContactRoute
+  '/models': typeof ModelsRouteWithChildren
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
@@ -88,6 +97,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/configurator'
     | '/contact'
+    | '/models'
     | '/models/r-520'
     | '/models/r-680'
     | '/models/r-950'
@@ -97,6 +107,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/configurator'
     | '/contact'
+    | '/models'
     | '/models/r-520'
     | '/models/r-680'
     | '/models/r-950'
@@ -106,6 +117,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/configurator'
     | '/contact'
+    | '/models'
     | '/models/r-520'
     | '/models/r-680'
     | '/models/r-950'
@@ -116,13 +128,18 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   ConfiguratorRoute: typeof ConfiguratorRoute
   ContactRoute: typeof ContactRoute
-  ModelsR520Route: typeof ModelsR520Route
-  ModelsR680Route: typeof ModelsR680Route
-  ModelsR950Route: typeof ModelsR950Route
+  ModelsRoute: typeof ModelsRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/models': {
+      id: '/models'
+      path: '/models'
+      fullPath: '/models'
+      preLoaderRoute: typeof ModelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/contact': {
       id: '/contact'
       path: '/contact'
@@ -153,36 +170,49 @@ declare module '@tanstack/react-router' {
     }
     '/models/r-950': {
       id: '/models/r-950'
-      path: '/models/r-950'
+      path: '/r-950'
       fullPath: '/models/r-950'
       preLoaderRoute: typeof ModelsR950RouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ModelsRoute
     }
     '/models/r-680': {
       id: '/models/r-680'
-      path: '/models/r-680'
+      path: '/r-680'
       fullPath: '/models/r-680'
       preLoaderRoute: typeof ModelsR680RouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ModelsRoute
     }
     '/models/r-520': {
       id: '/models/r-520'
-      path: '/models/r-520'
+      path: '/r-520'
       fullPath: '/models/r-520'
       preLoaderRoute: typeof ModelsR520RouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ModelsRoute
     }
   }
 }
+
+interface ModelsRouteChildren {
+  ModelsR520Route: typeof ModelsR520Route
+  ModelsR680Route: typeof ModelsR680Route
+  ModelsR950Route: typeof ModelsR950Route
+}
+
+const ModelsRouteChildren: ModelsRouteChildren = {
+  ModelsR520Route: ModelsR520Route,
+  ModelsR680Route: ModelsR680Route,
+  ModelsR950Route: ModelsR950Route,
+}
+
+const ModelsRouteWithChildren =
+  ModelsRoute._addFileChildren(ModelsRouteChildren)
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AboutRoute: AboutRoute,
   ConfiguratorRoute: ConfiguratorRoute,
   ContactRoute: ContactRoute,
-  ModelsR520Route: ModelsR520Route,
-  ModelsR680Route: ModelsR680Route,
-  ModelsR950Route: ModelsR950Route,
+  ModelsRoute: ModelsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

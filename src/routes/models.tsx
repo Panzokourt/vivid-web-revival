@@ -8,6 +8,9 @@ import r520 from "@/assets/model-r520.jpg";
 import r680 from "@/assets/model-r680.jpg";
 import r950 from "@/assets/model-r950.jpg";
 
+const SITE = "https://vivid-web-revival.lovable.app";
+const CANONICAL = `${SITE}/models`;
+
 export const Route = createFileRoute("/models")({
   head: () => ({
     meta: [
@@ -24,17 +27,52 @@ export const Route = createFileRoute("/models")({
           "Three hulls, one philosophy. Explore the RIBALI collection of handcrafted Greek RIBs.",
       },
       { property: "og:type", content: "website" },
+      { property: "og:url", content: CANONICAL },
+      { property: "og:image", content: `${SITE}${r680}` },
       { name: "twitter:card", content: "summary_large_image" },
       { name: "twitter:title", content: "The RIBALI Collection" },
       {
         name: "twitter:description",
         content: "R-520, R-680, R-950 — handcrafted RIB hulls from Piraeus.",
       },
+      { name: "twitter:image", content: `${SITE}${r680}` },
     ],
-    links: [{ rel: "canonical", href: "https://vivid-web-revival.lovable.app/models" }],
+    links: [{ rel: "canonical", href: CANONICAL }],
+    scripts: [
+      {
+        type: "application/ld+json",
+        children: JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "ItemList",
+          name: "RIBALI Collection",
+          url: CANONICAL,
+          itemListElement: [
+            {
+              "@type": "ListItem",
+              position: 1,
+              url: `${SITE}/models/r-520`,
+              name: "RIBALI R-520 Explore",
+            },
+            {
+              "@type": "ListItem",
+              position: 2,
+              url: `${SITE}/models/r-680`,
+              name: "RIBALI R-680 Sport",
+            },
+            {
+              "@type": "ListItem",
+              position: 3,
+              url: `${SITE}/models/r-950`,
+              name: "RIBALI R-950 Cruise",
+            },
+          ],
+        }),
+      },
+    ],
   }),
   component: ModelsPage,
 });
+
 
 const MODELS = [
   {

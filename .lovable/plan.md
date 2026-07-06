@@ -1,77 +1,72 @@
-## Homepage restructure
+## Page transition — SVG wave sweep
 
-New section order on `/`:
+A full-viewport `ink`-colored SVG wave sweeps up over the screen, holds briefly, then sweeps out of the top. On route change: cover → swap route → reveal. On first visit only (per session): a one-shot intro reveal (no cover, just the wave sliding out from the top).
+
+Total duration ~1.1s (cover ~0.55s, reveal ~0.55s). Level 4 on the slider.
+
+## How it works
+
+Single overlay component mounted once in `__root.tsx`, above all page content, fixed to viewport, `pointer-events-none` at rest, `pointer-events-auto` during animation to swallow clicks.
+
+Structure:
 
 ```text
-Hero → Featured Models → Anatomy of a RIB → Experiences → Heritage → Stats → Dealers CTA → Footer
+<div class="fixed inset-0 z-[100]">
+  <svg preserveAspectRatio="none" viewBox="0 0 100 100">
+    <path d="..." fill="var(--ink)" />
+  </svg>
+</div>
 ```
 
-Removed: `TechConstruction` (the vague "Technical parameters" block). Replaced by three richer, purpose-built sections. Copy stays English, animation intensity kept moderate (level 3): two pinned sequences max, the rest are stagger/parallax/counter reveals.
+The path uses two SVG cubic-bezier curves to draw a wave crest on the leading edge. GSAP animates the path's `d` attribute between three states — flat off-screen (bottom), wave covering full screen, flat off-screen (top) — using GSAP's `attr` plugin. This gives the actual liquid morph, not just a translate.
 
-## 1. `AnatomyRIB` — replaces Technical parameters
+## Route change flow
 
-Purpose: show what actually makes a RIBALI, not floating numbers.
+1. Intercept navigation with TanStack Router's `router.subscribe('onBeforeNavigate', ...)` — cover the screen (0.55s ease-in wave rising from bottom).
+2. When `onResolved` fires (new route mounted), scroll to top instantly, then play the reveal (0.55s ease-out wave sliding off the top).
+3. During the cover phase, block clicks and set `aria-busy="true"` on the overlay.
 
-Layout: full-viewport section, split into a sticky left column (large hero shot of a boat, top-down or 3/4) and a right column of scroll-driven "hotspot" cards. As the user scrolls, each hotspot activates one at a time.
+If `onResolved` fires before the cover finishes (fast navigation), we chain: wait for cover completion → hold 1 frame → reveal.
 
-Hotspots (4):
-- **Deep-V hull** — 22° deadrise, hand-laid GRP layup, tuned for Aegean chop.
-- **ORCA Hypalon tubes** — 1670 dtex, hot-welded seams, 10-year UV rating.
-- **Driver-forward console** — wraparound windshield, glass helm, leaning-post seat.
-- **Modular deck** — bow sunpad, aft bench, stowage bays; reconfigurable to spec.
+## First-visit intro
 
-Interaction: circular markers overlaid on the boat image at fixed relative coordinates. Active marker pulses in copper, others dim. Right column shows the matching title + body, animated in. Progress rail on the far right shows 1/4 … 4/4.
+On mount of the overlay component:
+- Read `sessionStorage.getItem('ribali:visited')`.
+- If null: start the overlay in "covered" state and immediately play the reveal animation (~0.7s, slightly slower, more cinematic). Then set the flag.
+- If set: overlay starts hidden, does nothing.
 
-GSAP: one `ScrollTrigger` pin on the section (~1.5× viewport). `snap: 1 / (steps - 1)` for tidy step feel. Cross-fade of hotspot copy with `y: 20 → 0`, marker scale/opacity swap. Reduced-motion: no pin, static grid of 4 cards under the image.
+This means direct-loading `/models/r-680` in a new tab also gets the wave intro — the effect is tied to the session, not the route.
 
-## 2. `Experiences` — new section
+## Reduced motion
 
-Purpose: sell the use cases, not the specs.
+If `prefers-reduced-motion: reduce`:
+- No cover on route change — the overlay stays hidden.
+- No intro on first visit.
+- Navigation is instant.
 
-Layout: horizontal-scrolling strip of 4 tall cards (each 70vw on desktop, 85vw on mobile), similar mechanic to `FeaturedModels` but shorter (60vh cards, not full screen), so it doesn't feel repetitive. Card = large image + eyebrow + short line.
+## SectionSnap interaction
 
-Cards:
-- **Day Charter** — sunrise-to-sunset island runs.
-- **Family Cruise** — shaded bimini, easy boarding, quiet ride.
-- **Dive & Snorkel** — dive-ready platform, ladder, rinse shower.
-- **Sunset Aperitivo** — bow sunpad, cooler, ambient deck lights.
+`SectionSnap` on the home page uses its own scroll behavior. The overlay sits above it visually (`z-100`) so no conflict; but during the cover phase we lock body scroll via `document.body.style.overflow = 'hidden'` to prevent jitter, then restore.
 
-GSAP: horizontal scrub on desktop (pin + `x: -totalScroll`), stagger fade-up on card meta on enter. Mobile: native horizontal snap, no pin. Parallax on each card image (yPercent -8 → 8) inside its frame.
+## Files
 
-## 3. `Heritage` — new section
+New:
+- `src/components/riboli/PageTransition.tsx` — overlay + GSAP timeline + router subscription.
 
-Purpose: give the brand depth.
+Edited:
+- `src/routes/__root.tsx` — mount `<PageTransition />` once inside the root layout, above `<Outlet />`.
 
-Layout: dark background section (`bg-ink text-paper`), full-width timeline. Left: sticky title "A quarter century on the water". Right: vertical list of 5 milestones with year, headline, body.
-
-Milestones (placeholder, easy to edit later):
-- **2000** Founded on the Saronic coast.
-- **2007** First deep-V RIBALI hull launched.
-- **2013** ORCA Hypalon partnership.
-- **2019** 500th boat delivered.
-- **2025** R-950 flagship debut.
-
-GSAP: on scroll, each milestone slides in from the right with `x: 40, opacity: 0` staggered, the year does a quick number tick-up (reuse pattern from `Stats.tsx`). A vertical progress line fills top-to-bottom based on scroll position within the section using `ScrollTrigger` `scrub`.
-
-## Cleanup
-
-- `src/routes/index.tsx`: swap `<TechConstruction />` for `<AnatomyRIB />` and insert `<Experiences />` and `<Heritage />` in order shown above. Wrap each new one in `<div data-snap>` for existing `SectionSnap`.
-- Leave `TechConstruction.tsx` in place (not deleted) in case it's reused on model pages later, but unimported.
-- Reuse existing tokens: `paper`, `ink`, `copper`, `font-display`, `text-invert-blend` where large numerals sit over imagery.
-- Images: reuse existing assets (`hero.jpg`, `tech-detail.jpg`, model shots) for now with clearly-marked placeholders; no new asset generation in this plan.
+No new dependencies. Uses the existing `gsap` from `@/lib/gsap` (registerPlugin for `AttrPlugin` added to that file).
 
 ## Technical details
 
-New files:
-
-- `src/components/riboli/AnatomyRIB.tsx`
-- `src/components/riboli/Experiences.tsx`
-- `src/components/riboli/Heritage.tsx`
-
-Edited:
-
-- `src/routes/index.tsx` (imports + JSX order)
-
-GSAP usage stays inside `useLayoutEffect` + `gsap.context(...)` with `prefersReducedMotion()` guards, matching the pattern in `Hero.tsx` / `FeaturedModels.tsx` / `Stats.tsx`. No new dependencies. Every pinned trigger uses `invalidateOnRefresh: true`.
-
-Accessibility: hotspot markers get `aria-label`, active state announced via `aria-current="step"`. Horizontal experience strip has a fallback keyboard scroll (native overflow-x on reduced motion).
+- Wave path: two states — `covered` = `M 0 0 L 100 0 L 100 100 L 0 100 Z` (rectangle), `uncovered-bottom` = `M 0 100 C 30 100, 70 100, 100 100 L 100 100 L 0 100 Z` (flat line at bottom), `uncovered-top` = flat line at top. The `covered` state morphs from a wave crest (`C 30 40, 70 40, 100 0` on top edge) into a flat top over 200ms mid-timeline so the shape reads as a wave then a fill.
+- Actually simpler: three keyframes on the SVG path's `d`:
+  1. Rest (below screen, wave crest visible): `M0,100 C25,100 25,100 50,100 C75,100 75,100 100,100 L100,100 L0,100 Z` — invisible.
+  2. Cover with wave leading edge: `M0,0 C25,20 75,-20 100,0 L100,100 L0,100 Z`.
+  3. Settle flat cover: `M0,0 L100,0 L100,100 L0,100 Z`.
+  4. Exit through top: `M0,-100 C25,-80 75,-120 100,-100 L100,-100 L0,-100 Z`.
+- Router hooks: `router.subscribe('onBeforeLoad', cover)` and `router.subscribe('onResolved', reveal)`. Access via `useRouter()` inside the client-only component.
+- Component is client-only: wrap render in a `useEffect` mount gate so SSR emits nothing.
+- Register `AttrPlugin`: `gsap.registerPlugin(AttrPlugin)` inside `src/lib/gsap.ts`.
+- Colors: wave fill uses the `ink` token (`hsl` from theme via inline `fill` bound to CSS var).

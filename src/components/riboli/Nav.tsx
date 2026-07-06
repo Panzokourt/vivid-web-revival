@@ -33,7 +33,7 @@ export function Nav() {
   return (
     <nav
       className={`fixed top-0 left-0 right-0 z-50 flex items-center justify-between px-6 md:px-10 py-5 transition-colors duration-300 ${textCls} ${
-        scrolled ? "bg-paper/85 backdrop-blur-md border-b border-ink/10" : ""
+        !overHero ? "bg-paper/85 backdrop-blur-md border-b border-ink/10" : ""
       }`}
     >
       <Link to="/" className="font-display text-2xl tracking-widest" style={shadow}>

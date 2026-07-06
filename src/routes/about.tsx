@@ -1,6 +1,6 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { Link } from "@tanstack/react-router";
-import { useLayoutEffect, useRef } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
 import { Nav } from "@/components/riboli/Nav";
 import { Footer } from "@/components/riboli/Footer";
@@ -105,6 +105,16 @@ const CHAPTERS = [
 
 function AboutPage() {
   const root = useRef<HTMLDivElement>(null);
+  const [reducedMotion, setReducedMotion] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
+    setReducedMotion(mq.matches);
+    const onChange = (e: MediaQueryListEvent) => setReducedMotion(e.matches);
+    mq.addEventListener("change", onChange);
+    return () => mq.removeEventListener("change", onChange);
+  }, []);
 
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;
@@ -228,59 +238,67 @@ function AboutPage() {
       </section>
 
       {/* STORY — pinned chapters (desktop) / stacked (mobile) */}
-      <section className="chapters-section relative bg-paper border-b border-ink/10 md:h-screen md:overflow-hidden">
-        {/* Desktop: pinned, absolutely-stacked crossfade */}
-        <div className="hidden md:grid absolute inset-0 grid-cols-2 gap-0">
-          <div className="relative flex flex-col justify-center px-10 lg:px-16">
-            <div className="text-[10px] uppercase tracking-[0.35em] text-copper mb-6">
-              Our story · three chapters
-            </div>
-            <div className="relative">
-              {CHAPTERS.map((c, i) => (
-                <div
-                  key={c.year}
-                  className={`chapter-text ${i === 0 ? "relative" : "absolute inset-0"} max-w-md`}
-                >
-                  <div className="font-display text-7xl lg:text-8xl leading-none text-ink/90 mb-4">
-                    {c.year}
+      <section
+        className={`chapters-section relative bg-paper border-b border-ink/10 ${
+          reducedMotion ? "" : "md:h-screen md:overflow-hidden"
+        }`}
+      >
+        {/* Desktop: pinned, absolutely-stacked crossfade (disabled on reduced-motion) */}
+        {!reducedMotion && (
+          <div className="hidden md:grid absolute inset-0 grid-cols-2 gap-0">
+            <div className="relative flex flex-col justify-center px-10 lg:px-16">
+              <div className="text-[10px] uppercase tracking-[0.35em] text-copper mb-6">
+                Our story · three chapters
+              </div>
+              <div className="relative">
+                {CHAPTERS.map((c, i) => (
+                  <div
+                    key={c.year}
+                    className={`chapter-text ${i === 0 ? "relative" : "absolute inset-0"} max-w-md`}
+                  >
+                    <div className="font-display text-7xl lg:text-8xl leading-none text-ink/90 mb-4">
+                      {c.year}
+                    </div>
+                    <h3 className="font-display text-3xl lg:text-4xl leading-tight mb-5">
+                      {c.title}
+                    </h3>
+                    <p className="text-ink/70 text-base lg:text-lg leading-relaxed">{c.body}</p>
                   </div>
-                  <h3 className="font-display text-3xl lg:text-4xl leading-tight mb-5">
-                    {c.title}
-                  </h3>
-                  <p className="text-ink/70 text-base lg:text-lg leading-relaxed">{c.body}</p>
-                </div>
-              ))}
+                ))}
+              </div>
+              <div className="mt-10 flex gap-2">
+                {CHAPTERS.map((c) => (
+                  <span key={c.year} className="h-[2px] w-10 bg-ink/20" />
+                ))}
+              </div>
             </div>
-            <div className="mt-10 flex gap-2">
+            <div className="relative overflow-hidden">
               {CHAPTERS.map((c) => (
-                <span key={c.year} className="h-[2px] w-10 bg-ink/20" />
+                <img
+                  key={c.year}
+                  src={c.image}
+                  alt={`${c.year} — ${c.title}`}
+                  className="chapter-image absolute inset-0 h-full w-full object-cover"
+                  style={{ filter: "contrast(1.05) saturate(0.85)" }}
+                />
               ))}
             </div>
           </div>
-          <div className="relative overflow-hidden">
-            {CHAPTERS.map((c, i) => (
-              <img
-                key={c.year}
-                src={c.image}
-                alt={`${c.year} — ${c.title}`}
-                className={`chapter-image absolute inset-0 h-full w-full object-cover ${i === 0 ? "" : ""}`}
-                style={{ filter: "contrast(1.05) saturate(0.85)" }}
-              />
-            ))}
-          </div>
-        </div>
+        )}
 
-        {/* Mobile: normal stack */}
-        <div className="md:hidden px-6 py-16 space-y-14">
+        {/* Mobile stack — also used as the reduced-motion desktop fallback */}
+        <div className={`${reducedMotion ? "" : "md:hidden"} px-6 py-16 space-y-14`}>
           <div className="text-[10px] uppercase tracking-[0.35em] text-copper mb-3">
             Our story
           </div>
           {CHAPTERS.map((c) => (
-            <div key={c.year} className="reveal-up space-y-4">
-              <div className="font-display text-6xl leading-none text-ink/90">{c.year}</div>
-              <h3 className="font-display text-2xl leading-tight">{c.title}</h3>
-              <p className="text-ink/70 text-base leading-relaxed">{c.body}</p>
-              <div className="aspect-[4/3] overflow-hidden mt-4">
+            <div key={c.year} className="reveal-up space-y-4 md:max-w-3xl md:mx-auto">
+              <div className="font-display text-6xl md:text-7xl leading-none text-ink/90">
+                {c.year}
+              </div>
+              <h3 className="font-display text-2xl md:text-3xl leading-tight">{c.title}</h3>
+              <p className="text-ink/70 text-base md:text-lg leading-relaxed">{c.body}</p>
+              <div className="aspect-[4/3] md:aspect-[16/9] overflow-hidden mt-4">
                 <img
                   src={c.image}
                   alt={`${c.year} — ${c.title}`}
@@ -292,6 +310,7 @@ function AboutPage() {
           ))}
         </div>
       </section>
+
 
       {/* CRAFT + VALUES */}
       <section className="bg-ink text-paper px-6 md:px-10 py-20 md:py-32">

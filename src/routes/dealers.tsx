@@ -4,6 +4,7 @@ import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { Nav } from "@/components/riboli/Nav";
 import { Footer } from "@/components/riboli/Footer";
 import { MagneticButton } from "@/components/riboli/MagneticButton";
+import { DealersMap, type DealerPin } from "@/components/riboli/DealersMap";
 
 export const Route = createFileRoute("/dealers")({
   head: () => ({
@@ -38,25 +39,34 @@ const REGIONS = [
     region: "Greece",
     dealers: [
       {
+        id: "gr-piraeus",
         name: "RIBALI Piraeus — Flagship",
         address: "Akti Themistokleous 142, Piraeus 18538",
         phone: "+30 210 000 0000",
         email: "piraeus@ribali.gr",
         hours: "Mon–Sat · 09:00 – 19:00",
+        lat: 37.9364,
+        lng: 23.6511,
       },
       {
+        id: "gr-mykonos",
         name: "RIBALI Mykonos",
         address: "Ornos Marina, Mykonos 84600",
         phone: "+30 22890 000 00",
         email: "mykonos@ribali.gr",
         hours: "Apr–Oct · daily",
+        lat: 37.4291,
+        lng: 25.3389,
       },
       {
+        id: "gr-rhodes",
         name: "RIBALI Rhodes",
         address: "Mandraki Harbour, Rhodes 85100",
         phone: "+30 22410 000 00",
         email: "rhodes@ribali.gr",
         hours: "Mon–Fri · 09:00 – 18:00",
+        lat: 36.4507,
+        lng: 28.2277,
       },
     ],
   },
@@ -64,18 +74,24 @@ const REGIONS = [
     region: "Italy",
     dealers: [
       {
+        id: "it-portofino",
         name: "RIBALI Portofino",
         address: "Molo Umberto I, 16034 Portofino GE",
         phone: "+39 0185 000 000",
         email: "portofino@ribali.it",
         hours: "Tue–Sun · 10:00 – 19:00",
+        lat: 44.3032,
+        lng: 9.2094,
       },
       {
+        id: "it-sardegna",
         name: "RIBALI Sardegna",
         address: "Porto Cervo Marina, 07021 Arzachena SS",
         phone: "+39 0789 000 000",
         email: "sardegna@ribali.it",
         hours: "May–Sep · daily",
+        lat: 41.1387,
+        lng: 9.5379,
       },
     ],
   },
@@ -83,11 +99,14 @@ const REGIONS = [
     region: "France & Monaco",
     dealers: [
       {
+        id: "fr-monaco",
         name: "RIBALI Côte d'Azur",
         address: "Port Hercule, 98000 Monaco",
         phone: "+377 93 00 00 00",
         email: "monaco@ribali.fr",
         hours: "Mon–Sat · 09:30 – 18:30",
+        lat: 43.7333,
+        lng: 7.4256,
       },
     ],
   },
@@ -95,11 +114,14 @@ const REGIONS = [
     region: "Spain & Balearics",
     dealers: [
       {
+        id: "es-palma",
         name: "RIBALI Palma",
         address: "Moll Vell 3, 07012 Palma de Mallorca",
         phone: "+34 971 000 000",
         email: "palma@ribali.es",
         hours: "Mon–Fri · 09:00 – 18:00",
+        lat: 39.5667,
+        lng: 2.6417,
       },
     ],
   },
@@ -107,11 +129,14 @@ const REGIONS = [
     region: "Croatia",
     dealers: [
       {
+        id: "hr-split",
         name: "RIBALI Split",
         address: "ACI Marina Split, 21000 Split",
         phone: "+385 21 000 000",
         email: "split@ribali.hr",
         hours: "Apr–Oct · daily",
+        lat: 43.5027,
+        lng: 16.4381,
       },
     ],
   },
@@ -119,15 +144,31 @@ const REGIONS = [
     region: "United Arab Emirates",
     dealers: [
       {
+        id: "ae-dubai",
         name: "RIBALI Dubai",
         address: "Dubai Marina Yacht Club, Dubai",
         phone: "+971 4 000 0000",
         email: "dubai@ribali.ae",
         hours: "Sun–Thu · 10:00 – 20:00",
+        lat: 25.0805,
+        lng: 55.1403,
       },
     ],
   },
 ] as const;
+
+const ALL_PINS: DealerPin[] = REGIONS.flatMap((r) =>
+  r.dealers.map((d) => ({
+    id: d.id,
+    name: d.name,
+    region: r.region,
+    address: d.address,
+    phone: d.phone,
+    email: d.email,
+    lat: d.lat,
+    lng: d.lng,
+  })),
+);
 
 function DealersPage() {
   const root = useRef<HTMLDivElement>(null);
@@ -192,6 +233,30 @@ function DealersPage() {
           from sea trials in the Aegean to service in the Balearics.
         </p>
       </section>
+
+      {/* INTERACTIVE MAP */}
+      <section className="px-6 md:px-10 py-16 md:py-24 border-b border-ink/10 bg-paper-2/40">
+        <div className="max-w-[1600px] mx-auto">
+          <div className="reveal-up flex flex-col md:flex-row md:items-end md:justify-between gap-4 mb-10 md:mb-14">
+            <div>
+              <div className="text-[10px] uppercase tracking-[0.35em] text-copper mb-4">
+                Global network
+              </div>
+              <h2 className="font-display text-4xl md:text-6xl leading-[0.95] tracking-tight max-w-2xl">
+                Explore the map.
+              </h2>
+            </div>
+            <p className="text-ink/60 text-sm md:text-base max-w-md md:text-right">
+              Pick a location to reveal contact details. Every pin is a hand-picked partner.
+            </p>
+          </div>
+          <div className="reveal-up">
+            <DealersMap pins={ALL_PINS} />
+          </div>
+        </div>
+      </section>
+
+
 
       {/* REGIONS */}
       <section className="px-6 md:px-10 py-16 md:py-24 border-b border-ink/10">

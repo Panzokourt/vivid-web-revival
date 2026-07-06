@@ -14,7 +14,107 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      model_gallery: {
+        Row: {
+          caption: string | null
+          created_at: string
+          id: string
+          image_url: string
+          model_id: string
+          order_index: number
+        }
+        Insert: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url: string
+          model_id: string
+          order_index?: number
+        }
+        Update: {
+          caption?: string | null
+          created_at?: string
+          id?: string
+          image_url?: string
+          model_id?: string
+          order_index?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "model_gallery_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "models"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      models: {
+        Row: {
+          beam_m: number | null
+          code: string
+          created_at: string
+          description: string | null
+          fuel_l: number | null
+          hero_image: string | null
+          hull_type: string | null
+          id: string
+          length_m: number | null
+          max_hp: number | null
+          name: string
+          number: string
+          order_index: number
+          pax: number | null
+          slug: string
+          tag: string | null
+          tagline: string | null
+          tube_material: string | null
+          weight_kg: number | null
+        }
+        Insert: {
+          beam_m?: number | null
+          code: string
+          created_at?: string
+          description?: string | null
+          fuel_l?: number | null
+          hero_image?: string | null
+          hull_type?: string | null
+          id?: string
+          length_m?: number | null
+          max_hp?: number | null
+          name: string
+          number: string
+          order_index?: number
+          pax?: number | null
+          slug: string
+          tag?: string | null
+          tagline?: string | null
+          tube_material?: string | null
+          weight_kg?: number | null
+        }
+        Update: {
+          beam_m?: number | null
+          code?: string
+          created_at?: string
+          description?: string | null
+          fuel_l?: number | null
+          hero_image?: string | null
+          hull_type?: string | null
+          id?: string
+          length_m?: number | null
+          max_hp?: number | null
+          name?: string
+          number?: string
+          order_index?: number
+          pax?: number | null
+          slug?: string
+          tag?: string | null
+          tagline?: string | null
+          tube_material?: string | null
+          weight_kg?: number | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

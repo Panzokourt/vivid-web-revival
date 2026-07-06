@@ -1,5 +1,5 @@
 import { createFileRoute } from "@tanstack/react-router";
-import { ConfiguratorPage } from "@/components/ribali/configurator/ConfiguratorPage";
+import { ConfiguratorPage } from "@/components/riboli/configurator/ConfiguratorPage";
 
 export const Route = createFileRoute("/configurator")({
   head: () => ({

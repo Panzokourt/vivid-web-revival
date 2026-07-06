@@ -62,9 +62,11 @@ export function FeaturedModels() {
 
       <div ref={track} className="flex gap-6 md:gap-10 px-6 md:px-10 pb-24 will-change-transform">
         {models.map((m) => (
-          <article
-            key={m.number}
-            className="model-slide relative shrink-0 w-[85vw] md:w-[70vw] lg:w-[75vw] h-[80vh] lg:h-[85vh] bg-paper-2 overflow-hidden group"
+          <Link
+            key={m.slug}
+            to="/models/$slug"
+            params={{ slug: m.slug }}
+            className="model-slide relative shrink-0 w-[85vw] md:w-[70vw] lg:w-[75vw] h-[80vh] lg:h-[85vh] bg-paper-2 overflow-hidden group block"
           >
             <img
               src={m.img}
@@ -91,15 +93,15 @@ export function FeaturedModels() {
               </div>
             </div>
 
-            <a
-              href="#"
-              className="absolute bottom-6 right-6 md:bottom-10 md:right-10 inline-flex items-center gap-3 border border-paper/60 text-paper px-6 py-3 text-[11px] uppercase tracking-[0.3em] hover:bg-paper hover:text-ink transition-colors"
+            <span
+              className="absolute bottom-6 right-6 md:bottom-10 md:right-10 inline-flex items-center gap-3 border border-paper/60 text-paper px-6 py-3 text-[11px] uppercase tracking-[0.3em] group-hover:bg-paper group-hover:text-ink transition-colors"
             >
               View <span>+</span>
-            </a>
-          </article>
+            </span>
+          </Link>
         ))}
       </div>
+
     </section>
   );
 }

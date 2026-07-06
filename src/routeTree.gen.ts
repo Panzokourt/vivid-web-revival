@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as ModelsRouteImport } from './routes/models'
+import { Route as DealersRouteImport } from './routes/dealers'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConfiguratorRouteImport } from './routes/configurator'
 import { Route as AboutRouteImport } from './routes/about'
@@ -21,6 +22,11 @@ import { Route as ModelsR520RouteImport } from './routes/models.r-520'
 const ModelsRoute = ModelsRouteImport.update({
   id: '/models',
   path: '/models',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const DealersRoute = DealersRouteImport.update({
+  id: '/dealers',
+  path: '/dealers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -64,6 +70,7 @@ export interface FileRoutesByFullPath {
   '/about': typeof AboutRoute
   '/configurator': typeof ConfiguratorRoute
   '/contact': typeof ContactRoute
+  '/dealers': typeof DealersRoute
   '/models': typeof ModelsRouteWithChildren
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
@@ -74,6 +81,7 @@ export interface FileRoutesByTo {
   '/about': typeof AboutRoute
   '/configurator': typeof ConfiguratorRoute
   '/contact': typeof ContactRoute
+  '/dealers': typeof DealersRoute
   '/models': typeof ModelsRouteWithChildren
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
@@ -85,6 +93,7 @@ export interface FileRoutesById {
   '/about': typeof AboutRoute
   '/configurator': typeof ConfiguratorRoute
   '/contact': typeof ContactRoute
+  '/dealers': typeof DealersRoute
   '/models': typeof ModelsRouteWithChildren
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
@@ -97,6 +106,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/configurator'
     | '/contact'
+    | '/dealers'
     | '/models'
     | '/models/r-520'
     | '/models/r-680'
@@ -107,6 +117,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/configurator'
     | '/contact'
+    | '/dealers'
     | '/models'
     | '/models/r-520'
     | '/models/r-680'
@@ -117,6 +128,7 @@ export interface FileRouteTypes {
     | '/about'
     | '/configurator'
     | '/contact'
+    | '/dealers'
     | '/models'
     | '/models/r-520'
     | '/models/r-680'
@@ -128,6 +140,7 @@ export interface RootRouteChildren {
   AboutRoute: typeof AboutRoute
   ConfiguratorRoute: typeof ConfiguratorRoute
   ContactRoute: typeof ContactRoute
+  DealersRoute: typeof DealersRoute
   ModelsRoute: typeof ModelsRouteWithChildren
 }
 
@@ -138,6 +151,13 @@ declare module '@tanstack/react-router' {
       path: '/models'
       fullPath: '/models'
       preLoaderRoute: typeof ModelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/dealers': {
+      id: '/dealers'
+      path: '/dealers'
+      fullPath: '/dealers'
+      preLoaderRoute: typeof DealersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -212,6 +232,7 @@ const rootRouteChildren: RootRouteChildren = {
   AboutRoute: AboutRoute,
   ConfiguratorRoute: ConfiguratorRoute,
   ContactRoute: ContactRoute,
+  DealersRoute: DealersRoute,
   ModelsRoute: ModelsRouteWithChildren,
 }
 export const routeTree = rootRouteImport

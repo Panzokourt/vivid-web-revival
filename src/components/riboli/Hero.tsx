@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { MagneticButton } from "@/components/riboli/MagneticButton";
 import heroImg from "@/assets/hero.jpg";
 
 export function Hero() {
@@ -88,13 +89,14 @@ export function Hero() {
 
       {/* bottom row */}
       <div className="absolute bottom-8 left-0 right-0 z-30 flex items-end justify-between px-6 md:px-10">
-        <a
+        <MagneticButton
+          as="a"
           href="#models"
           className="hero-corner group inline-flex items-center gap-3 bg-ink text-paper px-8 py-4 text-[11px] uppercase tracking-[0.3em] hover:bg-copper transition-colors"
         >
           Book
           <span className="text-lg leading-none group-hover:rotate-90 transition-transform">+</span>
-        </a>
+        </MagneticButton>
         <div className="hero-corner text-center hidden md:block">
           <div className="font-display text-6xl leading-none">1450</div>
           <div className="text-[10px] uppercase tracking-[0.3em] text-ink/60 mt-2">$ per hour</div>

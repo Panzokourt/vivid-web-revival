@@ -1,56 +1,61 @@
-# About Page — Plan
+# GSAP Enhancements
 
-Νέα route `/about` σε editorial-light στυλ, αγγλικά, με placeholder copy για fictional RIBALI shipyard.
+Four new animation systems added across the app, all respecting `prefers-reduced-motion` (via existing `prefersReducedMotion()` helper) and cleaned up in `useEffect` returns.
 
-## Route
+## 1. Magnetic / Cursor-Follow CTA Buttons
 
-- `src/routes/about.tsx` — createFileRoute("/about"), unique head() (title "About RIBALI — Handcrafted RIBs", description, og:title/description/type=website, og:url, canonical)
-- Nav.tsx: αλλαγή "Contact" → "About" link, ή προσθήκη νέου link "About" (`/about`). Θα ενημερώσουμε τα `links` σε absolute paths `/about`.
+**New file**: `src/components/riboli/MagneticButton.tsx`
+- Wrapper component (`<MagneticButton as="a" href=... className=...>`) using `gsap.quickTo` for `x`/`y`.
+- On `mousemove` inside the element, translates the button toward cursor (strength ~0.3, max ~12px). On `mouseleave`, tweens back to 0 with elastic ease.
+- Inner span also gets a subtler follow (parallax feel).
+- Disabled on touch devices and when `prefersReducedMotion()` is true — falls back to plain element.
 
-## Sections
+**Applied to**:
+- Hero primary CTA ("Explore models" / configurator) in `src/components/riboli/Hero.tsx`
+- DealersCTA main button in `src/components/riboli/DealersCTA.tsx`
+- About page CTA buttons in `src/routes/about.tsx`
+- Nav "Configurator" pill in `src/components/riboli/Nav.tsx`
 
-**1. Editorial Hero**
-- Eyebrow: "Since 1998 · Piraeus, Greece"
-- Giant serif: "A boat is a promise."
-- Sub-copy paragraph (150-200 words) για το story της εταιρίας — origin, γιατί ξεκίνησαν, τι κάνει τα RIBALI ξεχωριστά.
-- Large editorial image (workshop/craft) με parallax GSAP scroll
+## 2. Pinned Chapters with Crossfade (About page Story)
 
-**2. Story block**
-- Two-column layout: αριστερά ένα quote/eyebrow ("Our story"), δεξιά flowing paragraphs (~300 words) — history, ίδρυση, growth, present.
+**Edited**: `src/routes/about.tsx`
+- Rewrites the current Story block into a pinned section: left column is sticky text that swaps between 3 "chapters" (e.g. *1998 — The first hull*, *2010 — Open-sea DNA*, *2026 — The RIBALI line*).
+- Right column is a stacked stack of 3 absolutely-positioned images; ScrollTrigger with `scrub: true` and `pin: true` crossfades opacity between them as the user scrolls through the section (height ~300vh).
+- Left text also crossfades in sync (title + paragraph per chapter).
+- On mobile (< md), disables pin/scrub and shows the 3 chapters as a normal vertical stack.
 
-**3. Craft & Values**
-- Section title "The craft"
-- 4 values σε grid (Craft, Sea, Precision, Endurance) — κάθε card με μεγάλο index (01/02/03/04), title, 2-3 lines description.
-- Παράλληλα intro paragraph για το process (hand-laid, aegean-tested).
+## 3. Side Scroll Progress Bar
 
-**4. Team + CTA**
-- Section title "The people"
-- 3 team member cards (placeholder names — Founder / Head of Design / Master Craftsman) με portrait placeholder (colored block ή unsplash-style solid color με initials), όνομα, ρόλο, 1-line bio.
-- Κάτω-κάτω closing CTA band: "Visit our shipyard →" links σε `/#dealers` και secondary "Configure yours →" στο `/configurator`.
+**New file**: `src/components/riboli/ScrollProgress.tsx`
+- Fixed vertical 2px bar on the right edge of viewport (`right-0 top-0 bottom-0`), with an inner `bg-primary` element whose `scaleY` is driven by `ScrollTrigger` on the document (`start: top top`, `end: bottom bottom`, `scrub: true`).
+- Also includes a small numeric % indicator at bottom-right that updates via the same trigger (optional, subtle).
+- Hidden when `prefersReducedMotion()`; hidden on print.
 
-## Components (single file)
+**Mounted in**: `src/routes/__root.tsx` inside the RootComponent so it renders on every page.
 
-Όλα σε `src/routes/about.tsx` (μία σελίδα, δεν χρειάζεται καινούριο components folder — απλά inline subcomponents όπως στο Hero.tsx).
+## 4. Page-Load "Tear" Overlay
 
-## GSAP animations
+**New file**: `src/components/riboli/LoaderOverlay.tsx`
+- Full-viewport overlay with two halves (top + bottom, or left + right) using `bg-ink`. Renders on mount; a `gsap.timeline` on mount:
+  1. Small logo/wordmark "RIBALI" fades in center (0.4s).
+  2. Brief hold (0.3s).
+  3. Two halves split apart (`yPercent: -100` top, `yPercent: 100` bottom) with `power4.inOut` over 0.9s — the "tear".
+  4. Overlay unmounts / sets `pointer-events: none` and `display: none`.
+- Uses `sessionStorage` flag (`ribali_loader_shown`) so it plays once per session, not on every route change.
+- Skipped entirely if `prefersReducedMotion()`.
 
-- Hero eyebrow + giant title stagger reveal
-- Story paragraphs fade-up σε scroll (ScrollTrigger)
-- Values cards stagger reveal
-- Team cards stagger reveal
-- Hero image parallax (yPercent scrub) — ίδιο pattern με Hero.tsx
+**Mounted in**: `src/routes/__root.tsx` (above `<Outlet />`, inside a client-only guard since it touches `window`).
 
-## Head metadata
+## Technical notes
 
-```
-title: "About RIBALI — Handcrafted RIBs from the Aegean"
-description: "Since 1998, RIBALI has been building rigid inflatable boats by hand in Piraeus. Discover our story, craft, and the people behind every hull."
-og:title, og:description, og:type=website, og:url=https://vivid-web-revival.lovable.app/about
-canonical: https://vivid-web-revival.lovable.app/about
-```
+- All new components are client-only (guard with `typeof window !== 'undefined'` or lazy `useEffect`) — safe for TanStack SSR.
+- Reuse existing `gsap` and `ScrollTrigger` imports from `@/lib/gsap`.
+- Every `useEffect` returns cleanup that calls `ScrollTrigger.getById(...)?.kill()` or stores the trigger ref and kills it, so route changes don't leak triggers.
+- No new dependencies (GSAP already installed).
+- No backend/schema changes.
 
 ## Out of scope
 
-- Δεν φτιάχνουμε backend/CMS για το about content (hardcoded copy — user θα το αλλάξει μετά)
-- Δεν βάζουμε πραγματικές φωτογραφίες προσωπικού (colored placeholders με initials)
-- Δεν αλλάζουμε το homepage
+- No changes to configurator, models pages, or Cards/Stats animations.
+- No custom cursor (only button-level magnetism).
+- Loader is minimal-brand (wordmark only), no video/loading progress logic.

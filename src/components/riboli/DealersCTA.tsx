@@ -1,5 +1,6 @@
 import { useLayoutEffect, useRef } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { MagneticButton } from "@/components/riboli/MagneticButton";
 
 export function DealersCTA() {
   const root = useRef<HTMLElement>(null);
@@ -50,12 +51,13 @@ export function DealersCTA() {
           Find your nearest authorised partner and schedule a private sea trial
           across the Mediterranean and beyond.
         </p>
-        <a
+        <MagneticButton
+          as="a"
           href="#"
           className="cta-el mt-10 inline-flex items-center gap-3 bg-ink text-paper px-10 py-5 text-[11px] uppercase tracking-[0.3em] hover:bg-copper transition-colors"
         >
           Find a dealer <span className="text-lg leading-none">+</span>
-        </a>
+        </MagneticButton>
       </div>
     </section>
   );

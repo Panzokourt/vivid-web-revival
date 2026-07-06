@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { Link } from "@tanstack/react-router";
+import { MagneticButton } from "@/components/riboli/MagneticButton";
 
 const links = [
   { label: "Models", href: "/#models" },
@@ -41,13 +42,14 @@ export function Nav() {
         ))}
       </div>
       <div className="flex items-center gap-4">
-        <Link
+        <MagneticButton
+          as={Link}
           to="/configurator"
           className="hidden sm:inline-flex items-center gap-2 bg-ink text-paper px-4 py-2.5 text-[10px] uppercase tracking-[0.25em] hover:bg-copper transition-colors"
         >
           Configure
           <span className="text-base leading-none">+</span>
-        </Link>
+        </MagneticButton>
         <button
           aria-label="Menu"
           onClick={() => setOpen((v) => !v)}

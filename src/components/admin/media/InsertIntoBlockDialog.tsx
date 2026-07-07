@@ -126,6 +126,17 @@ export function InsertIntoBlockDialog({ mediaName, mediaKind, onClose }: Props) 
     onError: (e) => toast.error(e instanceof Error ? e.message : "Η εισαγωγή απέτυχε"),
   });
 
+  const clear = useServerFn(adminClearBlockMediaField);
+  const clearMutation = useMutation({
+    mutationFn: (t: Target) => clear({ data: { block_id: t.block.id, path: t.path } }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "page_blocks"] });
+      toast.success("Το πεδίο ξεζευγαρώθηκε");
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Η αφαίρεση απέτυχε"),
+  });
+
+
   const filterChip = (label: string, value: typeof filter, Icon?: typeof ImageIcon) => (
     <button
       onClick={() => setFilter(value)}

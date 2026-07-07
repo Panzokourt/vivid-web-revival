@@ -16,6 +16,36 @@ import type { FieldType } from "@/lib/cms/schemas";
 type BlockKey = string; // `${page}/${block}`
 const bk = (page: string, block: string): BlockKey => `${page}/${block}`;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function deepClone<T>(v: T): T { return v == null ? v : (JSON.parse(JSON.stringify(v)) as T); }
+
+function deepGet(obj: unknown, path: string): unknown {
+  const parts = path.split(".");
+  let cur: unknown = obj;
+  for (const p of parts) {
+    if (cur == null) return undefined;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    cur = (cur as any)[p];
+  }
+  return cur;
+}
+
+function deepSet(obj: Record<string, unknown>, path: string, value: unknown): void {
+  const parts = path.split(".");
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  let cur: any = obj;
+  for (let i = 0; i < parts.length - 1; i++) {
+    const p = parts[i];
+    const next = parts[i + 1];
+    const nextIsIndex = /^\d+$/.test(next);
+    if (cur[p] == null || typeof cur[p] !== "object") {
+      cur[p] = nextIsIndex ? [] : {};
+    }
+    cur = cur[p];
+  }
+  cur[parts[parts.length - 1]] = value;
+}
+
 export type EditableFieldType = Extract<FieldType, "text" | "textarea" | "richtext" | "url" | "image">;
 
 export type OpenField = {

@@ -353,7 +353,48 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      dealers_public: {
+        Row: {
+          active: boolean | null
+          city: string | null
+          country: string | null
+          created_at: string | null
+          id: string | null
+          lat: number | null
+          lng: number | null
+          name: string | null
+          order_index: number | null
+          updated_at: string | null
+          website: string | null
+        }
+        Insert: {
+          active?: boolean | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          id?: string | null
+          lat?: number | null
+          lng?: number | null
+          name?: string | null
+          order_index?: number | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Update: {
+          active?: boolean | null
+          city?: string | null
+          country?: string | null
+          created_at?: string | null
+          id?: string | null
+          lat?: number | null
+          lng?: number | null
+          name?: string | null
+          order_index?: number | null
+          updated_at?: string | null
+          website?: string | null
+        }
+        Relationships: []
+      }
     }
     Functions: {
       has_role: {

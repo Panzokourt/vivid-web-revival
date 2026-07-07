@@ -641,7 +641,16 @@ function FileCard({
 }) {
   const kind = getFileKind(file.mime_type, file.name);
   return (
-    <Card className={`overflow-hidden group relative ${selected ? "ring-2 ring-copper" : ""}`}>
+    <Card
+      className={`overflow-hidden group relative ${selected ? "ring-2 ring-copper" : ""}`}
+      draggable
+      onDragStart={(e) => {
+        e.dataTransfer.setData("application/x-ribali-media", file.name);
+        e.dataTransfer.setData("text/plain", file.name);
+        e.dataTransfer.effectAllowed = "copy";
+      }}
+      title="Σύρε σε πεδίο media του CMS"
+    >
       <div className="absolute top-2 left-2 z-10 opacity-0 group-hover:opacity-100 data-[selected=true]:opacity-100" data-selected={selected}>
         <div className="bg-white/95 rounded p-0.5 shadow-sm">
           <Checkbox checked={selected} onCheckedChange={onToggleSelect} />
@@ -671,6 +680,7 @@ function FileCard({
     </Card>
   );
 }
+
 
 function FileList({
   files, selected, onToggle, onSelectAll, onOpen, onCopy, onDelete,

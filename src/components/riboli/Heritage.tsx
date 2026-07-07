@@ -103,14 +103,17 @@ export function Heritage() {
             style={{ transform: "scaleY(0)" }}
           />
           {milestones.map((m, i) => (
-            <li key={m.year} className="heritage-item relative mb-14 last:mb-0">
+            <li key={i} className="heritage-item relative mb-14 last:mb-0">
               <span className="absolute -left-[46px] top-2 w-3 h-3 rounded-full bg-copper" />
-              <div
-                className="heritage-year font-display text-6xl md:text-7xl leading-none"
-                data-year={m.year}
-              >
-                {m.year - 25}
-              </div>
+              <EditableItemControls page="home" block="heritage" path="milestones" index={i} total={milestones.length} className="-top-2 right-0" />
+              <EditableField page="home" block="heritage" field={`milestones.${i}.year`} type="text" label={`Milestone ${i + 1} year`} as="div" className="inline-block">
+                <div
+                  className="heritage-year font-display text-6xl md:text-7xl leading-none"
+                  data-year={m.year}
+                >
+                  {m.year - 25}
+                </div>
+              </EditableField>
               <EditableField page="home" block="heritage" field={`milestones.${i}.title`} type="text" label={`Milestone ${i + 1} title`} as="div" className="mt-4 text-xl md:text-2xl font-display">
                 {m.title}
               </EditableField>
@@ -119,6 +122,15 @@ export function Heritage() {
               </EditableField>
             </li>
           ))}
+          <li className="relative mt-4">
+            <EditableAddButton
+              page="home"
+              block="heritage"
+              path="milestones"
+              template={{ year: new Date().getFullYear(), title: "Νέο ορόσημο", body: "Περιγραφή..." }}
+              label="Προσθήκη ορόσημου"
+            />
+          </li>
         </ol>
       </div>
     </section>

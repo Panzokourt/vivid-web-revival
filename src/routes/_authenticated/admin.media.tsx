@@ -470,6 +470,7 @@ function MediaPage() {
                 </div>
               )}
             </>
+          ) : (
             <FileList
               files={visible}
               selected={selected}

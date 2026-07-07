@@ -2,12 +2,9 @@ import { createServerFn } from "@tanstack/react-start";
 import { queryOptions } from "@tanstack/react-query";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
 
-async function assertAdmin(context: {
-  supabase: { rpc: (fn: string, args: Record<string, unknown>) => Promise<{ data: unknown }> };
-  userId: string;
-}) {
-  const { data: isAdmin } = await context.supabase.rpc("has_role", {
-    _user_id: context.userId,
+async function assertAdmin(ctx: { supabase: any; userId: string }) {
+  const { data: isAdmin } = await ctx.supabase.rpc("has_role", {
+    _user_id: ctx.userId,
     _role: "admin",
   });
   if (!isAdmin) throw new Error("Forbidden");
@@ -81,18 +78,15 @@ export const getSystemInfo = createServerFn({ method: "GET" })
       leadsTotal,
       leadsMonth,
       modelsAll,
-      modelsPub,
       dealersAll,
       blocksAll,
       blocksDraft,
-      storageObjs,
     ] = await Promise.all([
       supabaseAdmin.from("analytics_events").select("id", { count: "exact", head: true }).gte("created_at", day).eq("event_type", "page_view"),
       supabaseAdmin.from("analytics_events").select("id", { count: "exact", head: true }).gte("created_at", month).eq("event_type", "page_view"),
       supabaseAdmin.from("quote_requests").select("id", { count: "exact", head: true }),
       supabaseAdmin.from("quote_requests").select("id", { count: "exact", head: true }).gte("created_at", month),
       supabaseAdmin.from("models").select("id", { count: "exact", head: true }),
-      supabaseAdmin.from("models").select("id", { count: "exact", head: true }).eq("published", true),
       supabaseAdmin.from("dealers").select("id", { count: "exact", head: true }),
       supabaseAdmin.from("page_blocks").select("id", { count: "exact", head: true }),
       supabaseAdmin.from("page_blocks").select("id", { count: "exact", head: true }).eq("published", false),

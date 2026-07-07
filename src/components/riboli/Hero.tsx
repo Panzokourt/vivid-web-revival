@@ -188,7 +188,7 @@ export function Hero() {
           style={{ filter: DISPLAY_SHADOW }}
           aria-hidden
         >
-          {chars("Rib")}
+          {chars(block.top_right_word ?? "Rib")}
         </div>
         <svg
           className="h-corner mt-2 text-paper/70"
@@ -199,14 +199,16 @@ export function Hero() {
       </div>
 
       {/* 4. Mid-left body triad */}
-      <div
+      <EditableField
+        page="home" block="hero" field="mid_left_body" type="textarea" label="Mid-left body" as="div"
         className="h-body absolute left-6 md:left-10 top-1/2 -translate-y-1/2 z-20 max-w-[220px] text-paper/95 text-sm md:text-base leading-snug"
-        style={{ textShadow: TEXT_SHADOW }}
       >
-        Built by hand<br />on the shores<br />of Greece
-      </div>
+        <span style={{ textShadow: TEXT_SHADOW, whiteSpace: "pre-line" }}>
+          {block.mid_left_body}
+        </span>
+      </EditableField>
 
-      {/* 5. Mid — outlined "Riboli" */}
+      {/* 5. Mid — outlined main word */}
       <div className="absolute inset-x-0 top-[46%] -translate-y-1/2 z-10 flex items-center justify-center pointer-events-none px-6">
         <div
           className="h-display-aegean font-display leading-[0.85] tracking-tight text-[14vw] md:text-[11vw] text-outline-thick text-paper max-w-full"
@@ -214,18 +216,18 @@ export function Hero() {
           style={{ filter: DISPLAY_SHADOW }}
           aria-hidden
         >
-          {chars("Ribali")}
+          {chars(mainWord)}
         </div>
       </div>
 
-      {/* 6. Mid-right — solid "680", anchored inside the viewport */}
+      {/* 6. Mid-right — solid big word */}
       <div className="absolute top-[54%] -translate-y-1/2 right-6 md:right-10 z-20 pointer-events-none max-w-[45vw]">
         <div
           className="h-display-sea font-display leading-[0.85] tracking-tight text-paper text-[16vw] md:text-[12vw]"
           data-hover-parallax="0.014"
           style={{ filter: DISPLAY_SHADOW }}
         >
-          {chars("680")}
+          {chars(bigWord)}
         </div>
       </div>
 
@@ -233,10 +235,12 @@ export function Hero() {
       <div className="absolute bottom-10 left-6 md:left-10 z-30 flex flex-col items-start gap-6">
         <MagneticButton
           as="a"
-          href="#models"
+          href={block.cta_href || "#models"}
           className="h-book group inline-flex items-center gap-3 bg-paper text-ink px-8 py-4 text-[11px] uppercase tracking-[0.3em] hover:bg-copper hover:text-paper transition-colors"
         >
-          Book
+          <EditableField page="home" block="hero" field="cta_label" type="text" label="CTA label">
+            {block.cta_label}
+          </EditableField>
           <span className="text-lg leading-none group-hover:rotate-90 transition-transform">+</span>
         </MagneticButton>
         <div
@@ -255,21 +259,29 @@ export function Hero() {
         className="h-body absolute bottom-10 left-1/2 -translate-x-1/2 z-20 text-center text-paper"
         style={{ textShadow: TEXT_SHADOW }}
       >
-        <div className="text-xs md:text-sm uppercase tracking-[0.25em] font-semibold text-paper/80">
-          Performance
-        </div>
-        <div className="mt-2 text-base md:text-xl uppercase tracking-[0.15em] font-semibold leading-tight">
-          Deep-V<br />Hulls
-        </div>
+        <EditableField
+          page="home" block="hero" field="bottom_center_label" type="text" label="Bottom label" as="div"
+          className="text-xs md:text-sm uppercase tracking-[0.25em] font-semibold text-paper/80"
+        >
+          {block.bottom_center_label}
+        </EditableField>
+        <EditableField
+          page="home" block="hero" field="bottom_center_title" type="textarea" label="Bottom title" as="div"
+          className="mt-2 text-base md:text-xl uppercase tracking-[0.15em] font-semibold leading-tight"
+        >
+          <span style={{ whiteSpace: "pre-line" }}>{block.bottom_center_title}</span>
+        </EditableField>
       </div>
 
       {/* 9. Bottom-right body */}
-      <div
+      <EditableField
+        page="home" block="hero" field="bottom_right_body" type="textarea" label="Bottom-right body" as="div"
         className="h-body absolute bottom-10 right-6 md:right-10 z-20 max-w-[220px] text-right text-paper/95 text-sm md:text-base leading-snug"
-        style={{ textShadow: TEXT_SHADOW }}
       >
-        Editorial performance craft<br />for open water
-      </div>
+        <span style={{ textShadow: TEXT_SHADOW, whiteSpace: "pre-line" }}>
+          {block.bottom_right_body}
+        </span>
+      </EditableField>
     </section>
   );
 }

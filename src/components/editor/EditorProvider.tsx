@@ -68,6 +68,9 @@ type Ctx = {
   registerBaseline: (page: string, block: string, content: Record<string, unknown>) => void;
   getFieldValue: (page: string, block: string, field: string) => unknown;
   setFieldValue: (page: string, block: string, field: string, value: unknown) => void;
+  arrayAdd: (page: string, block: string, path: string, template: unknown) => void;
+  arrayRemove: (page: string, block: string, path: string, index: number) => void;
+  arrayMove: (page: string, block: string, path: string, from: number, to: number) => void;
 
   open: OpenField | null;
   openField: (o: OpenField) => void;
@@ -157,6 +160,55 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     [baselines],
   );
 
+  const mutateArray = useCallback(
+    (page: string, block: string, path: string, mutate: (arr: unknown[]) => unknown[]) => {
+      const key = bk(page, block);
+      setDrafts((prev) => {
+        const base = baselines[key] ?? {};
+        const current = prev[key] ?? deepClone(base);
+        const next = deepClone(current);
+        const merged = { ...(base as Record<string, unknown>), ...(next as Record<string, unknown>) };
+        const existing = deepGet(merged, path);
+        const arr = Array.isArray(existing) ? deepClone(existing) : [];
+        const updated = mutate(arr as unknown[]);
+        deepSet(next, path, updated);
+        return { ...prev, [key]: next };
+      });
+      setDirty((prev) => {
+        const n = new Set(prev);
+        n.add(key);
+        return n;
+      });
+    },
+    [baselines],
+  );
+
+  const arrayAdd = useCallback(
+    (page: string, block: string, path: string, template: unknown) => {
+      mutateArray(page, block, path, (arr) => [...arr, deepClone(template)]);
+    },
+    [mutateArray],
+  );
+  const arrayRemove = useCallback(
+    (page: string, block: string, path: string, index: number) => {
+      mutateArray(page, block, path, (arr) => arr.filter((_, i) => i !== index));
+    },
+    [mutateArray],
+  );
+  const arrayMove = useCallback(
+    (page: string, block: string, path: string, from: number, to: number) => {
+      mutateArray(page, block, path, (arr) => {
+        const next = [...arr];
+        if (from < 0 || from >= next.length || to < 0 || to >= next.length) return next;
+        const [item] = next.splice(from, 1);
+        next.splice(to, 0, item);
+        return next;
+      });
+    },
+    [mutateArray],
+  );
+
+
   const saveWithMode = useCallback(
     async (published: boolean) => {
       if (dirty.size === 0) {
@@ -221,6 +273,9 @@ export function EditorProvider({ children }: { children: ReactNode }) {
       registerBaseline,
       getFieldValue,
       setFieldValue,
+      arrayAdd,
+      arrayRemove,
+      arrayMove,
       open,
       openField: setOpen,
       closeField: () => setOpen(null),
@@ -229,7 +284,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
       discard,
       saving,
     }),
-    [isAdmin, mode, drafts, dirty, registerBaseline, getFieldValue, setFieldValue, open, saveDraft, publish, discard, saving],
+    [isAdmin, mode, drafts, dirty, registerBaseline, getFieldValue, setFieldValue, arrayAdd, arrayRemove, arrayMove, open, saveDraft, publish, discard, saving],
   );
 
   return <EditorCtx.Provider value={value}>{children}</EditorCtx.Provider>;

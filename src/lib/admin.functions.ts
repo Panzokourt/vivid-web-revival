@@ -708,4 +708,45 @@ export const adminSetBlockMediaField = createServerFn({ method: "POST" })
     return { ok: true };
   });
 
+// Clear a specific media field on a block (unlinks the value; sets to "").
+export const adminClearBlockMediaField = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw) =>
+    z.object({
+      block_id: z.string().uuid(),
+      path: z.string().min(1).max(200).regex(/^[a-zA-Z0-9_.]+$/),
+    }).parse(raw),
+  )
+  .handler(async ({ context, data }) => {
+    const { data: block, error } = await context.supabase
+      .from("page_blocks")
+      .select("content")
+      .eq("id", data.block_id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!block) throw new Error("Block not found");
+
+    const content = (block.content && typeof block.content === "object" ? { ...(block.content as Record<string, unknown>) } : {}) as Record<string, unknown>;
+    const segs = data.path.split(".");
+    let cursor: Record<string, unknown> | unknown[] = content;
+    for (let i = 0; i < segs.length - 1; i++) {
+      const key = segs[i];
+      const idx = /^\d+$/.test(key) ? Number(key) : key;
+      const next = (cursor as Record<string | number, unknown>)[idx as never];
+      if (!next || typeof next !== "object") return { ok: true };
+      (cursor as Record<string | number, unknown>)[idx as never] = Array.isArray(next) ? [...next] : { ...(next as Record<string, unknown>) };
+      cursor = (cursor as Record<string | number, unknown>)[idx as never] as Record<string, unknown> | unknown[];
+    }
+    const last = segs[segs.length - 1];
+    (cursor as Record<string | number, unknown>)[(/^\d+$/.test(last) ? Number(last) : last) as never] = "";
+
+    const { error: uErr } = await context.supabase
+      .from("page_blocks")
+      .update({ content: content as never, updated_by: context.userId })
+      .eq("id", data.block_id);
+    if (uErr) throw new Error(uErr.message);
+    return { ok: true };
+  });
+
+
 

@@ -10,6 +10,7 @@ import {
   BarChart3,
   Users,
   Server,
+  Database,
   LogOut,
   ExternalLink,
 } from "lucide-react";

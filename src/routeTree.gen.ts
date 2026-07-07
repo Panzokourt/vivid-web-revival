@@ -28,6 +28,7 @@ import { Route as AuthenticatedAdminModelsRouteImport } from './routes/_authenti
 import { Route as AuthenticatedAdminMediaRouteImport } from './routes/_authenticated/admin.media'
 import { Route as AuthenticatedAdminLeadsRouteImport } from './routes/_authenticated/admin.leads'
 import { Route as AuthenticatedAdminDealersRouteImport } from './routes/_authenticated/admin.dealers'
+import { Route as AuthenticatedAdminDatabaseRouteImport } from './routes/_authenticated/admin.database'
 import { Route as AuthenticatedAdminContentRouteImport } from './routes/_authenticated/admin.content'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
 import { Route as AuthenticatedAdminContentHistoryRouteImport } from './routes/_authenticated/admin.content.history'
@@ -130,6 +131,12 @@ const AuthenticatedAdminDealersRoute =
     path: '/admin/dealers',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminDatabaseRoute =
+  AuthenticatedAdminDatabaseRouteImport.update({
+    id: '/admin/database',
+    path: '/admin/database',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminContentRoute =
   AuthenticatedAdminContentRouteImport.update({
     id: '/admin/content',
@@ -163,6 +170,7 @@ export interface FileRoutesByFullPath {
   '/models/r-950': typeof ModelsR950Route
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/content': typeof AuthenticatedAdminContentRouteWithChildren
+  '/admin/database': typeof AuthenticatedAdminDatabaseRoute
   '/admin/dealers': typeof AuthenticatedAdminDealersRoute
   '/admin/leads': typeof AuthenticatedAdminLeadsRoute
   '/admin/media': typeof AuthenticatedAdminMediaRoute
@@ -186,6 +194,7 @@ export interface FileRoutesByTo {
   '/models/r-950': typeof ModelsR950Route
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/content': typeof AuthenticatedAdminContentRouteWithChildren
+  '/admin/database': typeof AuthenticatedAdminDatabaseRoute
   '/admin/dealers': typeof AuthenticatedAdminDealersRoute
   '/admin/leads': typeof AuthenticatedAdminLeadsRoute
   '/admin/media': typeof AuthenticatedAdminMediaRoute
@@ -211,6 +220,7 @@ export interface FileRoutesById {
   '/models/r-950': typeof ModelsR950Route
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/content': typeof AuthenticatedAdminContentRouteWithChildren
+  '/_authenticated/admin/database': typeof AuthenticatedAdminDatabaseRoute
   '/_authenticated/admin/dealers': typeof AuthenticatedAdminDealersRoute
   '/_authenticated/admin/leads': typeof AuthenticatedAdminLeadsRoute
   '/_authenticated/admin/media': typeof AuthenticatedAdminMediaRoute
@@ -236,6 +246,7 @@ export interface FileRouteTypes {
     | '/models/r-950'
     | '/admin/analytics'
     | '/admin/content'
+    | '/admin/database'
     | '/admin/dealers'
     | '/admin/leads'
     | '/admin/media'
@@ -259,6 +270,7 @@ export interface FileRouteTypes {
     | '/models/r-950'
     | '/admin/analytics'
     | '/admin/content'
+    | '/admin/database'
     | '/admin/dealers'
     | '/admin/leads'
     | '/admin/media'
@@ -283,6 +295,7 @@ export interface FileRouteTypes {
     | '/models/r-950'
     | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/content'
+    | '/_authenticated/admin/database'
     | '/_authenticated/admin/dealers'
     | '/_authenticated/admin/leads'
     | '/_authenticated/admin/media'
@@ -440,6 +453,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminDealersRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/database': {
+      id: '/_authenticated/admin/database'
+      path: '/admin/database'
+      fullPath: '/admin/database'
+      preLoaderRoute: typeof AuthenticatedAdminDatabaseRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/content': {
       id: '/_authenticated/admin/content'
       path: '/admin/content'
@@ -482,6 +502,7 @@ const AuthenticatedAdminContentRouteWithChildren =
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
   AuthenticatedAdminContentRoute: typeof AuthenticatedAdminContentRouteWithChildren
+  AuthenticatedAdminDatabaseRoute: typeof AuthenticatedAdminDatabaseRoute
   AuthenticatedAdminDealersRoute: typeof AuthenticatedAdminDealersRoute
   AuthenticatedAdminLeadsRoute: typeof AuthenticatedAdminLeadsRoute
   AuthenticatedAdminMediaRoute: typeof AuthenticatedAdminMediaRoute
@@ -494,6 +515,7 @@ interface AuthenticatedRouteRouteChildren {
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
   AuthenticatedAdminContentRoute: AuthenticatedAdminContentRouteWithChildren,
+  AuthenticatedAdminDatabaseRoute: AuthenticatedAdminDatabaseRoute,
   AuthenticatedAdminDealersRoute: AuthenticatedAdminDealersRoute,
   AuthenticatedAdminLeadsRoute: AuthenticatedAdminLeadsRoute,
   AuthenticatedAdminMediaRoute: AuthenticatedAdminMediaRoute,

@@ -113,7 +113,9 @@ export function Experiences() {
             </div>
             <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/10 to-transparent" />
 
-            <EditableField page="home" block="experiences" field={`items.${i}.img`} type="image" label={`Item ${i + 1} image`} as="div" className="absolute top-6 right-6 md:top-10 md:right-10 z-10">
+            <EditableItemControls page="home" block="experiences" path="items" index={i} total={items.length} className="top-2 right-2" />
+
+            <EditableField page="home" block="experiences" field={`items.${i}.img`} type="image" label={`Item ${i + 1} image`} as="div" className="absolute top-14 right-6 md:top-14 md:right-10 z-10">
               <span className="inline-block bg-paper/80 text-ink px-2 py-1 text-[10px] uppercase tracking-widest rounded">Image</span>
             </EditableField>
 
@@ -133,6 +135,15 @@ export function Experiences() {
             </div>
           </article>
         ))}
+        <div className="shrink-0 flex items-center pl-2">
+          <EditableAddButton
+            page="home"
+            block="experiences"
+            path="items"
+            template={{ img: "", eyebrow: "05 — Νέα εμπειρία", title: "Τίτλος εμπειρίας", body: "Περιγραφή..." }}
+            label="Προσθήκη experience"
+          />
+        </div>
       </div>
     </section>
   );

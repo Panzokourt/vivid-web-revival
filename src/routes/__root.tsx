@@ -17,6 +17,9 @@ import { SmoothScroll } from "@/components/riboli/SmoothScroll";
 
 import { Cursor } from "@/components/riboli/Cursor";
 import { PreviewBanner } from "@/components/riboli/PreviewBanner";
+import { EditorProvider } from "@/components/editor/EditorProvider";
+import { FloatingToggle } from "@/components/editor/FloatingToggle";
+import { EditorBar } from "@/components/editor/EditorBar";
 
 function NotFoundComponent() {
   return (
@@ -201,16 +204,17 @@ function RootComponent() {
 
   return (
     <QueryClientProvider client={queryClient}>
-      <LoaderOverlay />
-      <PreviewBanner />
-
-
-
-      <Cursor />
-      <SmoothScroll />
-      <ScrollProgress />
-      {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
-      <Outlet />
+      <EditorProvider>
+        <LoaderOverlay />
+        <PreviewBanner />
+        <EditorBar />
+        <FloatingToggle />
+        <Cursor />
+        <SmoothScroll />
+        <ScrollProgress />
+        {/* Required: nested routes render here. Removing <Outlet /> breaks all child routes. */}
+        <Outlet />
+      </EditorProvider>
     </QueryClientProvider>
   );
 }

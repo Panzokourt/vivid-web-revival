@@ -83,13 +83,17 @@ export function Heritage() {
     <section ref={root} id="heritage" className="relative bg-ink text-paper overflow-hidden">
       <div className="max-w-[1600px] mx-auto px-6 md:px-10 py-28 md:py-40 grid lg:grid-cols-[1fr_1.4fr] gap-16">
         <div className="heritage-title lg:sticky lg:top-24 self-start">
-          <div className="text-[11px] uppercase tracking-[0.3em] text-paper/60">
+          <EditableField page="home" block="heritage" field="eyebrow" type="text" label="Eyebrow" as="div" className="text-[11px] uppercase tracking-[0.3em] text-paper/60">
             {block.eyebrow}
-          </div>
-          <h2 className="font-display text-5xl md:text-7xl leading-[0.9] mt-4 whitespace-pre-line">
-            {block.title}
-          </h2>
-          <RichText html={block.intro} className="mt-8 text-paper/70 max-w-sm leading-relaxed" />
+          </EditableField>
+          <EditableField page="home" block="heritage" field="title" type="textarea" label="Title" as="div" className="font-display text-5xl md:text-7xl leading-[0.9] mt-4 whitespace-pre-line">
+            <h2 className="font-display text-5xl md:text-7xl leading-[0.9] whitespace-pre-line">
+              {block.title}
+            </h2>
+          </EditableField>
+          <EditableField page="home" block="heritage" field="intro" type="richtext" label="Intro" as="div" className="mt-8 max-w-sm">
+            <RichText html={block.intro} className="text-paper/70 leading-relaxed" />
+          </EditableField>
         </div>
 
 
@@ -98,7 +102,7 @@ export function Heritage() {
             className="heritage-progress absolute top-0 left-[-1px] w-[2px] h-full bg-copper origin-top"
             style={{ transform: "scaleY(0)" }}
           />
-          {milestones.map((m) => (
+          {milestones.map((m, i) => (
             <li key={m.year} className="heritage-item relative mb-14 last:mb-0">
               <span className="absolute -left-[46px] top-2 w-3 h-3 rounded-full bg-copper" />
               <div
@@ -107,12 +111,12 @@ export function Heritage() {
               >
                 {m.year - 25}
               </div>
-              <div className="mt-4 text-xl md:text-2xl font-display">
+              <EditableField page="home" block="heritage" field={`milestones.${i}.title`} type="text" label={`Milestone ${i + 1} title`} as="div" className="mt-4 text-xl md:text-2xl font-display">
                 {m.title}
-              </div>
-              <p className="mt-3 text-paper/70 max-w-lg leading-relaxed">
-                {m.body}
-              </p>
+              </EditableField>
+              <EditableField page="home" block="heritage" field={`milestones.${i}.body`} type="textarea" label={`Milestone ${i + 1} body`} as="div" className="mt-3 max-w-lg">
+                <p className="text-paper/70 leading-relaxed">{m.body}</p>
+              </EditableField>
             </li>
           ))}
         </ol>

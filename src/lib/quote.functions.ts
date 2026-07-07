@@ -28,23 +28,21 @@ export const submitQuoteRequest = createServerFn({ method: "POST" })
       process.env.SUPABASE_PUBLISHABLE_KEY!,
       { auth: { storage: undefined, persistSession: false, autoRefreshToken: false } },
     );
-    const { data: row, error } = await supabase
-      .from("quote_requests")
-      .insert({
-        model_slug: data.modelSlug,
-        hull_color: data.hullColor,
-        tube_color: data.tubeColor,
-        canopy_color: data.canopyColor,
-        engine_hp: data.engineHp,
-        equipment: data.equipment,
-        full_name: data.fullName,
-        email: data.email,
-        phone: data.phone || null,
-        country: data.country || null,
-        message: data.message || null,
-      })
-      .select("id")
-      .single();
+    const id = crypto.randomUUID();
+    const { error } = await supabase.from("quote_requests").insert({
+      id,
+      model_slug: data.modelSlug,
+      hull_color: data.hullColor,
+      tube_color: data.tubeColor,
+      canopy_color: data.canopyColor,
+      engine_hp: data.engineHp,
+      equipment: data.equipment,
+      full_name: data.fullName,
+      email: data.email,
+      phone: data.phone || null,
+      country: data.country || null,
+      message: data.message || null,
+    });
     if (error) throw new Error(error.message);
-    return { ok: true, id: row.id };
+    return { ok: true, id };
   });

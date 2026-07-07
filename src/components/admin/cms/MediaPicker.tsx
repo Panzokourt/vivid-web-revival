@@ -25,20 +25,20 @@ export function MediaPicker({ value, onChange }: Props) {
 
   const current = (media as Array<{ name: string; url: string }>).find((m) => m.name === value);
 
-  const handleDragEnter = (e: React.DragEvent) => {
+  const handleDragEnter = (e: DragEvent) => {
     if (e.dataTransfer.types.includes(MEDIA_DND_MIME)) {
       e.preventDefault();
       setDragOver(true);
     }
   };
-  const handleDragOver = (e: React.DragEvent) => {
+  const handleDragOver = (e: DragEvent) => {
     if (e.dataTransfer.types.includes(MEDIA_DND_MIME)) {
       e.preventDefault();
       e.dataTransfer.dropEffect = "copy";
     }
   };
   const handleDragLeave = () => setDragOver(false);
-  const handleDrop = (e: React.DragEvent) => {
+  const handleDrop = (e: DragEvent) => {
     const name = e.dataTransfer.getData(MEDIA_DND_MIME);
     setDragOver(false);
     if (name) {

@@ -391,18 +391,36 @@ function MediaPage() {
 
           {/* Bulk actions bar */}
           {selected.size > 0 && (
-            <Card className="p-3 flex items-center justify-between bg-ink/5">
+            <Card className="p-3 flex flex-wrap items-center justify-between gap-2 bg-ink/5">
               <div className="text-sm">
                 <span className="font-medium">{selected.size}</span> επιλεγμένα
                 <button onClick={selectAllVisible} className="ml-3 text-xs text-copper hover:underline">Επιλογή όλων ({visible.length})</button>
                 <button onClick={clearSelection} className="ml-2 text-xs text-ink/50 hover:text-ink">Καθαρισμός</button>
               </div>
-              <Button
-                variant="destructive" size="sm"
-                onClick={() => setConfirmDelete({ names: Array.from(selected), label: `${selected.size} αρχεία` })}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />Διαγραφή
-              </Button>
+              <div className="flex items-center gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm"><FolderInput className="h-4 w-4 mr-2" />Μετακίνηση σε…</Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => moveMutation.mutate({ names: Array.from(selected), to_folder: "" })}>
+                      / (root)
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {Array.from(folders.keys()).filter((k) => k !== "root").sort().map((f) => (
+                      <DropdownMenuItem key={f} onClick={() => moveMutation.mutate({ names: Array.from(selected), to_folder: f })}>
+                        {f}/
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <Button
+                  variant="destructive" size="sm"
+                  onClick={() => setConfirmDelete({ names: Array.from(selected), label: `${selected.size} αρχεία` })}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />Διαγραφή
+                </Button>
+              </div>
             </Card>
           )}
 
@@ -422,24 +440,36 @@ function MediaPage() {
           ) : visible.length === 0 ? (
             <EmptyState onUpload={() => fileRef.current?.click()} hasFilter={search !== "" || kindFilter !== "all" || folder !== "all"} />
           ) : view === "grid" ? (
-            <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-              {visible.map((f) => (
-                <FileCard
-                  key={f.name}
-                  file={f}
-                  selected={selected.has(f.name)}
-                  onToggleSelect={() => toggleSelect(f.name)}
-                  onOpen={() => {
-                    if (getFileKind(f.mime_type, f.name) === "image") setPreviewImg(f);
-                    else setDetails(f);
-                  }}
-                  onDetails={() => setDetails(f)}
-                  onCopy={() => { navigator.clipboard.writeText(f.name); toast.success("Path copied"); }}
-                  onDelete={() => setConfirmDelete({ names: [f.name], label: basename(f.name) })}
-                />
-              ))}
-            </div>
-          ) : (
+            <>
+              <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                {paged.map((f) => (
+                  <FileCard
+                    key={f.name}
+                    file={f}
+                    selected={selected.has(f.name)}
+                    onToggleSelect={() => toggleSelect(f.name)}
+                    onOpen={() => {
+                      if (getFileKind(f.mime_type, f.name) === "image") setPreviewImg(f);
+                      else setDetails(f);
+                    }}
+                    onDetails={() => setDetails(f)}
+                    onInsert={() => setInsertFile(f)}
+                    onCopy={() => { navigator.clipboard.writeText(f.name); toast.success("Path copied"); }}
+                    onDelete={() => setConfirmDelete({ names: [f.name], label: basename(f.name) })}
+                  />
+                ))}
+              </div>
+              {paged.length < visible.length && (
+                <div ref={sentinelRef} className="py-6 text-center text-xs text-ink/50">
+                  Φόρτωση περισσότερων… ({paged.length} / {visible.length})
+                </div>
+              )}
+              {paged.length >= visible.length && visible.length > PAGE_SIZE && (
+                <div className="py-4 text-center text-[11px] text-ink/40">
+                  Εμφανίζονται και τα {visible.length} αρχεία
+                </div>
+              )}
+            </>
             <FileList
               files={visible}
               selected={selected}

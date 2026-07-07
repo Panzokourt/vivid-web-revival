@@ -83,12 +83,20 @@ function ContentPage() {
             <div key={page}>
               <div className="text-[11px] uppercase tracking-[0.3em] text-ink/50 mb-2">{page}</div>
               <div className="grid gap-3 md:grid-cols-2">
-                {items.map((b) => (
+                {items.map((b) => {
+                  const preview =
+                    (b.content as Record<string, unknown>)?.title as string | undefined ??
+                    (b.content as Record<string, unknown>)?.eyebrow as string | undefined ??
+                    "";
+                  return (
                   <Card key={b.id} className="p-4">
                     <div className="flex items-start justify-between gap-2">
                       <div className="min-w-0">
                         <div className="font-medium truncate">{b.block_key}</div>
-                        <div className="mt-1">
+                        {preview && (
+                          <div className="text-xs text-ink/60 mt-1 line-clamp-2 whitespace-pre-line">{preview}</div>
+                        )}
+                        <div className="mt-2">
                           {b.published ? <Badge>Published</Badge> : <Badge variant="outline">Draft</Badge>}
                         </div>
                       </div>
@@ -99,7 +107,8 @@ function ContentPage() {
                     </div>
                     <pre className="mt-3 text-[11px] leading-relaxed bg-ink/5 rounded p-2 overflow-x-auto max-h-32">{JSON.stringify(b.content, null, 2)}</pre>
                   </Card>
-                ))}
+                  );
+                })}
               </div>
             </div>
           ))}

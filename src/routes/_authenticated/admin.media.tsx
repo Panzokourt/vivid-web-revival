@@ -127,6 +127,21 @@ function MediaPage() {
     return arr;
   }, [files, folder, search, kindFilter, sort]);
 
+  const paged = useMemo(() => visible.slice(0, visibleCount), [visible, visibleCount]);
+  // Reset pagination when filters change
+  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [folder, search, kindFilter, sort, view]);
+  // Infinite scroll sentinel
+  useEffect(() => {
+    if (view !== "grid") return;
+    const el = sentinelRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting) setVisibleCount((c) => Math.min(c + PAGE_SIZE, visible.length));
+    }, { rootMargin: "300px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [view, visible.length, paged.length]);
+
   // Mutations
   const delMutation = useMutation({
     mutationFn: (names: string[]) =>
@@ -136,6 +151,38 @@ function MediaPage() {
       setSelected(new Set());
       setDetails(null);
       toast.success(names.length === 1 ? "Το αρχείο διαγράφηκε" : `${names.length} αρχεία διαγράφηκαν`);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Η διαγραφή απέτυχε"),
+  });
+
+  const moveMutation = useMutation({
+    mutationFn: (v: { names: string[]; to_folder: string }) => moveFn({ data: v }),
+    onSuccess: (r) => {
+      qc.invalidateQueries({ queryKey: ["admin", "media"] });
+      setSelected(new Set());
+      toast.success(`${(r as { count: number }).count} αρχεία μετακινήθηκαν`);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Η μετακίνηση απέτυχε"),
+  });
+
+  const renameFolderMutation = useMutation({
+    mutationFn: (v: { from: string; to: string }) => renameFolderFn({ data: v }),
+    onSuccess: (_r, v) => {
+      qc.invalidateQueries({ queryKey: ["admin", "media"] });
+      setFolder(v.to);
+      setFolderAction(null);
+      toast.success(`Ο φάκελος μετονομάστηκε σε "${v.to}"`);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Η μετονομασία απέτυχε"),
+  });
+
+  const deleteFolderMutation = useMutation({
+    mutationFn: (prefix: string) => deleteFolderFn({ data: { prefix } }),
+    onSuccess: (r, prefix) => {
+      qc.invalidateQueries({ queryKey: ["admin", "media"] });
+      if (folder === prefix) setFolder("all");
+      setFolderAction(null);
+      toast.success(`Ο φάκελος διαγράφηκε (${(r as { count: number }).count} αρχεία)`);
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Η διαγραφή απέτυχε"),
   });

@@ -102,7 +102,9 @@ export function DealersMap({ pins }: { pins: DealerPin[] }) {
   // Toggle Google Maps gestureHandling based on ⌘/Ctrl so users can pan + zoom while the key is held.
   useEffect(() => {
     const setMode = (greedy: boolean) => {
+      if (!mapRef.current) return;
       mapRef.current.setOptions({ gestureHandling: greedy ? "greedy" : "none", scrollwheel: greedy });
+    };
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Meta" || e.key === "Control" || e.metaKey || e.ctrlKey) setMode(true);
     };

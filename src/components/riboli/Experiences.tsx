@@ -7,8 +7,9 @@ import img4 from "@/assets/model-r520.jpg";
 import { usePageBlock } from "@/lib/page-blocks";
 import { EditableField } from "@/components/editor/EditableField";
 import { EditableItemControls, EditableAddButton } from "@/components/editor/EditableList";
+import { resolveAsset } from "@/lib/asset-map";
 
-type Experience = { img: string; eyebrow: string; title: string; body: string };
+type Experience = { img?: string; image_key?: string; eyebrow: string; title: string; body: string };
 
 const FALLBACK = {
   eyebrow: "How it's used",

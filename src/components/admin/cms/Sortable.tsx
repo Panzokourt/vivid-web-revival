@@ -37,16 +37,14 @@ export function Sortable<T extends { id: string }>({ items, onReorder, renderIte
     <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={onDragEnd}>
       <SortableContext items={items.map((i) => i.id)} strategy={verticalListSortingStrategy}>
         {items.map((item) => (
-          <SortableRow key={item.id} id={item.id}>
-            {(handle) => renderItem(item, handle)}
-          </SortableRow>
+          <SortableRow key={item.id} id={item.id} render={(handle) => renderItem(item, handle)} />
         ))}
       </SortableContext>
     </DndContext>
   );
 }
 
-function SortableRow({ id, children }: { id: string; children: (handle: ReactNode) => ReactNode }) {
+function SortableRow({ id, render }: { id: string; render: (handle: ReactNode) => ReactNode }) {
   const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id });
   const style = {
     transform: CSS.Transform.toString(transform),
@@ -56,7 +54,6 @@ function SortableRow({ id, children }: { id: string; children: (handle: ReactNod
   const handle = (
     <button
       type="button"
-      ref={setNodeRef as unknown as React.Ref<HTMLButtonElement>}
       {...attributes}
       {...listeners}
       className="cursor-grab active:cursor-grabbing p-1 text-ink/40 hover:text-ink"
@@ -67,7 +64,7 @@ function SortableRow({ id, children }: { id: string; children: (handle: ReactNod
   );
   return (
     <div ref={setNodeRef} style={style}>
-      {children(handle)}
+      {render(handle)}
     </div>
   );
 }

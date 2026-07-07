@@ -273,6 +273,9 @@ export function EditorProvider({ children }: { children: ReactNode }) {
       registerBaseline,
       getFieldValue,
       setFieldValue,
+      arrayAdd,
+      arrayRemove,
+      arrayMove,
       open,
       openField: setOpen,
       closeField: () => setOpen(null),
@@ -281,7 +284,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
       discard,
       saving,
     }),
-    [isAdmin, mode, drafts, dirty, registerBaseline, getFieldValue, setFieldValue, open, saveDraft, publish, discard, saving],
+    [isAdmin, mode, drafts, dirty, registerBaseline, getFieldValue, setFieldValue, arrayAdd, arrayRemove, arrayMove, open, saveDraft, publish, discard, saving],
   );
 
   return <EditorCtx.Provider value={value}>{children}</EditorCtx.Provider>;

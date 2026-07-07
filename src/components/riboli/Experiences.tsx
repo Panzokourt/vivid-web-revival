@@ -4,17 +4,27 @@ import img1 from "@/assets/hero.jpg";
 import img2 from "@/assets/model-r680.jpg";
 import img3 from "@/assets/model-r950.jpg";
 import img4 from "@/assets/model-r520.jpg";
+import { usePageBlock } from "@/lib/page-blocks";
+import { EditableField } from "@/components/editor/EditableField";
 
-const experiences = [
-  { img: img1, eyebrow: "01 — Day Charter", title: "Sunrise-to-sunset island runs", body: "Skip the crowds. Hop three coves before lunch, anchor where the ferries can't reach." },
-  { img: img2, eyebrow: "02 — Family Cruise", title: "Shaded, quiet, easy on-board", body: "Bimini top, low freeboard, walk-around deck — designed for kids and grandparents alike." },
-  { img: img3, eyebrow: "03 — Dive & Snorkel", title: "A working platform under you", body: "Fold-down ladder, rinse shower, tank stowage. Back on-board without the drama." },
-  { img: img4, eyebrow: "04 — Sunset Aperitivo", title: "The best table in the Aegean", body: "Bow sunpad, cooler drawer, ambient deck lights. Cast off at seven, back by ten." },
-];
+type Experience = { img: string; eyebrow: string; title: string; body: string };
+
+const FALLBACK = {
+  eyebrow: "How it's used",
+  title: "Experiences",
+  items: [
+    { img: img1, eyebrow: "01 — Day Charter", title: "Sunrise-to-sunset island runs", body: "Skip the crowds. Hop three coves before lunch, anchor where the ferries can't reach." },
+    { img: img2, eyebrow: "02 — Family Cruise", title: "Shaded, quiet, easy on-board", body: "Bimini top, low freeboard, walk-around deck — designed for kids and grandparents alike." },
+    { img: img3, eyebrow: "03 — Dive & Snorkel", title: "A working platform under you", body: "Fold-down ladder, rinse shower, tank stowage. Back on-board without the drama." },
+    { img: img4, eyebrow: "04 — Sunset Aperitivo", title: "The best table in the Aegean", body: "Bow sunpad, cooler drawer, ambient deck lights. Cast off at seven, back by ten." },
+  ] as Experience[],
+};
 
 export function Experiences() {
   const root = useRef<HTMLElement>(null);
   const track = useRef<HTMLDivElement>(null);
+  const block = usePageBlock("home", "experiences", FALLBACK);
+  const items = (block.items ?? FALLBACK.items) as Experience[];
 
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;
@@ -67,12 +77,14 @@ export function Experiences() {
       <div className="px-6 md:px-10 pt-16 md:pt-20 pb-6 shrink-0">
         <div className="exp-eyebrow flex items-end justify-between gap-6 max-w-[1600px] mx-auto">
           <div>
-            <div className="text-[11px] uppercase tracking-[0.3em] text-ink/50">
-              How it's used
-            </div>
-            <h2 className="font-display text-5xl md:text-7xl leading-none mt-2">
-              Experiences
-            </h2>
+            <EditableField page="home" block="experiences" field="eyebrow" type="text" label="Eyebrow" as="div" className="text-[11px] uppercase tracking-[0.3em] text-ink/50">
+              {block.eyebrow}
+            </EditableField>
+            <EditableField page="home" block="experiences" field="title" type="text" label="Title" as="div" className="mt-2">
+              <h2 className="font-display text-5xl md:text-7xl leading-none">
+                {block.title}
+              </h2>
+            </EditableField>
           </div>
           <div className="text-[11px] uppercase tracking-[0.3em] text-ink/50 hidden md:block">
             Scroll <span className="text-ink/80">→</span>
@@ -84,9 +96,9 @@ export function Experiences() {
         ref={track}
         className="flex gap-6 md:gap-10 px-6 md:px-10 pb-10 will-change-transform flex-1 min-h-0 items-stretch"
       >
-        {experiences.map((e) => (
+        {items.map((e, i) => (
           <article
-            key={e.eyebrow}
+            key={i}
             className="relative shrink-0 w-[85vw] md:w-[60vw] lg:w-[55vw] h-full bg-paper-2 overflow-hidden isolate"
           >
             <div className="absolute inset-0 overflow-hidden">
@@ -100,17 +112,23 @@ export function Experiences() {
             </div>
             <div className="absolute inset-0 bg-gradient-to-t from-ink/70 via-ink/10 to-transparent" />
 
-            <div className="absolute top-6 left-6 md:top-10 md:left-10 text-paper text-[11px] uppercase tracking-[0.3em]">
+            <EditableField page="home" block="experiences" field={`items.${i}.img`} type="image" label={`Item ${i + 1} image`} as="div" className="absolute top-6 right-6 md:top-10 md:right-10 z-10">
+              <span className="inline-block bg-paper/80 text-ink px-2 py-1 text-[10px] uppercase tracking-widest rounded">Image</span>
+            </EditableField>
+
+            <EditableField page="home" block="experiences" field={`items.${i}.eyebrow`} type="text" label={`Item ${i + 1} eyebrow`} as="div" className="absolute top-6 left-6 md:top-10 md:left-10 text-paper text-[11px] uppercase tracking-[0.3em]">
               {e.eyebrow}
-            </div>
+            </EditableField>
 
             <div className="absolute bottom-6 left-6 right-6 md:bottom-10 md:left-10 md:right-10 text-paper">
-              <div className="font-display text-3xl md:text-5xl leading-tight max-w-xl">
+              <EditableField page="home" block="experiences" field={`items.${i}.title`} type="textarea" label={`Item ${i + 1} title`} as="div" className="font-display text-3xl md:text-5xl leading-tight max-w-xl">
                 {e.title}
-              </div>
-              <p className="mt-3 text-paper/80 max-w-md text-sm md:text-base leading-relaxed">
-                {e.body}
-              </p>
+              </EditableField>
+              <EditableField page="home" block="experiences" field={`items.${i}.body`} type="textarea" label={`Item ${i + 1} body`} as="div" className="mt-3 max-w-md">
+                <p className="text-paper/80 text-sm md:text-base leading-relaxed">
+                  {e.body}
+                </p>
+              </EditableField>
             </div>
           </article>
         ))}

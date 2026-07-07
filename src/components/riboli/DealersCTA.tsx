@@ -3,6 +3,7 @@ import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { MagneticButton } from "@/components/riboli/MagneticButton";
 import { usePageBlock } from "@/lib/page-blocks";
 import { RichText } from "@/components/admin/cms/RichText";
+import { EditableField } from "@/components/editor/EditableField";
 
 const FALLBACK = {
   eyebrow: "Dealers Network",
@@ -49,24 +50,69 @@ export function DealersCTA() {
       id="dealers"
       className="relative overflow-hidden bg-paper-2 text-ink py-32 md:py-48"
     >
-      <div className="cta-outline pointer-events-none absolute -top-6 left-0 right-0 font-display text-[26vw] leading-none text-outline text-ink/25 whitespace-nowrap">
+      <EditableField
+        page="home"
+        block="dealers_cta"
+        field="marquee"
+        type="text"
+        label="Marquee (φόντο)"
+        as="div"
+        className="cta-outline pointer-events-none absolute -top-6 left-0 right-0 font-display text-[26vw] leading-none text-outline text-ink/25 whitespace-nowrap"
+      >
         {block.marquee}
-      </div>
+      </EditableField>
 
       <div className="relative max-w-4xl mx-auto text-center px-6">
-        <div className="cta-el text-[11px] uppercase tracking-[0.3em] text-ink/60">
+        <EditableField
+          page="home"
+          block="dealers_cta"
+          field="eyebrow"
+          type="text"
+          label="Eyebrow"
+          as="div"
+          className="cta-el text-[11px] uppercase tracking-[0.3em] text-ink/60"
+        >
           {block.eyebrow}
-        </div>
-        <h2 className="cta-el font-display text-5xl md:text-7xl leading-[0.9] mt-4 whitespace-pre-line">
-          {block.title}
-        </h2>
-        <RichText html={block.body} className="cta-el mt-8 max-w-xl mx-auto text-ink/70 leading-relaxed" />
+        </EditableField>
+        <EditableField
+          page="home"
+          block="dealers_cta"
+          field="title"
+          type="textarea"
+          label="Τίτλος"
+          as="div"
+          className="cta-el font-display text-5xl md:text-7xl leading-[0.9] mt-4 whitespace-pre-line"
+        >
+          <h2 className="font-display text-5xl md:text-7xl leading-[0.9] whitespace-pre-line">
+            {block.title}
+          </h2>
+        </EditableField>
+        <EditableField
+          page="home"
+          block="dealers_cta"
+          field="body"
+          type="richtext"
+          label="Κείμενο"
+          as="div"
+          className="cta-el mt-8 max-w-xl mx-auto"
+        >
+          <RichText html={block.body} className="text-ink/70 leading-relaxed" />
+        </EditableField>
         <MagneticButton
           as="a"
           href={block.cta_href}
           className="cta-el mt-10 inline-flex items-center gap-3 bg-ink text-paper px-10 py-5 text-[11px] uppercase tracking-[0.3em] hover:bg-copper transition-colors"
         >
-          {block.cta_label} <span className="text-lg leading-none">+</span>
+          <EditableField
+            page="home"
+            block="dealers_cta"
+            field="cta_label"
+            type="text"
+            label="Ετικέτα κουμπιού"
+          >
+            {block.cta_label}
+          </EditableField>
+          <span className="text-lg leading-none">+</span>
         </MagneticButton>
       </div>
     </section>

@@ -160,12 +160,13 @@ export function Hero() {
       <HeroGraphics containerRef={root} variant="minimal" />
 
       {/* 1. Top-left */}
-      <div
+      <EditableField
+        page="home" block="hero" field="eyebrow" type="text" label="Eyebrow" as="div"
         className="h-corner absolute top-24 left-6 md:left-10 z-20 text-[11px] uppercase tracking-[0.3em] text-paper/90"
-        style={{ textShadow: TEXT_SHADOW }}
       >
-        Handcrafted
-      </div>
+        <span style={{ textShadow: TEXT_SHADOW }}>{block.eyebrow}</span>
+      </EditableField>
+
 
       {/* 2. Top-center mark */}
       <div

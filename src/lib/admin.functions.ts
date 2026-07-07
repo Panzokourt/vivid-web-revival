@@ -343,20 +343,29 @@ export const adminRevokeRole = createServerFn({ method: "POST" })
 export const adminListMedia = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
   .handler(async ({ context }) => {
-    const { data, error } = await context.supabase.storage.from("media").list("", {
-      limit: 200,
-      sortBy: { column: "created_at", order: "desc" },
-    });
-    if (error) throw new Error(error.message);
     const SUPABASE_URL = process.env.SUPABASE_URL!;
-    return (data ?? [])
-      .filter((f) => f.name && !f.name.startsWith("."))
-      .map((f) => ({
-        name: f.name,
-        size: (f.metadata as { size?: number } | null)?.size ?? 0,
-        created_at: f.created_at ?? null,
-        url: `${SUPABASE_URL}/storage/v1/object/public/media/${encodeURIComponent(f.name)}`,
-      }));
+    const prefixes = ["", "site"];
+    const results: Array<{ name: string; size: number; created_at: string | null; url: string }> = [];
+    for (const prefix of prefixes) {
+      const { data, error } = await context.supabase.storage.from("media").list(prefix, {
+        limit: 200,
+        sortBy: { column: "created_at", order: "desc" },
+      });
+      if (error) throw new Error(error.message);
+      for (const f of data ?? []) {
+        if (!f.name || f.name.startsWith(".")) continue;
+        // Skip subfolder entries (their metadata is null)
+        if (!f.metadata) continue;
+        const fullPath = prefix ? `${prefix}/${f.name}` : f.name;
+        results.push({
+          name: fullPath,
+          size: (f.metadata as { size?: number } | null)?.size ?? 0,
+          created_at: f.created_at ?? null,
+          url: `${SUPABASE_URL}/storage/v1/object/public/media/${fullPath.split("/").map(encodeURIComponent).join("/")}`,
+        });
+      }
+    }
+    return results;
   });
 
 export const adminMediaQueryOptions = () =>

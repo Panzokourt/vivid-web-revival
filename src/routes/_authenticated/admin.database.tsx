@@ -170,7 +170,7 @@ function TableViewer({ table }: { table: TableInfo }) {
   const [confirmDelete, setConfirmDelete] = useState<string[] | null>(null);
 
   // debounce search
-  useMemo(() => {
+  useEffect(() => {
     const h = setTimeout(() => {
       setDebounced(search);
       setPage(0);

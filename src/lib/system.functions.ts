@@ -187,7 +187,7 @@ export const getSystemInfo = createServerFn({ method: "GET" })
         leadsTotal: leadsTotal.count ?? 0,
         leadsThisMonth: leadsMonth.count ?? 0,
         modelsTotal: modelsAll.count ?? 0,
-        modelsPublished: modelsPub.count ?? 0,
+        modelsPublished: modelsAll.count ?? 0,
         dealersTotal: dealersAll.count ?? 0,
         contentBlocks: blocksAll.count ?? 0,
         contentDrafts: blocksDraft.count ?? 0,

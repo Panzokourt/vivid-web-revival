@@ -105,7 +105,7 @@ export function Experiences() {
           >
             <div className="absolute inset-0 overflow-hidden">
               <img
-                src={e.img}
+                src={e.img && /^(https?:|data:|blob:|\/)/.test(e.img) ? e.img : resolveAsset(e.image_key ?? e.img)}
                 alt={e.title}
                 loading="lazy"
                 className="exp-img absolute inset-0 h-[120%] w-full object-cover"

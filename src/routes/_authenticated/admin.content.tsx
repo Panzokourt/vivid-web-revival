@@ -18,7 +18,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
 import { Plus, Pencil, Trash2, Code, ExternalLink, History, Eye, EyeOff } from "lucide-react";
@@ -419,5 +419,3 @@ function NewBlockDialog({ onClose, onCreated }: { onClose: () => void; onCreated
   );
 }
 
-// Trigger DialogTrigger import (kept in case referenced elsewhere in tree)
-export { DialogTrigger };

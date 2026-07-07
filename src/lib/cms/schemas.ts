@@ -4,6 +4,7 @@
 export type FieldType =
   | "text"
   | "textarea"
+  | "richtext"
   | "number"
   | "url"
   | "image"
@@ -26,7 +27,8 @@ export type BlockSchema = {
 
 const eyebrow: Field = { key: "eyebrow", label: "Επικεφαλίδα (eyebrow)", type: "text" };
 const title: Field = { key: "title", label: "Τίτλος", type: "textarea", rows: 2 };
-const lede: Field = { key: "lede", label: "Εισαγωγή", type: "textarea", rows: 3 };
+const lede: Field = { key: "lede", label: "Εισαγωγή", type: "richtext" };
+
 
 export const SCHEMAS: Record<string, BlockSchema> = {
   // ─── HOME ────────────────────────────────────────────────────────────────

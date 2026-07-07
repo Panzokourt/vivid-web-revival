@@ -16,6 +16,7 @@ import { LoaderOverlay } from "@/components/riboli/LoaderOverlay";
 import { SmoothScroll } from "@/components/riboli/SmoothScroll";
 
 import { Cursor } from "@/components/riboli/Cursor";
+import { PreviewBanner } from "@/components/riboli/PreviewBanner";
 
 function NotFoundComponent() {
   return (
@@ -201,6 +202,9 @@ function RootComponent() {
   return (
     <QueryClientProvider client={queryClient}>
       <LoaderOverlay />
+      <PreviewBanner />
+
+
 
       <Cursor />
       <SmoothScroll />

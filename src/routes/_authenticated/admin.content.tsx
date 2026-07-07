@@ -21,7 +21,7 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Code, ExternalLink, History, Eye, EyeOff } from "lucide-react";
+import { Plus, Pencil, Trash2, Code, ExternalLink, History, Eye, EyeOff, Sparkles } from "lucide-react";
 import { getSchema, SCHEMA_OPTIONS } from "@/lib/cms/schemas";
 import { SchemaForm } from "@/components/admin/cms/SchemaForm";
 import { Sortable } from "@/components/admin/cms/Sortable";
@@ -132,6 +132,11 @@ function ContentPage() {
           </p>
         </div>
         <div className="flex gap-2">
+          <a href="/?preview=1" target="_blank" rel="noreferrer">
+            <Button variant="outline" title="Δες όλες τις αλλαγές (drafts + published) χωρίς να επηρεαστεί το production">
+              <Sparkles className="h-4 w-4 mr-2" />Preview live
+            </Button>
+          </a>
           <Link to="/admin/content/history"><Button variant="outline"><History className="h-4 w-4 mr-2" />Ιστορικό</Button></Link>
           <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4 mr-2" />Νέο block</Button>
         </div>
@@ -157,6 +162,15 @@ function ContentPage() {
                     className="text-xs text-ink/60 hover:text-copper inline-flex items-center gap-1"
                   >
                     Προβολή <ExternalLink className="h-3 w-3" />
+                  </a>
+                  <a
+                    href={`${page === "home" ? "/" : `/${page}`}?preview=1`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs text-amber-700 hover:text-amber-900 inline-flex items-center gap-1"
+                    title="Preview drafts + published"
+                  >
+                    Preview <Sparkles className="h-3 w-3" />
                   </a>
                 </div>
                 <div className="flex gap-1">

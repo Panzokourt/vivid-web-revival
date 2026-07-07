@@ -308,7 +308,17 @@ function MediaPage() {
             .filter(([k]) => k !== "root")
             .sort(([a], [b]) => a.localeCompare(b))
             .map(([name, count]) => (
-              <FolderItem key={name} label={`${name}/`} count={count} active={folder === name} onClick={() => setFolder(name)} />
+              <FolderItem
+                key={name}
+                label={`${name}/`}
+                count={count}
+                active={folder === name}
+                onClick={() => setFolder(name)}
+                onRename={() => setFolderAction({ kind: "rename", folder: name })}
+                onDelete={count > 0
+                  ? () => setFolderAction({ kind: "delete", folder: name })
+                  : undefined}
+              />
             ))}
           <button
             onClick={() => {

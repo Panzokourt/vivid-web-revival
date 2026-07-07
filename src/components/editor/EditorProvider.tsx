@@ -102,10 +102,8 @@ export function EditorProvider({ children }: { children: ReactNode }) {
   const getFieldValue = useCallback(
     (page: string, block: string, field: string) => {
       const key = bk(page, block);
-      const d = drafts[key];
-      if (d && field in d) return d[field];
-      const b = baselines[key];
-      return b?.[field];
+      const merged = { ...(baselines[key] ?? {}), ...(drafts[key] ?? {}) };
+      return deepGet(merged, field);
     },
     [drafts, baselines],
   );
@@ -114,8 +112,11 @@ export function EditorProvider({ children }: { children: ReactNode }) {
     (page: string, block: string, field: string, value: unknown) => {
       const key = bk(page, block);
       setDrafts((prev) => {
-        const cur = prev[key] ?? {};
-        return { ...prev, [key]: { ...cur, [field]: value } };
+        const base = baselines[key] ?? {};
+        const current = prev[key] ?? deepClone(base);
+        const next = deepClone(current);
+        deepSet(next, field, value);
+        return { ...prev, [key]: next };
       });
       setDirty((prev) => {
         const next = new Set(prev);
@@ -123,7 +124,7 @@ export function EditorProvider({ children }: { children: ReactNode }) {
         return next;
       });
     },
-    [],
+    [baselines],
   );
 
   const saveWithMode = useCallback(

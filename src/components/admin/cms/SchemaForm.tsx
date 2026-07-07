@@ -214,34 +214,6 @@ function ListField({ field, value, onChange }: { field: Field; value: Value[]; o
             );
           }}
         />
-            return (
-              <div className="border border-ink/15 rounded bg-white/60 mb-2">
-                <div className="flex items-center gap-1 px-1 py-2">
-                  {handle}
-                  <button type="button" onClick={() => toggle(item._id)} className="flex-1 flex items-center gap-2 text-left min-w-0">
-                    {isOpen ? <ChevronDown className="h-4 w-4 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}
-                    <span className="text-xs text-ink/50 shrink-0">#{idx + 1}</span>
-                    <span className="text-sm truncate">{label || `Στοιχείο ${idx + 1}`}</span>
-                  </button>
-                  <Button type="button" size="sm" variant="ghost" onClick={() => duplicate(item._id)}><Copy className="h-4 w-4" /></Button>
-                  <Button type="button" size="sm" variant="ghost" onClick={() => remove(item._id)}><Trash2 className="h-4 w-4 text-red-600" /></Button>
-                </div>
-                {isOpen && (
-                  <div className="p-3 pt-2 border-t border-ink/10 grid gap-4">
-                    {itemSchema.map((sub) => (
-                      <FieldRenderer
-                        key={sub.key}
-                        field={sub}
-                        value={item.data[sub.key]}
-                        onChange={(nv) => updateItem(item._id, { [sub.key]: nv })}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-            );
-          }}
-        />
       </div>
     </div>
   );

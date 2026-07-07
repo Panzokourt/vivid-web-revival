@@ -11,9 +11,12 @@ type Props = {
   onChange: (v: string) => void;
 };
 
+export const MEDIA_DND_MIME = "application/x-ribali-media";
+
 export function MediaPicker({ value, onChange }: Props) {
   const [open, setOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const [dragOver, setDragOver] = useState(false);
   const { data: media = [], isLoading } = useQuery(adminMediaQueryOptions());
 
   const filtered = (media as Array<{ name: string; url: string }>).filter((m) =>
@@ -22,8 +25,37 @@ export function MediaPicker({ value, onChange }: Props) {
 
   const current = (media as Array<{ name: string; url: string }>).find((m) => m.name === value);
 
+  const handleDragEnter = (e: React.DragEvent) => {
+    if (e.dataTransfer.types.includes(MEDIA_DND_MIME)) {
+      e.preventDefault();
+      setDragOver(true);
+    }
+  };
+  const handleDragOver = (e: React.DragEvent) => {
+    if (e.dataTransfer.types.includes(MEDIA_DND_MIME)) {
+      e.preventDefault();
+      e.dataTransfer.dropEffect = "copy";
+    }
+  };
+  const handleDragLeave = () => setDragOver(false);
+  const handleDrop = (e: React.DragEvent) => {
+    const name = e.dataTransfer.getData(MEDIA_DND_MIME);
+    setDragOver(false);
+    if (name) {
+      e.preventDefault();
+      onChange(name);
+    }
+  };
+
   return (
-    <div className="flex items-center gap-3">
+    <div
+      className={`flex items-center gap-3 rounded transition-colors ${dragOver ? "ring-2 ring-copper bg-copper/5 -m-1 p-1" : ""}`}
+      onDragEnter={handleDragEnter}
+      onDragOver={handleDragOver}
+      onDragLeave={handleDragLeave}
+      onDrop={handleDrop}
+    >
+
       <div className="h-16 w-16 rounded border border-ink/15 bg-ink/5 flex items-center justify-center overflow-hidden shrink-0">
         {current ? (
           <img src={current.url} alt="" className="h-full w-full object-cover" />

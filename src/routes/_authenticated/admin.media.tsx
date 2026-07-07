@@ -62,6 +62,9 @@ function MediaPage() {
 
   const del = useServerFn(adminDeleteMedia);
   const bulkDel = useServerFn(adminBulkDeleteMedia);
+  const moveFn = useServerFn(adminMoveMediaFiles);
+  const renameFolderFn = useServerFn(adminRenameMediaFolder);
+  const deleteFolderFn = useServerFn(adminDeleteMediaFolder);
 
   // UI state
   const [search, setSearch] = useState("");
@@ -76,8 +79,12 @@ function MediaPage() {
   const [uploads, setUploads] = useState<UploadItem[]>([]);
   const [uploadFolder, setUploadFolder] = useState<string>("site");
   const [isDragging, setIsDragging] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [folderAction, setFolderAction] = useState<FolderAction>(null);
+  const [insertFile, setInsertFile] = useState<MediaFile | null>(null);
   const dragCounter = useRef(0);
   const fileRef = useRef<HTMLInputElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   // Folder list with counts
   const folders = useMemo(() => {

@@ -1,12 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useMemo, useRef, useState, useCallback, type DragEvent } from "react";
+import { useMemo, useRef, useState, useCallback, useEffect, type DragEvent } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import {
   adminMediaQueryOptions,
   adminDeleteMedia,
   adminBulkDeleteMedia,
+  adminMoveMediaFiles,
+  adminRenameMediaFolder,
+  adminDeleteMediaFolder,
   type MediaFile,
 } from "@/lib/admin.functions";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +21,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
@@ -28,9 +34,10 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   Upload, Trash2, Copy, Search, LayoutGrid, List, X, Download, Folder, FolderPlus,
-  FileText, ImageIcon, Film, ExternalLink,
+  FileText, ImageIcon, Film, ExternalLink, MoreVertical, Pencil, FolderInput, Send,
 } from "lucide-react";
 import { FilePreview } from "@/components/admin/media/FilePreview";
+import { InsertIntoBlockDialog } from "@/components/admin/media/InsertIntoBlockDialog";
 import { getFileKind, formatSize, formatDate, basename, dirname, type FileKind } from "@/lib/media-utils";
 
 export const Route = createFileRoute("/_authenticated/admin/media")({
@@ -40,18 +47,24 @@ export const Route = createFileRoute("/_authenticated/admin/media")({
 
 const DEFAULT_FOLDERS = ["site", "models", "dealers", "uploads"];
 const MAX_SIZE = 20 * 1024 * 1024;
+const PAGE_SIZE = 48;
 
 type SortKey = "newest" | "oldest" | "name" | "size";
 type KindFilter = "all" | "image" | "video" | "doc" | "other";
 
 type UploadItem = { id: string; file: File; folder: string; progress: number; status: "queued" | "uploading" | "done" | "error"; error?: string };
+type FolderAction = { kind: "rename" | "delete"; folder: string } | null;
 
 function MediaPage() {
   const { data: files = [], isLoading } = useQuery(adminMediaQueryOptions());
+
   const qc = useQueryClient();
 
   const del = useServerFn(adminDeleteMedia);
   const bulkDel = useServerFn(adminBulkDeleteMedia);
+  const moveFn = useServerFn(adminMoveMediaFiles);
+  const renameFolderFn = useServerFn(adminRenameMediaFolder);
+  const deleteFolderFn = useServerFn(adminDeleteMediaFolder);
 
   // UI state
   const [search, setSearch] = useState("");
@@ -66,8 +79,12 @@ function MediaPage() {
   const [uploads, setUploads] = useState<UploadItem[]>([]);
   const [uploadFolder, setUploadFolder] = useState<string>("site");
   const [isDragging, setIsDragging] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const [folderAction, setFolderAction] = useState<FolderAction>(null);
+  const [insertFile, setInsertFile] = useState<MediaFile | null>(null);
   const dragCounter = useRef(0);
   const fileRef = useRef<HTMLInputElement>(null);
+  const sentinelRef = useRef<HTMLDivElement>(null);
 
   // Folder list with counts
   const folders = useMemo(() => {
@@ -110,6 +127,21 @@ function MediaPage() {
     return arr;
   }, [files, folder, search, kindFilter, sort]);
 
+  const paged = useMemo(() => visible.slice(0, visibleCount), [visible, visibleCount]);
+  // Reset pagination when filters change
+  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [folder, search, kindFilter, sort, view]);
+  // Infinite scroll sentinel
+  useEffect(() => {
+    if (view !== "grid") return;
+    const el = sentinelRef.current;
+    if (!el) return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries[0]?.isIntersecting) setVisibleCount((c) => Math.min(c + PAGE_SIZE, visible.length));
+    }, { rootMargin: "300px" });
+    io.observe(el);
+    return () => io.disconnect();
+  }, [view, visible.length, paged.length]);
+
   // Mutations
   const delMutation = useMutation({
     mutationFn: (names: string[]) =>
@@ -119,6 +151,38 @@ function MediaPage() {
       setSelected(new Set());
       setDetails(null);
       toast.success(names.length === 1 ? "Το αρχείο διαγράφηκε" : `${names.length} αρχεία διαγράφηκαν`);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Η διαγραφή απέτυχε"),
+  });
+
+  const moveMutation = useMutation({
+    mutationFn: (v: { names: string[]; to_folder: string }) => moveFn({ data: v }),
+    onSuccess: (r) => {
+      qc.invalidateQueries({ queryKey: ["admin", "media"] });
+      setSelected(new Set());
+      toast.success(`${(r as { count: number }).count} αρχεία μετακινήθηκαν`);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Η μετακίνηση απέτυχε"),
+  });
+
+  const renameFolderMutation = useMutation({
+    mutationFn: (v: { from: string; to: string }) => renameFolderFn({ data: v }),
+    onSuccess: (_r, v) => {
+      qc.invalidateQueries({ queryKey: ["admin", "media"] });
+      setFolder(v.to);
+      setFolderAction(null);
+      toast.success(`Ο φάκελος μετονομάστηκε σε "${v.to}"`);
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Η μετονομασία απέτυχε"),
+  });
+
+  const deleteFolderMutation = useMutation({
+    mutationFn: (prefix: string) => deleteFolderFn({ data: { prefix } }),
+    onSuccess: (r, prefix) => {
+      qc.invalidateQueries({ queryKey: ["admin", "media"] });
+      if (folder === prefix) setFolder("all");
+      setFolderAction(null);
+      toast.success(`Ο φάκελος διαγράφηκε (${(r as { count: number }).count} αρχεία)`);
     },
     onError: (e) => toast.error(e instanceof Error ? e.message : "Η διαγραφή απέτυχε"),
   });
@@ -244,7 +308,17 @@ function MediaPage() {
             .filter(([k]) => k !== "root")
             .sort(([a], [b]) => a.localeCompare(b))
             .map(([name, count]) => (
-              <FolderItem key={name} label={`${name}/`} count={count} active={folder === name} onClick={() => setFolder(name)} />
+              <FolderItem
+                key={name}
+                label={`${name}/`}
+                count={count}
+                active={folder === name}
+                onClick={() => setFolder(name)}
+                onRename={() => setFolderAction({ kind: "rename", folder: name })}
+                onDelete={count > 0
+                  ? () => setFolderAction({ kind: "delete", folder: name })
+                  : undefined}
+              />
             ))}
           <button
             onClick={() => {
@@ -317,18 +391,36 @@ function MediaPage() {
 
           {/* Bulk actions bar */}
           {selected.size > 0 && (
-            <Card className="p-3 flex items-center justify-between bg-ink/5">
+            <Card className="p-3 flex flex-wrap items-center justify-between gap-2 bg-ink/5">
               <div className="text-sm">
                 <span className="font-medium">{selected.size}</span> επιλεγμένα
                 <button onClick={selectAllVisible} className="ml-3 text-xs text-copper hover:underline">Επιλογή όλων ({visible.length})</button>
                 <button onClick={clearSelection} className="ml-2 text-xs text-ink/50 hover:text-ink">Καθαρισμός</button>
               </div>
-              <Button
-                variant="destructive" size="sm"
-                onClick={() => setConfirmDelete({ names: Array.from(selected), label: `${selected.size} αρχεία` })}
-              >
-                <Trash2 className="h-4 w-4 mr-2" />Διαγραφή
-              </Button>
+              <div className="flex items-center gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm"><FolderInput className="h-4 w-4 mr-2" />Μετακίνηση σε…</Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => moveMutation.mutate({ names: Array.from(selected), to_folder: "" })}>
+                      / (root)
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    {Array.from(folders.keys()).filter((k) => k !== "root").sort().map((f) => (
+                      <DropdownMenuItem key={f} onClick={() => moveMutation.mutate({ names: Array.from(selected), to_folder: f })}>
+                        {f}/
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+                <Button
+                  variant="destructive" size="sm"
+                  onClick={() => setConfirmDelete({ names: Array.from(selected), label: `${selected.size} αρχεία` })}
+                >
+                  <Trash2 className="h-4 w-4 mr-2" />Διαγραφή
+                </Button>
+              </div>
             </Card>
           )}
 
@@ -348,23 +440,36 @@ function MediaPage() {
           ) : visible.length === 0 ? (
             <EmptyState onUpload={() => fileRef.current?.click()} hasFilter={search !== "" || kindFilter !== "all" || folder !== "all"} />
           ) : view === "grid" ? (
-            <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
-              {visible.map((f) => (
-                <FileCard
-                  key={f.name}
-                  file={f}
-                  selected={selected.has(f.name)}
-                  onToggleSelect={() => toggleSelect(f.name)}
-                  onOpen={() => {
-                    if (getFileKind(f.mime_type, f.name) === "image") setPreviewImg(f);
-                    else setDetails(f);
-                  }}
-                  onDetails={() => setDetails(f)}
-                  onCopy={() => { navigator.clipboard.writeText(f.name); toast.success("Path copied"); }}
-                  onDelete={() => setConfirmDelete({ names: [f.name], label: basename(f.name) })}
-                />
-              ))}
-            </div>
+            <>
+              <div className="grid gap-4 grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5">
+                {paged.map((f) => (
+                  <FileCard
+                    key={f.name}
+                    file={f}
+                    selected={selected.has(f.name)}
+                    onToggleSelect={() => toggleSelect(f.name)}
+                    onOpen={() => {
+                      if (getFileKind(f.mime_type, f.name) === "image") setPreviewImg(f);
+                      else setDetails(f);
+                    }}
+                    onDetails={() => setDetails(f)}
+                    onInsert={() => setInsertFile(f)}
+                    onCopy={() => { navigator.clipboard.writeText(f.name); toast.success("Path copied"); }}
+                    onDelete={() => setConfirmDelete({ names: [f.name], label: basename(f.name) })}
+                  />
+                ))}
+              </div>
+              {paged.length < visible.length && (
+                <div ref={sentinelRef} className="py-6 text-center text-xs text-ink/50">
+                  Φόρτωση περισσότερων… ({paged.length} / {visible.length})
+                </div>
+              )}
+              {paged.length >= visible.length && visible.length > PAGE_SIZE && (
+                <div className="py-4 text-center text-[11px] text-ink/40">
+                  Εμφανίζονται και τα {visible.length} αρχεία
+                </div>
+              )}
+            </>
           ) : (
             <FileList
               files={visible}
@@ -459,31 +564,79 @@ function MediaPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Folder rename / delete */}
+      <FolderActionDialog
+        action={folderAction}
+        onClose={() => setFolderAction(null)}
+        existingFolders={Array.from(folders.keys()).filter((k) => k !== "root")}
+        onRename={(from, to) => renameFolderMutation.mutate({ from, to })}
+        onDelete={(prefix) => deleteFolderMutation.mutate(prefix)}
+        renaming={renameFolderMutation.isPending}
+        deleting={deleteFolderMutation.isPending}
+      />
+
+      {/* Insert into CMS block */}
+      <InsertIntoBlockDialog
+        mediaName={insertFile?.name ?? null}
+        mediaKind={insertFile ? getFileKind(insertFile.mime_type, insertFile.name) : null}
+        onClose={() => setInsertFile(null)}
+      />
     </div>
   );
 }
 
 // ────────────────────────────────────────────────────────────────
 
-function FolderItem({ label, count, active, onClick }: { label: string; count: number; active: boolean; onClick: () => void }) {
+function FolderItem({
+  label, count, active, onClick, onRename, onDelete,
+}: {
+  label: string; count: number; active: boolean; onClick: () => void;
+  onRename?: () => void; onDelete?: () => void;
+}) {
   return (
-    <button
-      onClick={onClick}
-      className={`w-full flex items-center justify-between px-3 py-1.5 rounded text-sm ${active ? "bg-ink text-white" : "text-ink/70 hover:bg-ink/5"}`}
-    >
-      <span className="inline-flex items-center gap-2 truncate">
-        <Folder className="h-3.5 w-3.5" /> {label}
-      </span>
-      <span className={`text-[11px] tabular-nums ${active ? "text-white/70" : "text-ink/40"}`}>{count}</span>
-    </button>
+    <div className={`group/folder flex items-center rounded ${active ? "bg-ink text-white" : "text-ink/70 hover:bg-ink/5"}`}>
+      <button
+        onClick={onClick}
+        className="flex-1 flex items-center justify-between px-3 py-1.5 text-sm min-w-0"
+      >
+        <span className="inline-flex items-center gap-2 truncate">
+          <Folder className="h-3.5 w-3.5 shrink-0" /> <span className="truncate">{label}</span>
+        </span>
+        <span className={`text-[11px] tabular-nums ${active ? "text-white/70" : "text-ink/40"}`}>{count}</span>
+      </button>
+      {(onRename || onDelete) && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className={`opacity-0 group-hover/folder:opacity-100 p-1.5 mr-1 rounded ${active ? "hover:bg-white/10" : "hover:bg-ink/10"}`}
+              onClick={(e) => e.stopPropagation()}
+              aria-label="Ενέργειες φακέλου"
+            >
+              <MoreVertical className="h-3.5 w-3.5" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {onRename && (
+              <DropdownMenuItem onClick={onRename}><Pencil className="h-3.5 w-3.5 mr-2" />Μετονομασία</DropdownMenuItem>
+            )}
+            {onDelete && (
+              <DropdownMenuItem onClick={onDelete} className="text-red-600 focus:text-red-600">
+                <Trash2 className="h-3.5 w-3.5 mr-2" />Διαγραφή φακέλου
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+    </div>
   );
 }
 
 function FileCard({
-  file, selected, onToggleSelect, onOpen, onDetails, onCopy, onDelete,
+  file, selected, onToggleSelect, onOpen, onDetails, onInsert, onCopy, onDelete,
 }: {
   file: MediaFile; selected: boolean;
-  onToggleSelect: () => void; onOpen: () => void; onDetails: () => void;
+  onToggleSelect: () => void; onOpen: () => void; onDetails: () => void; onInsert: () => void;
   onCopy: () => void; onDelete: () => void;
 }) {
   const kind = getFileKind(file.mime_type, file.name);
@@ -504,6 +657,9 @@ function FileCard({
           <div className="text-[10px] text-ink/50">{formatSize(file.size)}</div>
         </div>
         <div className="flex items-center gap-0.5 mt-2 -ml-1">
+          <Button variant="ghost" size="sm" className="h-7 px-1.5 text-[10px] font-medium text-copper hover:bg-copper/10" onClick={onInsert} title="Εισαγωγή σε block">
+            <Send className="h-3 w-3 mr-1" />Insert
+          </Button>
           <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={onCopy} title="Copy path"><Copy className="h-3 w-3" /></Button>
           <a href={file.url} download={basename(file.name)} target="_blank" rel="noreferrer">
             <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Download"><Download className="h-3 w-3" /></Button>
@@ -643,5 +799,71 @@ function MetaRow({ label, value, mono }: { label: string; value: string; mono?: 
       <div className="text-xs uppercase tracking-wider text-ink/40">{label}</div>
       <div className={`text-xs text-ink/80 truncate max-w-[280px] ${mono ? "font-mono" : ""}`} title={value}>{value}</div>
     </div>
+  );
+}
+
+function FolderActionDialog({
+  action, onClose, existingFolders, onRename, onDelete, renaming, deleting,
+}: {
+  action: FolderAction;
+  onClose: () => void;
+  existingFolders: string[];
+  onRename: (from: string, to: string) => void;
+  onDelete: (prefix: string) => void;
+  renaming: boolean;
+  deleting: boolean;
+}) {
+  const [name, setName] = useState("");
+  useEffect(() => { setName(action?.folder ?? ""); }, [action]);
+
+  if (!action) return null;
+
+  if (action.kind === "rename") {
+    const clean = name.trim().replace(/[^a-zA-Z0-9_-]/g, "");
+    const invalid = !clean || existingFolders.includes(clean) && clean !== action.folder;
+    return (
+      <Dialog open onOpenChange={(o) => !o && onClose()}>
+        <DialogContent>
+          <SheetHeader>
+            <SheetTitle>Μετονομασία φακέλου "{action.folder}"</SheetTitle>
+            <SheetDescription>Όλα τα αρχεία θα μεταφερθούν στη νέα διαδρομή.</SheetDescription>
+          </SheetHeader>
+          <div className="mt-4">
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Νέο όνομα" autoFocus />
+            {invalid && clean && existingFolders.includes(clean) && (
+              <div className="text-xs text-red-600 mt-2">Ο φάκελος "{clean}" υπάρχει ήδη.</div>
+            )}
+          </div>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={onClose}>Ακύρωση</Button>
+            <Button
+              onClick={() => onRename(action.folder, clean)}
+              disabled={invalid || renaming || clean === action.folder}
+            >{renaming ? "Μετονομασία…" : "Μετονομασία"}</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return (
+    <AlertDialog open onOpenChange={(o) => !o && onClose()}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Διαγραφή φακέλου "{action.folder}";</AlertDialogTitle>
+          <AlertDialogDescription>
+            Θα διαγραφούν ΟΛΑ τα αρχεία μέσα στον φάκελο. Η ενέργεια είναι μη αναστρέψιμη.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Ακύρωση</AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-red-600 hover:bg-red-700"
+            disabled={deleting}
+            onClick={() => onDelete(action.folder)}
+          >{deleting ? "Διαγραφή…" : "Διαγραφή"}</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
   );
 }

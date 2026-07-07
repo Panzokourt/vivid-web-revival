@@ -66,7 +66,7 @@ function FieldRenderer({ field, value, onChange }: { field: Field; value: unknow
     );
   }
 
-  if (field.type === "image") {
+  if (field.type === "image" || field.type === "video" || field.type === "document") {
     return (
       <div className="grid gap-1.5">
         <Label>{field.label}</Label>

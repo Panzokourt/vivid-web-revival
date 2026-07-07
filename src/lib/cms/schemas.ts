@@ -8,6 +8,8 @@ export type FieldType =
   | "number"
   | "url"
   | "image"
+  | "video"
+  | "document"
   | "list";
 
 export type Field = {

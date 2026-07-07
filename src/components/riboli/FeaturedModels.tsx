@@ -18,6 +18,7 @@ const models = [
 export function FeaturedModels() {
   const root = useRef<HTMLElement>(null);
   const track = useRef<HTMLDivElement>(null);
+  const block = usePageBlock("home", "featured_models", { eyebrow: "The Collection", title: "Models" });
 
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;

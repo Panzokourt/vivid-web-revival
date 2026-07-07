@@ -3,6 +3,42 @@ import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { MagneticButton } from "@/components/riboli/MagneticButton";
 import { HeroGraphics } from "@/components/riboli/HeroGraphics";
 import heroImg from "@/assets/hero.jpg";
+import { usePageBlock } from "@/lib/page-blocks";
+import { EditableField } from "@/components/editor/EditableField";
+import { resolveAsset } from "@/lib/asset-map";
+
+type HeroContent = {
+  sr_heading: string;
+  eyebrow: string;
+  title_lines: string;
+  top_right_word: string;
+  mid_left_body: string;
+  bottom_right_body: string;
+  bottom_center_label: string;
+  bottom_center_title: string;
+  cta_label: string;
+  cta_href: string;
+  image_key: string;
+};
+
+const FALLBACK: HeroContent = {
+  sr_heading: "RIBALI — Handcrafted RIB Boats from the Aegean",
+  eyebrow: "Handcrafted",
+  title_lines: "Ribali\n680",
+  top_right_word: "Rib",
+  mid_left_body: "Built by hand\non the shores\nof Greece",
+  bottom_right_body: "Editorial performance craft\nfor open water",
+  bottom_center_label: "Performance",
+  bottom_center_title: "Deep-V\nHulls",
+  cta_label: "Book",
+  cta_href: "#models",
+  image_key: "hero.jpg",
+};
+
+function isUrl(s?: string) {
+  if (!s) return false;
+  return /^(https?:|data:|blob:|\/)/.test(s);
+}
 
 // Text-shadow that keeps every label legible on both sky and hull
 const TEXT_SHADOW = "0 2px 24px rgba(0,0,0,0.55), 0 0 2px rgba(0,0,0,0.35)";

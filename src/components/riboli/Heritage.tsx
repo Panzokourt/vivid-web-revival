@@ -3,6 +3,7 @@ import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { usePageBlock } from "@/lib/page-blocks";
 import { RichText } from "@/components/admin/cms/RichText";
 import { EditableField } from "@/components/editor/EditableField";
+import { EditableItemControls, EditableAddButton } from "@/components/editor/EditableList";
 
 type Milestone = { year: number; title: string; body: string };
 

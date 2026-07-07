@@ -1,6 +1,8 @@
 import { useLayoutEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { usePageBlock } from "@/lib/page-blocks";
+import { EditableField } from "@/components/editor/EditableField";
 import r680 from "@/assets/model-r680.jpg";
 import r950 from "@/assets/model-r950.jpg";
 import r520 from "@/assets/model-r520.jpg";

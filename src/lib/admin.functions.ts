@@ -240,6 +240,7 @@ export const adminListPageBlocks = createServerFn({ method: "GET" })
       .from("page_blocks")
       .select("*")
       .order("page_slug", { ascending: true })
+      .order("sort_order", { ascending: true })
       .order("block_key", { ascending: true });
     if (error) throw new Error(error.message);
     return data ?? [];
@@ -259,6 +260,7 @@ export const adminUpsertPageBlock = createServerFn({ method: "POST" })
   .middleware([requireSupabaseAuth])
   .inputValidator((raw) => blockSchema.parse(raw))
   .handler(async ({ context, data }) => {
+    const clean = sanitizeContent(data.content) as Record<string, unknown>;
     const { error } = await context.supabase
       .from("page_blocks")
       .upsert(
@@ -266,7 +268,7 @@ export const adminUpsertPageBlock = createServerFn({ method: "POST" })
           page_slug: data.page_slug,
           block_key: data.block_key,
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          content: data.content as any,
+          content: clean as any,
           published: data.published ?? true,
           updated_by: context.userId,
           updated_at: new Date().toISOString(),
@@ -285,6 +287,159 @@ export const adminDeletePageBlock = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+// Per-block publish toggle
+export const adminSetBlockPublished = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw) => z.object({ id: z.string().uuid(), published: z.boolean() }).parse(raw))
+  .handler(async ({ context, data }) => {
+    const { error } = await context.supabase
+      .from("page_blocks")
+      .update({ published: data.published, updated_by: context.userId, updated_at: new Date().toISOString() })
+      .eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Per-page bulk publish
+export const adminSetPagePublished = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw) => z.object({ page_slug: z.string().min(1).max(80), published: z.boolean() }).parse(raw))
+  .handler(async ({ context, data }) => {
+    const { error } = await context.supabase
+      .from("page_blocks")
+      .update({ published: data.published, updated_by: context.userId, updated_at: new Date().toISOString() })
+      .eq("page_slug", data.page_slug);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Reorder blocks within a page
+export const adminReorderBlocks = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw) =>
+    z.object({
+      page_slug: z.string().min(1).max(80),
+      ordered_ids: z.array(z.string().uuid()).min(1).max(200),
+    }).parse(raw),
+  )
+  .handler(async ({ context, data }) => {
+    // Sequential updates, small N (typically <20)
+    for (let i = 0; i < data.ordered_ids.length; i++) {
+      const { error } = await context.supabase
+        .from("page_blocks")
+        .update({ sort_order: (i + 1) * 10 })
+        .eq("id", data.ordered_ids[i])
+        .eq("page_slug", data.page_slug);
+      if (error) throw new Error(error.message);
+    }
+    return { ok: true };
+  });
+
+// ─── Versioning ─────────────────────────────────────────────────────────────
+export const adminListBlockVersions = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw) => z.object({ block_id: z.string().uuid() }).parse(raw))
+  .handler(async ({ context, data }) => {
+    const { data: rows, error } = await context.supabase
+      .from("page_block_versions")
+      .select("id, version, published, created_at, created_by")
+      .eq("block_id", data.block_id)
+      .order("version", { ascending: false })
+      .limit(50);
+    if (error) throw new Error(error.message);
+
+    // Enrich with email via admin API
+    const userIds = Array.from(new Set((rows ?? []).map((r) => r.created_by).filter((x): x is string => !!x)));
+    let emailById: Record<string, string> = {};
+    if (userIds.length > 0) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
+      emailById = Object.fromEntries((usersData?.users ?? []).map((u) => [u.id, u.email ?? ""]));
+    }
+    return (rows ?? []).map((r) => ({
+      id: r.id,
+      version: r.version,
+      published: r.published,
+      created_at: r.created_at,
+      created_by: r.created_by,
+      created_by_email: r.created_by ? (emailById[r.created_by] ?? null) : null,
+    }));
+  });
+
+export const adminGetBlockVersion = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw) => z.object({ version_id: z.string().uuid() }).parse(raw))
+  .handler(async ({ context, data }) => {
+    const { data: row, error } = await context.supabase
+      .from("page_block_versions")
+      .select("*")
+      .eq("id", data.version_id)
+      .single();
+    if (error) throw new Error(error.message);
+    return row;
+  });
+
+export const adminRestoreBlockVersion = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw) => z.object({ version_id: z.string().uuid() }).parse(raw))
+  .handler(async ({ context, data }) => {
+    const { data: v, error: vErr } = await context.supabase
+      .from("page_block_versions")
+      .select("block_id, content, published")
+      .eq("id", data.version_id)
+      .single();
+    if (vErr) throw new Error(vErr.message);
+    const { error } = await context.supabase
+      .from("page_blocks")
+      .update({
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        content: v.content as any,
+        published: v.published,
+        updated_by: context.userId,
+        updated_at: new Date().toISOString(),
+      })
+      .eq("id", v.block_id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
+// Recent changes across all blocks
+export const adminRecentBlockChanges = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data: rows, error } = await context.supabase
+      .from("page_block_versions")
+      .select("id, block_id, page_slug, block_key, version, published, created_at, created_by")
+      .order("created_at", { ascending: false })
+      .limit(100);
+    if (error) throw new Error(error.message);
+
+    const userIds = Array.from(new Set((rows ?? []).map((r) => r.created_by).filter((x): x is string => !!x)));
+    let emailById: Record<string, string> = {};
+    if (userIds.length > 0) {
+      const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
+      const { data: usersData } = await supabaseAdmin.auth.admin.listUsers();
+      emailById = Object.fromEntries((usersData?.users ?? []).map((u) => [u.id, u.email ?? ""]));
+    }
+    return (rows ?? []).map((r) => ({
+      ...r,
+      created_by_email: r.created_by ? (emailById[r.created_by] ?? null) : null,
+    }));
+  });
+
+export const adminBlockVersionsQueryOptions = (block_id: string) =>
+  queryOptions({
+    queryKey: ["admin", "block_versions", block_id],
+    queryFn: () => adminListBlockVersions({ data: { block_id } }),
+  });
+
+export const adminRecentChangesQueryOptions = () =>
+  queryOptions({
+    queryKey: ["admin", "recent_changes"],
+    queryFn: () => adminRecentBlockChanges(),
+  });
+
 
 // ─── Analytics ──────────────────────────────────────────────────────────────
 export const adminGetAnalytics = createServerFn({ method: "GET" })

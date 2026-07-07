@@ -193,6 +193,50 @@ export type Database = {
         }
         Relationships: []
       }
+      page_block_versions: {
+        Row: {
+          block_id: string
+          block_key: string
+          content: Json
+          created_at: string
+          created_by: string | null
+          id: string
+          page_slug: string
+          published: boolean
+          version: number
+        }
+        Insert: {
+          block_id: string
+          block_key: string
+          content: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          page_slug: string
+          published: boolean
+          version: number
+        }
+        Update: {
+          block_id?: string
+          block_key?: string
+          content?: Json
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          page_slug?: string
+          published?: boolean
+          version?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "page_block_versions_block_id_fkey"
+            columns: ["block_id"]
+            isOneToOne: false
+            referencedRelation: "page_blocks"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       page_blocks: {
         Row: {
           block_key: string
@@ -200,6 +244,7 @@ export type Database = {
           id: string
           page_slug: string
           published: boolean
+          sort_order: number
           updated_at: string
           updated_by: string | null
         }
@@ -209,6 +254,7 @@ export type Database = {
           id?: string
           page_slug: string
           published?: boolean
+          sort_order?: number
           updated_at?: string
           updated_by?: string | null
         }
@@ -218,6 +264,7 @@ export type Database = {
           id?: string
           page_slug?: string
           published?: boolean
+          sort_order?: number
           updated_at?: string
           updated_by?: string | null
         }

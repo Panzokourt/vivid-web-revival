@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { MagneticButton } from "@/components/riboli/MagneticButton";
 import { usePageBlock } from "@/lib/page-blocks";
+import { RichText } from "@/components/admin/cms/RichText";
 
 const FALLBACK = {
   eyebrow: "Dealers Network",
@@ -59,9 +60,7 @@ export function DealersCTA() {
         <h2 className="cta-el font-display text-5xl md:text-7xl leading-[0.9] mt-4 whitespace-pre-line">
           {block.title}
         </h2>
-        <p className="cta-el mt-8 max-w-xl mx-auto text-ink/70 leading-relaxed">
-          {block.body}
-        </p>
+        <RichText html={block.body} className="cta-el mt-8 max-w-xl mx-auto text-ink/70 leading-relaxed" />
         <MagneticButton
           as="a"
           href={block.cta_href}

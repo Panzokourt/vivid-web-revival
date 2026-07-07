@@ -1,74 +1,95 @@
-# CMS Content — Native UI Editor (χωρίς JSON)
+# Admin CMS — Publish · Reorder · Rich text · Versioning
 
-Σκοπός: να διαχειρίζεται ο admin τα content blocks με φιλικές φόρμες (πεδία, λίστες, drag-to-reorder, media picker) αντί για raw JSON.
+Τέσσερα features σε ένα plan. Δουλεύουν πάνω στο υπάρχον `page_blocks` και δεν αλλάζουν το public read path (`usePageBlock`).
 
-## 1. Schema-driven editor
+## 1. Publish / Unpublish (per-block & per-page)
 
-Δημιουργούμε ένα μητρώο σχημάτων ανά `page_slug/block_key` (π.χ. `home/heritage`, `home/dealers_cta`, `about/team`, `models/hero` κλπ) σε νέο αρχείο `src/lib/cms/schemas.ts`. Κάθε πεδίο ορίζεται με τύπο:
+**Per-block:** `published` υπάρχει ήδη. Πρόσθεση `Switch` inline στην κάρτα κάθε block στη λίστα `/admin/content` (χωρίς άνοιγμα dialog) → mutation `adminSetBlockPublished({id, published})`, optimistic update.
 
-- `text` (μονή γραμμή)
-- `textarea` (πολλαπλές γραμμές, με προαιρετικό `rows`)
-- `richtext` (bold/italic/link — Tiptap ή απλός markdown editor)
-- `number`
-- `url` / `href`
-- `image` (media picker από το bucket `media`)
-- `select` (σταθερές επιλογές)
-- `list` (επαναλαμβανόμενα items με sub-schema, με drag handle για reorder, add/remove, duplicate)
+**Per-page:** κουμπιά "Δημοσίευση όλων" / "Απόκρυψη όλων" στο header κάθε page group → bulk update μέσω `adminSetPagePublished({page_slug, published})`. Confirm dialog πριν την εκτέλεση.
 
-Παράδειγμα (`home/heritage`):
+Νέα server fns στο `src/lib/admin.functions.ts`. RLS ήδη επιτρέπει update σε admin/editor.
+
+## 2. Drag & Drop reorder
+
+**Package:** `@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities` (μικρά, accessible).
+
+**Στα list items** (μέσα σε block, π.χ. milestones, team): αντικαθιστώ τα ↑↓ κουμπιά στο `SchemaForm.tsx` με drag handle (grip icon). Το ↑↓ μένει ως fallback για keyboard/touch.
+
+**Στα blocks ανά page:** νέα στήλη `sort_order INT` στο `page_blocks` (schema migration). Server fn `adminReorderBlocks({page_slug, ordered_ids})` που κάνει bulk update του `sort_order`. Στη λίστα `/admin/content` τα blocks μέσα σε κάθε page group γίνονται sortable. Το `usePageBlock` δεν επηρεάζεται (φέρνει με key), αλλά όπου διαβάζουμε λίστες blocks θα ταξινομούμε κατά `sort_order`.
+
+## 3. Rich text editor
+
+**Package:** `@tiptap/react` + `@tiptap/starter-kit` + `@tiptap/extension-link`. Μικρή toolbar: **B**, *I*, link, unlink, clear formatting.
+
+Νέος τύπος πεδίου `richtext` στο `src/lib/cms/schemas.ts`. Αποθηκεύεται ως **HTML string** στο ίδιο JSON content (backward compatible — υπάρχουσες σελίδες που χρησιμοποιούν το πεδίο ως plain text μπορούν να αναβαθμιστούν με `dangerouslySetInnerHTML` όπου χρειάζεται).
+
+**Rollout:** αρχικά μετατρέπω σε `richtext` τα πιο "λεκτικά" πεδία: `intro` (heritage), `body` (dealers_cta, experiences item, values item, chapters item, team bio, confirmation body). Οι υπάρχοντες components που είναι ήδη συνδεδεμένοι (Heritage, DealersCTA) παίρνουν helper `<RichText html={...} />` για safe render με allowlist tags.
+
+**Sanitization:** χρήση `sanitize-html` server-side στο upsert για να μην περνάει scripts. Client-side ο Tiptap ήδη περιορίζει τα tags.
+
+## 4. Ιστορικό εκδόσεων (versioning)
+
+**Schema (migration):**
+
+```sql
+CREATE TABLE public.page_block_versions (
+  id uuid primary key default gen_random_uuid(),
+  block_id uuid not null references public.page_blocks(id) on delete cascade,
+  page_slug text not null,
+  block_key text not null,
+  content jsonb not null,
+  published boolean not null,
+  version int not null,               -- incrementing per block_id
+  change_summary text,                -- optional label
+  created_at timestamptz not null default now(),
+  created_by uuid references auth.users(id)
+);
+CREATE INDEX ... ON page_block_versions(block_id, version DESC);
 ```
-eyebrow: text
-title: textarea
-intro: textarea
-milestones: list of { year: number, title: text, body: textarea }
-```
 
-Έτσι ο χρήστης βλέπει labels στα Ελληνικά (π.χ. "Επικεφαλίδα", "Ορόσημα") και όχι JSON keys.
++ GRANTs (`authenticated`, `service_role`), RLS (admin/editor SELECT/INSERT, admin DELETE, no updates), και **trigger** στο `page_blocks` που σε κάθε `INSERT`/`UPDATE` γράφει snapshot στο `page_block_versions` με auto-incrementing `version`.
 
-## 2. Νέα σελίδα επεξεργασίας
+**Retention:** κρατάμε τις τελευταίες **50 versions** ανά block μέσω trigger cleanup (DELETE όπου `version <= max_version - 50`). Αν θέλεις άλλο όριο πες μου.
 
-- `/_authenticated/admin/content/$page/$block` — δεδικασμένη σελίδα με φόρμα ενός block.
-- Η υπάρχουσα `/admin/content` γίνεται λίστα: γκρουπαρισμένα blocks ανά σελίδα, με κουμπί "Επεξεργασία" που πάει στη νέα route (αντί για JSON preview).
-- Πάνω δεξιά: Save / Publish toggle / Preview site link / Discard changes.
-- Auto-save draft σε localStorage + explicit Save στη βάση.
+**UI: "History" drawer/dialog** από την καρτέλα edit κάθε block:
 
-## 3. Media picker
+- Λίστα versions (νεότερη πρώτη): timestamp, χρήστης (email), κουμπιά **Preview**, **Restore**, **Diff**.
+- **Preview:** ανοίγει read-only το SchemaForm με το παλιό content.
+- **Restore:** confirm → server fn `adminRestoreBlockVersion({version_id})` που κάνει `UPDATE page_blocks SET content = v.content, published = v.published` (και ο trigger γράφει νέα έκδοση αυτόματα, οπότε το restore είναι κι αυτό αναστρέψιμο).
+- **Diff:** JSON diff view (unified) — απλή γραμμοπρόεκταση με highlighting (χρήση `diff` package για line-diff του JSON pretty-print). Αν το θεωρείς overkill, το κόβω αρχικά.
 
-- Reusable component `<MediaPickerField>` που ανοίγει dialog με τα αρχεία του `media` bucket (χρησιμοποιεί ήδη τα `adminListMedia` που έχουμε).
-- Επιλογή αρχείου → αποθήκευση του `path` στο content, με thumbnail preview στη φόρμα.
-- Upload νέου αρχείου από τη διαχείριση απευθείας μέσα στον picker.
+**Server fns:**
+- `adminListBlockVersions(block_id)` — pagination 50.
+- `adminGetBlockVersion(version_id)`.
+- `adminRestoreBlockVersion(version_id)`.
 
-## 4. Repeatable lists (π.χ. team, milestones, values)
+**Global "Recent changes":** μικρή σελίδα/tab `/admin/content/history` που δείχνει τις τελευταίες 100 αλλαγές σε όλα τα blocks (για γρήγορο audit / "τι άλλαξε σήμερα").
 
-- Component `<RepeatableList>` με:
-  - Drag handle (dnd-kit) για reorder
-  - "Προσθήκη" / "Διπλασιασμός" / "Διαγραφή"
-  - Collapse/expand κάθε item, με τίτλο-preview (π.χ. `title` του item)
+## Τεχνικές λεπτομέρειες / αρχεία
 
-## 5. Escape hatch: JSON mode
+- **Migration:** `page_block_versions` + `sort_order` σε `page_blocks` + trigger + RLS + GRANT.
+- **Server fns (`src/lib/admin.functions.ts`):** `adminSetBlockPublished`, `adminSetPagePublished`, `adminReorderBlocks`, `adminListBlockVersions`, `adminGetBlockVersion`, `adminRestoreBlockVersion`, `adminRecentChanges`.
+- **Νέα αρχεία:**
+  - `src/components/admin/cms/RichTextField.tsx` (Tiptap)
+  - `src/components/admin/cms/RichText.tsx` (public render με sanitize)
+  - `src/components/admin/cms/SortableList.tsx` (dnd-kit wrapper για item rows)
+  - `src/components/admin/cms/SortableBlockGrid.tsx` (dnd-kit για κάρτες block)
+  - `src/components/admin/cms/HistoryDialog.tsx` (versions list + preview/restore/diff)
+  - `src/routes/_authenticated/admin.content.history.tsx` (global recent changes)
+- **Updated:**
+  - `src/lib/cms/schemas.ts` (τύπος `richtext`, opt-in σε συγκεκριμένα πεδία)
+  - `src/components/admin/cms/SchemaForm.tsx` (render richtext, dnd handles)
+  - `src/routes/_authenticated/admin.content.tsx` (per-block toggle, per-page bulk, DnD reorder, History button)
+  - `src/components/riboli/Heritage.tsx`, `DealersCTA.tsx` (RichText render όπου έγιναν rich)
+- **Deps (bun add):** `@dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities @tiptap/react @tiptap/starter-kit @tiptap/extension-link sanitize-html diff` + `@types/sanitize-html @types/diff`.
 
-Toggle "Advanced (JSON)" σε κάθε form για power users ή για blocks χωρίς schema. Έτσι δεν χάνουμε ευελιξία για custom blocks που δεν έχουμε ακόμα ορίσει schema.
+## Rollout order
 
-## 6. Νέο block από UI
+1. Migration (schema + trigger + sort_order) — απαιτεί approval.
+2. Publish toggles + bulk (γρήγορη νίκη).
+3. DnD reorder (items + blocks).
+4. Rich text (Tiptap component + opt-in πεδία + public render).
+5. Version history dialog + global recent changes.
 
-- Κουμπί "Νέο block" → dialog που ζητά `page_slug` + `block_key` από dropdown με τα γνωστά schemas (ή "custom" για JSON mode).
-- Prefill με defaults από το schema.
-
-## 7. Validation & UX polish
-
-- Zod validation ανά schema, inline errors.
-- Sticky action bar (Save/Publish) όσο σκρολάρεις.
-- Toast confirmations με sonner.
-- "Unsaved changes" warning όταν αλλάζει route.
-- Preview link ανοίγει τη δημόσια σελίδα σε νέο tab.
-
-## Τεχνικές λεπτομέρειες
-
-- Νέα αρχεία: `src/lib/cms/schemas.ts`, `src/lib/cms/types.ts`, `src/components/admin/cms/SchemaForm.tsx`, `TextField.tsx`, `TextareaField.tsx`, `ImageField.tsx`, `RepeatableList.tsx`, `MediaPicker.tsx`, `JsonFallback.tsx`, `src/routes/_authenticated/admin.content.$page.$block.tsx`.
-- Update: `src/routes/_authenticated/admin.content.tsx` (list view), `src/lib/admin.functions.ts` (add `adminGetBlock`, `adminUpsertBlock`, `adminDeleteBlock` αν λείπουν).
-- Depend: `dnd-kit/core` + `dnd-kit/sortable` για reorder· ήδη έχουμε shadcn/tanstack query/sonner.
-- Fallback στη public πλευρά μένει ίδιο (`usePageBlock` με defaults) — δεν αλλάζει τίποτα στο site.
-
-## Rollout
-
-Ξεκινάω με τα schemas για τα ήδη σπαρμένα blocks (home, about, contact, dealers, configurator, models), ώστε ο χρήστης να δει αμέσως native UI παντού. Custom/άγνωστα blocks πέφτουν αυτόματα σε JSON mode.
+Public site δεν αλλάζει — μόνο ο admin. Fallback σε plain text παραμένει για blocks που δεν έχουν rich content ακόμη.

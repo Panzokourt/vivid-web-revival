@@ -4,6 +4,7 @@
 export type FieldType =
   | "text"
   | "textarea"
+  | "richtext"
   | "number"
   | "url"
   | "image"
@@ -26,7 +27,8 @@ export type BlockSchema = {
 
 const eyebrow: Field = { key: "eyebrow", label: "Επικεφαλίδα (eyebrow)", type: "text" };
 const title: Field = { key: "title", label: "Τίτλος", type: "textarea", rows: 2 };
-const lede: Field = { key: "lede", label: "Εισαγωγή", type: "textarea", rows: 3 };
+const lede: Field = { key: "lede", label: "Εισαγωγή", type: "richtext" };
+
 
 export const SCHEMAS: Record<string, BlockSchema> = {
   // ─── HOME ────────────────────────────────────────────────────────────────
@@ -67,7 +69,7 @@ export const SCHEMAS: Record<string, BlockSchema> = {
         itemLabel: (it) => (it.title as string) || "Πυλώνας",
         itemSchema: [
           { key: "title", label: "Τίτλος", type: "text" },
-          { key: "body", label: "Κείμενο", type: "textarea", rows: 3 },
+          { key: "body", label: "Κείμενο", type: "richtext" },
         ],
       },
     ],
@@ -77,14 +79,14 @@ export const SCHEMAS: Record<string, BlockSchema> = {
     fields: [
       eyebrow,
       title,
-      { key: "intro", label: "Εισαγωγή", type: "textarea", rows: 3 },
+      { key: "intro", label: "Εισαγωγή", type: "richtext" },
       {
         key: "milestones", label: "Ορόσημα", type: "list",
         itemLabel: (it) => `${it.year ?? ""} — ${it.title ?? ""}`,
         itemSchema: [
           { key: "year", label: "Έτος", type: "number" },
           { key: "title", label: "Τίτλος", type: "text" },
-          { key: "body", label: "Κείμενο", type: "textarea", rows: 3 },
+          { key: "body", label: "Κείμενο", type: "richtext" },
         ],
       },
     ],
@@ -99,7 +101,7 @@ export const SCHEMAS: Record<string, BlockSchema> = {
         itemLabel: (it) => (it.title as string) || "Εμπειρία",
         itemSchema: [
           { key: "title", label: "Τίτλος", type: "text" },
-          { key: "body", label: "Κείμενο", type: "textarea", rows: 3 },
+          { key: "body", label: "Κείμενο", type: "richtext" },
           { key: "image_key", label: "Εικόνα", type: "image" },
         ],
       },
@@ -165,7 +167,7 @@ export const SCHEMAS: Record<string, BlockSchema> = {
     fields: [
       eyebrow,
       title,
-      { key: "body", label: "Κείμενο", type: "textarea", rows: 3 },
+      { key: "body", label: "Κείμενο", type: "richtext" },
       { key: "cta_label", label: "Ετικέτα κουμπιού", type: "text" },
       { key: "cta_href", label: "Σύνδεσμος κουμπιού", type: "url" },
       { key: "marquee", label: "Marquee (φόντο)", type: "text" },
@@ -188,7 +190,7 @@ export const SCHEMAS: Record<string, BlockSchema> = {
         itemSchema: [
           { key: "year", label: "Έτος", type: "text" },
           { key: "title", label: "Τίτλος", type: "text" },
-          { key: "body", label: "Κείμενο", type: "textarea", rows: 4 },
+          { key: "body", label: "Κείμενο", type: "richtext" },
           { key: "image_key", label: "Εικόνα", type: "image" },
         ],
       },
@@ -205,7 +207,7 @@ export const SCHEMAS: Record<string, BlockSchema> = {
         itemSchema: [
           { key: "index", label: "Δείκτης (π.χ. 01)", type: "text" },
           { key: "title", label: "Τίτλος", type: "text" },
-          { key: "body", label: "Κείμενο", type: "textarea", rows: 3 },
+          { key: "body", label: "Κείμενο", type: "richtext" },
         ],
       },
     ],
@@ -251,7 +253,7 @@ export const SCHEMAS: Record<string, BlockSchema> = {
     fields: [
       eyebrow,
       title,
-      { key: "body", label: "Κείμενο", type: "textarea", rows: 3 },
+      { key: "body", label: "Κείμενο", type: "richtext" },
     ],
   },
 

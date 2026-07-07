@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useMemo } from "react";
 import type { BlockSchema, Field } from "@/lib/cms/schemas";
 import { emptyItem } from "@/lib/cms/schemas";
 import { Input } from "@/components/ui/input";
@@ -6,7 +6,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { MediaPicker } from "./MediaPicker";
-import { ChevronDown, ChevronRight, ArrowUp, ArrowDown, Copy, Trash2, Plus } from "lucide-react";
+import { RichTextField } from "./RichTextField";
+import { Sortable } from "./Sortable";
+import { ChevronDown, ChevronRight, Copy, Trash2, Plus } from "lucide-react";
 
 type Value = Record<string, unknown>;
 
@@ -54,6 +56,16 @@ function FieldRenderer({ field, value, onChange }: { field: Field; value: unknow
     );
   }
 
+  if (field.type === "richtext") {
+    return (
+      <div className="grid gap-1.5">
+        <Label>{field.label}</Label>
+        <RichTextField value={strVal} onChange={onChange as (v: string) => void} />
+        {field.help && <div className="text-[11px] text-ink/50">{field.help}</div>}
+      </div>
+    );
+  }
+
   if (field.type === "image") {
     return (
       <div className="grid gap-1.5">
@@ -90,39 +102,66 @@ function FieldRenderer({ field, value, onChange }: { field: Field; value: unknow
   );
 }
 
+// Stable per-render synthetic IDs for list items so dnd-kit can track them
+// even when items don't have an id field.
+type ItemWithId = { _id: string; data: Value };
+
 function ListField({ field, value, onChange }: { field: Field; value: Value[]; onChange: (v: Value[]) => void }) {
   const itemSchema = field.itemSchema ?? [];
-  const [openIdx, setOpenIdx] = useState<Set<number>>(new Set([0]));
+  const [openIds, setOpenIds] = useState<Set<string>>(new Set());
+  const [idMap] = useState(() => new WeakMap<Value, string>());
 
-  const toggle = (i: number) => {
-    const next = new Set(openIdx);
-    next.has(i) ? next.delete(i) : next.add(i);
-    setOpenIdx(next);
+  const withIds: ItemWithId[] = useMemo(() => {
+    return value.map((v) => {
+      let id = idMap.get(v);
+      if (!id) {
+        id = `item-${Math.random().toString(36).slice(2, 10)}`;
+        idMap.set(v, id);
+      }
+      return { _id: id, data: v };
+    });
+  }, [value, idMap]);
+
+  const toggle = (id: string) => {
+    const next = new Set(openIds);
+    next.has(id) ? next.delete(id) : next.add(id);
+    setOpenIds(next);
   };
 
-  const move = (i: number, dir: -1 | 1) => {
-    const j = i + dir;
-    if (j < 0 || j >= value.length) return;
-    const next = [...value];
-    [next[i], next[j]] = [next[j], next[i]];
-    onChange(next);
-  };
-
-  const remove = (i: number) => {
+  const remove = (id: string) => {
     if (!confirm("Διαγραφή στοιχείου;")) return;
-    onChange(value.filter((_, k) => k !== i));
+    onChange(withIds.filter((it) => it._id !== id).map((it) => it.data));
   };
 
-  const duplicate = (i: number) => {
-    const next = [...value];
-    next.splice(i + 1, 0, JSON.parse(JSON.stringify(value[i])));
-    onChange(next);
+  const duplicate = (id: string) => {
+    const idx = withIds.findIndex((it) => it._id === id);
+    if (idx < 0) return;
+    const cloned = JSON.parse(JSON.stringify(withIds[idx].data)) as Value;
+    const next = [...withIds];
+    next.splice(idx + 1, 0, { _id: `item-${Math.random().toString(36).slice(2, 10)}`, data: cloned });
+    onChange(next.map((it) => it.data));
   };
 
   const add = () => {
-    const next = [...value, emptyItem(itemSchema)];
-    onChange(next);
-    setOpenIdx(new Set([...openIdx, next.length - 1]));
+    const newItem = emptyItem(itemSchema);
+    const newId = `item-${Math.random().toString(36).slice(2, 10)}`;
+    idMap.set(newItem, newId);
+    onChange([...value, newItem]);
+    setOpenIds(new Set([...openIds, newId]));
+  };
+
+  const reorder = (nextItems: ItemWithId[]) => {
+    onChange(nextItems.map((it) => it.data));
+  };
+
+  const updateItem = (id: string, patch: Value) => {
+    const next = withIds.map((it) => {
+      if (it._id !== id) return it;
+      const merged = { ...it.data, ...patch };
+      idMap.set(merged, it._id);
+      return { _id: it._id, data: merged };
+    });
+    onChange(next.map((it) => it.data));
   };
 
   return (
@@ -133,47 +172,48 @@ function ListField({ field, value, onChange }: { field: Field; value: Value[]; o
           <Plus className="h-4 w-4 mr-1" /> Προσθήκη
         </Button>
       </div>
-      {value.length === 0 && (
+      {withIds.length === 0 && (
         <div className="text-xs text-ink/50 border border-dashed border-ink/20 rounded p-4 text-center">
           Κανένα στοιχείο ακόμη.
         </div>
       )}
       <div className="grid gap-2">
-        {value.map((item, i) => {
-          const isOpen = openIdx.has(i);
-          const label = field.itemLabel ? field.itemLabel(item, i) : `Στοιχείο ${i + 1}`;
-          return (
-            <div key={i} className="border border-ink/15 rounded bg-white/60">
-              <div className="flex items-center gap-1 px-2 py-2">
-                <button type="button" onClick={() => toggle(i)} className="flex-1 flex items-center gap-2 text-left min-w-0">
-                  {isOpen ? <ChevronDown className="h-4 w-4 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}
-                  <span className="text-xs text-ink/50 shrink-0">#{i + 1}</span>
-                  <span className="text-sm truncate">{label || `Στοιχείο ${i + 1}`}</span>
-                </button>
-                <Button type="button" size="sm" variant="ghost" onClick={() => move(i, -1)} disabled={i === 0}><ArrowUp className="h-4 w-4" /></Button>
-                <Button type="button" size="sm" variant="ghost" onClick={() => move(i, 1)} disabled={i === value.length - 1}><ArrowDown className="h-4 w-4" /></Button>
-                <Button type="button" size="sm" variant="ghost" onClick={() => duplicate(i)}><Copy className="h-4 w-4" /></Button>
-                <Button type="button" size="sm" variant="ghost" onClick={() => remove(i)}><Trash2 className="h-4 w-4 text-red-600" /></Button>
-              </div>
-              {isOpen && (
-                <div className="p-3 pt-2 border-t border-ink/10 grid gap-4">
-                  {itemSchema.map((sub) => (
-                    <FieldRenderer
-                      key={sub.key}
-                      field={sub}
-                      value={item[sub.key]}
-                      onChange={(nv) => {
-                        const next = [...value];
-                        next[i] = { ...item, [sub.key]: nv };
-                        onChange(next);
-                      }}
-                    />
-                  ))}
+        <Sortable
+          items={withIds.map((it) => ({ id: it._id, data: it.data }))}
+          onReorder={(next) => reorder(next.map((n) => ({ _id: n.id, data: n.data })))}
+          renderItem={(item, handle) => {
+            const _id = item.id;
+            const isOpen = openIds.has(_id);
+            const idx = withIds.findIndex((w) => w._id === _id);
+            const label = field.itemLabel ? field.itemLabel(item.data, idx) : `Στοιχείο ${idx + 1}`;
+            return (
+              <div className="border border-ink/15 rounded bg-white/60 mb-2">
+                <div className="flex items-center gap-1 px-1 py-2">
+                  {handle}
+                  <button type="button" onClick={() => toggle(_id)} className="flex-1 flex items-center gap-2 text-left min-w-0">
+                    {isOpen ? <ChevronDown className="h-4 w-4 shrink-0" /> : <ChevronRight className="h-4 w-4 shrink-0" />}
+                    <span className="text-xs text-ink/50 shrink-0">#{idx + 1}</span>
+                    <span className="text-sm truncate">{label || `Στοιχείο ${idx + 1}`}</span>
+                  </button>
+                  <Button type="button" size="sm" variant="ghost" onClick={() => duplicate(_id)}><Copy className="h-4 w-4" /></Button>
+                  <Button type="button" size="sm" variant="ghost" onClick={() => remove(_id)}><Trash2 className="h-4 w-4 text-red-600" /></Button>
                 </div>
-              )}
-            </div>
-          );
-        })}
+                {isOpen && (
+                  <div className="p-3 pt-2 border-t border-ink/10 grid gap-4">
+                    {itemSchema.map((sub) => (
+                      <FieldRenderer
+                        key={sub.key}
+                        field={sub}
+                        value={item.data[sub.key]}
+                        onChange={(nv) => updateItem(_id, { [sub.key]: nv })}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          }}
+        />
       </div>
     </div>
   );

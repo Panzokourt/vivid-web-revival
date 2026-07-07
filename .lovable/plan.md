@@ -1,82 +1,71 @@
-# RIBALI Admin CMS
+# Populate CMS with existing content & media
 
-Χτίζουμε custom in-app διαχειριστικό στο `/admin` με το ίδιο editorial design του site (paper/ink/copper, shadcn UI). Backend πάνω στο υπάρχον Lovable Cloud — δεν προσθέτουμε εξωτερικό headless CMS.
+Το admin CMS λειτουργεί, αλλά είναι άδειο. Θα το γεμίσουμε με ΟΛΟ το υπάρχον περιεχόμενο του site, ώστε ο admin να μπορεί να το επεξεργαστεί απευθείας.
 
-## 1. Auth & Roles
+## 1. Content blocks (seed migration)
 
-- Email + password μέσω Lovable Cloud auth (χωρίς Google, χωρίς public signup).
-- Route `/auth` (login-only, όχι signup form) + gated layout `_authenticated/`.
-- Ξεχωριστός πίνακας `user_roles` υπάρχει ήδη με `app_role`. Προσθέτουμε role `editor` (admin/editor) και security definer `has_role`.
-- `/admin/*` προστατεύεται από `beforeLoad` που ζητά ρόλο admin ή editor. Non-admins → redirect στο `/`.
-- Πρώτος admin: seed μέσω migration (θα ζητηθεί το email σου).
+Θα δημιουργήσουμε μία migration που κάνει `INSERT` στο `page_blocks` όλα τα κείμενα που είναι σήμερα hardcoded στα components. Δομή: `page_slug` / `block_key` / `content` (JSON) / `published=true`.
 
-## 2. Πληροφοριακή αρχιτεκτονική admin
+**Home (`page_slug=home`)**
+- `hero` — eyebrow, title lines (The/Aegean/Sea), body copy, CTA labels
+- `stats` — αριθμοί & labels (hulls delivered, years, κ.λπ.)
+- `pillars` — τα 3-4 pillars (title + body το καθένα)
+- `heritage` — eyebrow, title, intro + array με τα 5 milestones (2000/2007/2013/2019/2025)
+- `experiences` — eyebrow, title + τα 4 experience cards (eyebrow/title/body/image_key)
+- `anatomy` — title, intro + τα hotspots του RIB (id/label/description)
+- `tech_construction` — title, intro + τα tech bullets
+- `featured_models` — eyebrow, title + τα 3 model cards (R-520 / R-680 / R-950)
+- `dealers_cta` — title, body, CTA
 
-```text
-/admin
- ├── Dashboard        KPIs: leads σήμερα/μήνα, top model, latest quotes
- ├── Models           λίστα R-520/R-680/R-950 → edit specs, hero, tag, order
- │    └── Gallery     drag-reorder, upload, caption
- ├── Leads            quote_requests: filter status, view detail, mark contacted, CSV export
- ├── Dealers          CRUD (νέος πίνακας) — name, city, country, lat/lng, contact
- ├── Content          page blocks (hero, heritage, experiences, stats, about, contact)
- ├── Media            Supabase Storage bucket "media" browser + upload
- ├── Analytics        views/leads/conversion charts (recharts) από events table
- └── Settings         users & roles (invite, promote, revoke)
-```
+**Models pages (`page_slug=models` / `models-r520` / `models-r680` / `models-r950`)**
+- `hero` (title, tagline, hero image key)
+- `overview` (intro copy)
+- `specs` (array με key/value: LOA, beam, deadrise, dry weight, fuel, max hp, κ.λπ.)
+- `features` (bullet list)
+- `gallery` (array με image keys)
 
-## 3. Database changes (migration)
+**Static pages**
+- `about` → `hero`, `story`, `values`, `team`
+- `contact` → `hero`, `info` (address, phone, email), `hours`
+- `dealers` → `hero`, `intro`
+- `configurator` → `hero`, `intro`
 
-Νέοι/ενημερωμένοι πίνακες:
+Οι εικόνες αναφέρονται μέσα στο JSON με `image_key` (π.χ. `"hero.jpg"`), ώστε να δένουν με το Media Library.
 
-- `app_role` enum → προσθήκη `'editor'`.
-- `dealers` (name, city, country, lat, lng, phone, email, website, order_index, active).
-- `page_blocks` (page_slug, block_key, content jsonb, updated_at, updated_by) — key/value store για hero/heritage/experiences/κτλ.
-- `quote_requests` → προσθήκη `status` transitions (`new|contacted|qualified|closed`), `notes`, `assigned_to`.
-- `analytics_events` (event_type, path, model_slug, meta jsonb, created_at) — αντικαθιστά external analytics για basic KPIs.
-- Storage bucket `media` (public read, admin write).
+## 2. Media library (seed)
 
-RLS:
-- Δημόσιο SELECT παραμένει για `models`, `model_gallery`, `dealers`, `page_blocks` (μόνο published rows).
-- Admin/editor: full CRUD μέσω `has_role(auth.uid(), 'admin' OR 'editor')`.
-- `quote_requests`: μόνο admin/editor βλέπει· INSERT παραμένει anon με τα υπάρχοντα validation checks.
-- `user_roles`: μόνο admin γράφει.
+Οι εικόνες στο `src/assets/` (`hero.jpg`, `anatomy-rib.jpg`, `model-r520.jpg`, `model-r680.jpg`, `model-r950.jpg`, `tech-detail.jpg`) θα ανέβουν στο υπάρχον `media` storage bucket με script σε ένα server function που τρέχει μια φορά (admin-gated `seedMedia`), ή απευθείας από τον agent με `supabase--storage_upload`. Θα φαίνονται στο `/admin/media` ώστε ο admin να τις κατεβάζει/αντικαθιστά.
 
-## 4. Frontend υλοποίηση
+Επίσης θα δούμε αν υπάρχει πίνακας `model_gallery` — αν ναι, θα φορτώσουμε references στις παραπάνω εικόνες.
 
-- shadcn primitives: `Sidebar`, `Table` (TanStack Table), `Dialog`, `Form` (react-hook-form + zod), `Tabs`, `Toast`.
-- Layout: sidebar αριστερά (RIBALI mark, sections, sign-out), top bar με crumbs + user menu.
-- Design tokens ίδιοι με το site (paper/ink/copper), light theme.
-- Data: TanStack Query + `createServerFn` με `requireSupabaseAuth` + role check για κάθε mutation.
-- Media upload: signed URL μέσω server fn, upload client → Supabase Storage → επιστροφή public URL για gallery/hero.
-- Rich content: για page_blocks χρησιμοποιούμε structured JSON forms (όχι WYSIWYG) — π.χ. Hero έχει fields `eyebrow`, `title`, `subtitle`, `cta_label`, `cta_href`.
+## 3. Wire the frontend (fallback pattern)
 
-## 5. Analytics
+Στα components (`Hero`, `Heritage`, `Experiences`, `AnatomyRIB`, `TechConstruction`, `Stats`, `Pillars`, `FeaturedModels`, `DealersCTA`, model pages, about/contact) θα προσθέσουμε ένα hook `usePageBlock(page, key)` που:
+- Κάνει public read από `page_blocks` (RLS: `published=true` για anon) μέσω TanStack Query
+- Επιστρέφει το JSON content, με **fallback στα υπάρχοντα defaults** αν το block λείπει / offline
+- Έτσι το site δεν σπάει ποτέ, και οι αλλαγές του admin φαίνονται live
 
-- Lightweight tracker στο `__root.tsx`: POST στο `/api/track` (server route) που γράφει σε `analytics_events`.
-- Events: `page_view`, `model_view`, `configurator_open`, `quote_submitted`.
-- Dashboard: recharts line/bar για last 30 days, top pages, conversion rate (leads/views).
+## 4. Small UX βελτίωση στο `/admin/content`
 
-## 6. Wiring στο υπόλοιπο site
+Επειδή θα έχουμε ~25 blocks, θα προσθέσουμε:
+- Group by page (υπάρχει ήδη)
+- Ένα βοηθητικό preview όνομα κάθε block (π.χ. πρώτο `title` field του JSON)
+- Κουμπί "Duplicate" για γρήγορο templating
 
-- `FeaturedModels`, `ModelPage`, `DealersMap`, `Hero`, `Heritage`, `Experiences` διαβάζουν από τα νέα server fns αντί για hardcoded arrays όπου δεν το κάνουν ήδη.
-- Fallback: αν το DB return είναι κενό, μένουν τα υπάρχοντα defaults για να μη σπάσει το site κατά τη μετάβαση.
+---
 
-## 7. Βήματα υλοποίησης
+## Technical notes
 
-1. Migration: enum update, `dealers`, `page_blocks`, `analytics_events`, `quote_requests` extras, storage bucket, RLS + GRANTs.
-2. Seed πρώτου admin (θα σου ζητηθεί email).
-3. `/auth` login page + `_authenticated/` layout + admin role gate.
-4. `/admin` shell (sidebar + layout + dashboard skeleton).
-5. Modules ένα‑ένα: Models → Gallery → Leads → Dealers → Content → Media → Analytics → Settings.
-6. Σύνδεση public site με τα νέα data sources.
-7. Analytics tracker + dashboard.
-8. QA (mobile responsive admin, role permissions, RLS spot-checks).
+- Μία migration `INSERT ... ON CONFLICT (page_slug, block_key) DO NOTHING` — δεν χαλάει τυχόν επεξεργασίες που έχει ήδη κάνει ο admin.
+- Public RLS policy στο `page_blocks`: `SELECT` για `anon` όπου `published = true` (αν δεν υπάρχει ήδη — θα ελέγξω).
+- Upload εικόνων: `supabase--storage_upload` από τον agent για κάθε αρχείο στο `src/assets/`, path στο bucket `media/site/<filename>`.
+- `usePageBlock` hook: μικρό, με `queryKey: ["page_block", page, key]`, `staleTime: 5min`.
+- Δεν αλλάζουμε το visual design, μόνο την πηγή του κειμένου.
 
-## Τεχνικά (συνοπτικά)
+## Deliverables
 
-- Stack: TanStack Start, TanStack Query, shadcn/ui, Tailwind, Lovable Cloud (Supabase), createServerFn με `requireSupabaseAuth`, Supabase Storage.
-- Δεν εκθέτουμε service role στο client· όλες οι admin ενέργειες περνούν από server fns που κάνουν role check με `has_role`.
-- Email templates auth (password reset) θα στηθούν μέσω managed Lovable auth emails όταν χρειαστεί.
-
-Πες μου το email του πρώτου admin και ξεκινάω με το migration + auth gate.
+1. Migration: seed `page_blocks` με ~25 blocks
+2. Media bucket: 6 εικόνες ανεβασμένες
+3. `usePageBlock` hook + server fn `getPageBlock(page, key)`
+4. Refactor των παραπάνω components να διαβάζουν από το hook με fallback
+5. Μικρή βελτίωση `/admin/content` (preview label, duplicate)

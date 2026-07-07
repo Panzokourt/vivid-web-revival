@@ -1,5 +1,7 @@
+import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
+import { useEditorOptional } from "@/components/editor/EditorProvider";
 
 export type PageBlockContent = Record<string, unknown>;
 
@@ -34,6 +36,9 @@ async function fetchPageBlock(
  * Fetch a CMS-managed block with a hardcoded fallback so the site never breaks
  * if the block is missing or unpublished. When ?preview=1 is present in the URL,
  * unpublished drafts are shown too (requires admin/editor read access via RLS).
+ *
+ * When the live editor is active, in-progress drafts (from EditorProvider) are
+ * overlaid on top of the server content so edits reflect immediately.
  */
 export function usePageBlock<T extends PageBlockContent>(
   page: string,
@@ -47,5 +52,21 @@ export function usePageBlock<T extends PageBlockContent>(
     staleTime: preview ? 0 : 5 * 60_000,
     gcTime: 30 * 60_000,
   });
-  return { ...fallback, ...(data ?? {}) } as T;
+
+  const editor = useEditorOptional();
+  const merged = { ...fallback, ...(data ?? {}) } as T;
+
+  // Register baseline (fallback + server) so the editor can diff drafts against it.
+  useEffect(() => {
+    if (!editor) return;
+    editor.registerBaseline(page, key, merged as Record<string, unknown>);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [editor, page, key, JSON.stringify(data ?? null)]);
+
+  // Overlay editor drafts on top when in edit mode.
+  const draft = editor?.drafts[`${page}/${key}`];
+  if (draft && editor?.mode === "edit") {
+    return { ...merged, ...draft } as T;
+  }
+  return merged;
 }

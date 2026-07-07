@@ -46,6 +46,12 @@ const DISPLAY_SHADOW = "drop-shadow(0 4px 30px rgba(0,0,0,0.45))";
 
 export function Hero() {
   const root = useRef<HTMLElement>(null);
+  const block = usePageBlock<HeroContent>("home", "hero", FALLBACK);
+  const lines = (block.title_lines ?? FALLBACK.title_lines).split("\n").filter(Boolean);
+  const mainWord = lines[0] ?? "Ribali";
+  const bigWord = lines[1] ?? "680";
+  const imgSrc = isUrl(block.image_key) ? block.image_key! : resolveAsset(block.image_key) ?? heroImg;
+
 
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;

@@ -1,12 +1,15 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { useMemo, useRef, useState, useCallback, type DragEvent } from "react";
+import { useMemo, useRef, useState, useCallback, useEffect, type DragEvent } from "react";
 import { AdminShell } from "@/components/admin/AdminShell";
 import {
   adminMediaQueryOptions,
   adminDeleteMedia,
   adminBulkDeleteMedia,
+  adminMoveMediaFiles,
+  adminRenameMediaFolder,
+  adminDeleteMediaFolder,
   type MediaFile,
 } from "@/lib/admin.functions";
 import { supabase } from "@/integrations/supabase/client";
@@ -18,6 +21,9 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Progress } from "@/components/ui/progress";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
+  DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator,
+} from "@/components/ui/dropdown-menu";
+import {
   AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription,
   AlertDialogFooter, AlertDialogHeader, AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
@@ -28,9 +34,10 @@ import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { toast } from "sonner";
 import {
   Upload, Trash2, Copy, Search, LayoutGrid, List, X, Download, Folder, FolderPlus,
-  FileText, ImageIcon, Film, ExternalLink,
+  FileText, ImageIcon, Film, ExternalLink, MoreVertical, Pencil, FolderInput, Send,
 } from "lucide-react";
 import { FilePreview } from "@/components/admin/media/FilePreview";
+import { InsertIntoBlockDialog } from "@/components/admin/media/InsertIntoBlockDialog";
 import { getFileKind, formatSize, formatDate, basename, dirname, type FileKind } from "@/lib/media-utils";
 
 export const Route = createFileRoute("/_authenticated/admin/media")({
@@ -40,14 +47,17 @@ export const Route = createFileRoute("/_authenticated/admin/media")({
 
 const DEFAULT_FOLDERS = ["site", "models", "dealers", "uploads"];
 const MAX_SIZE = 20 * 1024 * 1024;
+const PAGE_SIZE = 48;
 
 type SortKey = "newest" | "oldest" | "name" | "size";
 type KindFilter = "all" | "image" | "video" | "doc" | "other";
 
 type UploadItem = { id: string; file: File; folder: string; progress: number; status: "queued" | "uploading" | "done" | "error"; error?: string };
+type FolderAction = { kind: "rename" | "delete"; folder: string } | null;
 
 function MediaPage() {
   const { data: files = [], isLoading } = useQuery(adminMediaQueryOptions());
+
   const qc = useQueryClient();
 
   const del = useServerFn(adminDeleteMedia);

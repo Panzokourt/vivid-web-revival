@@ -657,6 +657,9 @@ function FileCard({
           <div className="text-[10px] text-ink/50">{formatSize(file.size)}</div>
         </div>
         <div className="flex items-center gap-0.5 mt-2 -ml-1">
+          <Button variant="ghost" size="sm" className="h-7 px-1.5 text-[10px] font-medium text-copper hover:bg-copper/10" onClick={onInsert} title="Εισαγωγή σε block">
+            <Send className="h-3 w-3 mr-1" />Insert
+          </Button>
           <Button variant="ghost" size="sm" className="h-7 w-7 p-0" onClick={onCopy} title="Copy path"><Copy className="h-3 w-3" /></Button>
           <a href={file.url} download={basename(file.name)} target="_blank" rel="noreferrer">
             <Button variant="ghost" size="sm" className="h-7 w-7 p-0" title="Download"><Download className="h-3 w-3" /></Button>

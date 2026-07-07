@@ -68,6 +68,9 @@ type Ctx = {
   registerBaseline: (page: string, block: string, content: Record<string, unknown>) => void;
   getFieldValue: (page: string, block: string, field: string) => unknown;
   setFieldValue: (page: string, block: string, field: string, value: unknown) => void;
+  arrayAdd: (page: string, block: string, path: string, template: unknown) => void;
+  arrayRemove: (page: string, block: string, path: string, index: number) => void;
+  arrayMove: (page: string, block: string, path: string, from: number, to: number) => void;
 
   open: OpenField | null;
   openField: (o: OpenField) => void;

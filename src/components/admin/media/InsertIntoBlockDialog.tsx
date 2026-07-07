@@ -183,15 +183,20 @@ export function InsertIntoBlockDialog({ mediaName, mediaKind, onClose }: Props) 
                   <div className="space-y-1.5">
                     {items.map((t) => {
                       const isCurrent = t.currentValue === mediaName;
+                      const busy = insertMutation.isPending || clearMutation.isPending;
                       return (
-                        <button
+                        <div
                           key={t.key}
-                          onClick={() => insertMutation.mutate(t)}
-                          disabled={insertMutation.isPending || isCurrent}
-                          className={`w-full text-left p-3 rounded border transition-colors ${isCurrent ? "border-emerald-500 bg-emerald-50" : "border-ink/15 hover:border-copper hover:bg-copper/5"} ${insertMutation.isPending ? "opacity-50" : ""}`}
+                          className={`p-3 rounded border transition-colors ${isCurrent ? "border-emerald-500 bg-emerald-50" : "border-ink/15 hover:border-copper hover:bg-copper/5"} ${busy ? "opacity-60" : ""}`}
                         >
                           <div className="flex items-center justify-between gap-2">
-                            <div className="min-w-0 flex-1">
+                            <button
+                              type="button"
+                              disabled={busy || isCurrent}
+                              onClick={() => insertMutation.mutate(t)}
+                              className="min-w-0 flex-1 text-left disabled:cursor-default"
+                              title={isCurrent ? "Ήδη ανατεθειμένο" : "Εισαγωγή σε αυτό το πεδίο"}
+                            >
                               <div className="text-sm font-medium truncate">
                                 {t.block.block_key} · <span className="text-ink/70">{t.fieldLabel}</span>
                               </div>
@@ -203,13 +208,28 @@ export function InsertIntoBlockDialog({ mediaName, mediaKind, onClose }: Props) 
                                   Τρέχον: {t.currentValue}
                                 </div>
                               )}
-                            </div>
+                            </button>
                             <div className="flex items-center gap-2 shrink-0">
                               <Badge variant="outline" className="text-[10px] uppercase">{t.fieldType}</Badge>
-                              {isCurrent && <Check className="h-4 w-4 text-emerald-600" />}
+                              {isCurrent && (
+                                <>
+                                  <Check className="h-4 w-4 text-emerald-600" />
+                                  <Button
+                                    type="button"
+                                    size="sm"
+                                    variant="ghost"
+                                    className="h-7 px-2 text-red-600 hover:text-red-700 hover:bg-red-50"
+                                    disabled={busy}
+                                    onClick={() => clearMutation.mutate(t)}
+                                    title="Αφαίρεση από το πεδίο"
+                                  >
+                                    <X className="h-3.5 w-3.5 mr-1" />Αφαίρεση
+                                  </Button>
+                                </>
+                              )}
                             </div>
                           </div>
-                        </button>
+                        </div>
                       );
                     })}
                   </div>
@@ -218,6 +238,7 @@ export function InsertIntoBlockDialog({ mediaName, mediaKind, onClose }: Props) 
             </div>
           )}
         </div>
+
 
         <div className="flex justify-end pt-2">
           <Button variant="outline" onClick={onClose}>Κλείσιμο</Button>

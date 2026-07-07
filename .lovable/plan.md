@@ -1,79 +1,80 @@
-## Στόχος
-Τα αρχεία στο `/admin/media` εμφανίζονται ως σπασμένα εικονίδια γιατί (α) το bucket `media` είναι **private** άρα το `.../object/public/media/...` επιστρέφει 401, και (β) το UI χειρίζεται μόνο images. Θα διορθώσουμε την προεπισκόπηση για ΟΛΟΥΣ τους τύπους αρχείων και θα κάνουμε upgrade το UX της σελίδας σε standard media library.
+# Admin → System (Τεχνικά site)
 
----
+Νέα admin σελίδα `/admin/system` (admin-only) που συγκεντρώνει όλα τα τεχνικά/λειτουργικά στοιχεία του site σε ένα dashboard.
 
-## 1) Fix προεπισκόπησης (όλοι οι τύποι)
+## Τι θα βλέπει ο admin
 
-**Server (`adminListMedia` σε `src/lib/admin.functions.ts`):**
-- Δημιουργία **signed URL** ανά αρχείο (`createSignedUrls`, TTL 1 ώρα) αντί για public URL.
-- Επιστροφή extra πεδίων: `mime_type` (από `metadata.mimetype`), `updated_at`.
-- Νέο fn `adminGetSignedUrl(name, expires_in)` για long-lived προεπισκόπηση / download.
+**1. Domain & Hosting**
 
-**UI:**
-- Νέο helper `getFileKind(mime, name)` → `image | video | audio | pdf | doc | archive | font | other`.
-- Νέο component `FilePreview` που δείχνει:
-  - `image` → `<img>` με signed URL
-  - `video` → `<video>` με poster + play icon
-  - `audio` → waveform placeholder + `<audio>` controls στο details drawer
-  - `pdf` → κόκκινο icon με "PDF" badge
-  - `doc / archive / font / other` → generic icon με extension badge (`.docx`, `.zip`, `.woff2`, κλπ.)
-- Ο upload input δέχεται πλέον `accept="*"` (όχι μόνο `image/*`).
+- Preview URL, Published URL, Custom domains (αν υπάρχουν)
+- Publish status + visibility (public/private)
+- Hosting: Lovable (Cloudflare Workers edge runtime)
+- Region/edge info, τελευταίο deploy timestamp
 
----
+**2. Backend (Lovable Cloud)**
 
-## 2) Standard media-library UX
+- Cloud status (ACTIVE_HEALTHY / restarting / κτλ) με χρωματιστό badge
+- Database: πλήθος πινάκων, μέγεθος, connections
+- Storage: buckets, συνολικό μέγεθος αρχείων
+- Auth: σύνολο χρηστών, νέοι (7d), τελευταία σύνδεση
 
-**Toolbar (πάνω από το grid):**
-- **Search** input (filter by filename).
-- **Type filter** chips: All / Images / Videos / Docs / Other.
-- **Sort by**: Newest / Oldest / Name A→Z / Size ↓.
-- **View toggle**: Grid ⇄ List.
-- **Multi-select mode** με "Select all" + **bulk delete**.
+**3. AI Usage & Tokens (Lovable AI Gateway)**
 
-**Upload:**
-- **Drag-and-drop zone** που καλύπτει όλη τη σελίδα (highlight border όταν σέρνεις).
-- **Multi-file upload** (queue) με **progress bar** ανά αρχείο.
-- Επιλογή folder / prefix (`site/`, `models/`, `dealers/`) πριν το upload — dropdown "Upload to…".
-- Client-side validation: max 20 MB, warning για duplicate name.
+- Credits: υπόλοιπο workspace, χρήση τρέχουσας περιόδου
+- Τελευταίες 20 AI κλήσεις (μοντέλο, tokens, cost, status, timestamp)
+- Aggregates 7d/30d: σύνολο requests, tokens (in/out), cost, error rate
+- Group by model + operation
 
-**File cards (grid view):**
-- Thumbnail (ανάλογα με τον τύπο), overlay hover με actions.
-- Info: filename (truncate + tooltip), size, dimensions (για images), τύπος badge, ημερομηνία.
-- Actions: **Preview** (modal), **Copy URL**, **Download**, **Rename**, **Delete**.
+**4. API & Secrets**
 
-**List view:** πίνακας με στήλες Name / Type / Size / Modified / Actions.
+- Λίστα configured secrets (μόνο ονόματα, όχι τιμές)
+- Λίστα ενεργών connectors (Google Maps κτλ.)
+- Public API endpoints του project (`/api/public/*` αν υπάρχουν)
+- Supabase publishable key (masked), URL
 
-**Details drawer (Sheet) όταν κάνεις κλικ σε αρχείο:**
-- Μεγάλο preview, metadata (path, mime, size, dimensions, created/updated), copy URL, download, delete, "Where is it used" (basic scan σε `page_blocks.content` για την διαδρομή).
+**5. Runtime & Performance**
 
-**Folders sidebar (αριστερά):**
-- Λίστα prefixes (`/`, `site/`, `models/`, `dealers/`, `uploads/`) με counts. Click → filter.
-- "New folder" (δημιουργεί prefix στο επόμενο upload).
+- Node/runtime info, build version (commit hash αν διαθέσιμο)
+- Server function endpoints count
+- Πρόσφατα server errors (τελευταία 24h) από τα logs
 
-**Άλλα:**
-- Empty state με CTA "Drag files here or click Upload".
-- Loading skeletons αντί για "Loading…".
-- Toast σε bulk actions ("3 αρχεία διαγράφηκαν").
-- Confirm dialog (shadcn `AlertDialog`) αντί για `confirm()`.
-- Pagination / lazy load όταν >200 αρχεία.
+## Δομή
 
----
+- Route: `src/routes/_authenticated/admin.system.tsx` (admin-only, όχι editor)
+- Nav item "System" στο `AdminShell` με `adminOnly: true` + `Server` icon
+- Server functions σε `src/lib/system.functions.ts`:
+  - `getSystemInfoQueryOptions()` → domain/hosting/backend/secrets/DB/storage/auth counts
+  - `getAiUsageQueryOptions(range)` → credits + aggregated AI stats
+  - `getRecentAiCallsQueryOptions(limit)` → πρόσφατες κλήσεις
+- Όλα με `.middleware([requireSupabaseAuth])` + έλεγχος `has_role(admin)`
 
-## Technical
+## Πηγές δεδομένων (mapping)
 
-**Files να αλλάξουν:**
-- `src/lib/admin.functions.ts` — signed URLs, mime, νέα fns: `adminGetSignedUrl`, `adminBulkDeleteMedia`, `adminRenameMedia`.
-- `src/routes/_authenticated/admin.media.tsx` — νέο layout (folders sidebar + toolbar + grid/list + drawer).
 
-**Νέα:**
-- `src/components/admin/media/FilePreview.tsx` — thumbnail ανά τύπο.
-- `src/components/admin/media/FileIcon.tsx` — generic file icons.
-- `src/components/admin/media/UploadDropzone.tsx` — drag-drop + queue + progress.
-- `src/components/admin/media/FileDetailsSheet.tsx` — details drawer.
-- `src/components/admin/media/MediaToolbar.tsx` — search/filter/sort/view.
-- `src/lib/media-utils.ts` — `getFileKind`, `formatSize`, `getExtension`.
+| Section        | Πηγή                                                                                                                                             |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
+| URLs / publish | Env vars (`VITE_SUPABASE_URL`, project URL) + hardcoded από γνωστά project URLs                                                                  |
+| Cloud status   | Query στο `information_schema` για DB size/tables, `storage.objects` για storage size, `auth.users` count                                        |
+| AI usage       | Fallback: aggregation από `analytics_events` αν καταγράφονται· διαφορετικά placeholder με μήνυμα "Διαθέσιμο μέσω Lovable dashboard" + link       |
+| Secrets        | Στατική λίστα ονομάτων που ξέρουμε ότι χρησιμοποιούνται (Google Maps browser key, Supabase keys)· δεν γίνεται runtime enumeration από τον server |
+| Errors         | Query σε `analytics_events` με type='error' αν υπάρχει, αλλιώς κενό state                                                                        |
 
-**Public site:** ο `MediaPicker` (`src/components/admin/cms/MediaPicker.tsx`) και όσα σημεία χρησιμοποιούν URLs από media θα δουλεύουν κανονικά — signed URLs έχουν TTL 1h, οπότε γι' αυτά που πρέπει να "μείνουν" (πχ στο site content) θα εκθέσουμε ξεχωριστό helper που είτε επιστρέφει long-lived signed URL είτε (προτίμηση) γίνεται το bucket public — θα ρωτήσω τον χρήστη κατά τη διάρκεια της υλοποίησης αν προτιμά public bucket. Fallback: TTL 7 μέρες, refresh στο rendering.
 
-**Χωρίς αλλαγή:** RLS/policies, `page_blocks`, public site components.
+Σημαντικό: τα Lovable-workspace credits/AI logs (list_ai_gateway_requests, get_credit_balance) είναι εργαλεία της πλατφόρμας Lovable — δεν είναι προσβάσιμα runtime από το app. Στη σελίδα θα εμφανίζεται σχετική ενημέρωση με link στο Lovable dashboard για αυτά τα πεδία, ενώ τα υπόλοιπα (DB, storage, users, domain, secrets) θα είναι πλήρως live.
+
+## UI
+
+- Grid από `Card`s με κατηγορίες, KPI numbers πάνω, λεπτομέρειες κάτω
+- Badges για status (healthy/warning/error)
+- Copy-to-clipboard σε URLs/keys
+- Refresh button + auto-refresh κάθε 30s για status
+- Πίνακας για πρόσφατες AI κλήσεις με filtering by model
+
+## Τεχνικές λεπτομέρειες
+
+- Χρήση `useSuspenseQuery` με `ensureQueryData` στον loader (κάτω από `_authenticated`, ασφαλές)
+- DB queries μέσω `context.supabase` (RLS as admin user)· auth.users count μέσω `supabaseAdmin` (dynamic import μέσα στον handler)
+- Head: `title: "System — RIBALI Admin"`, `robots: noindex`
+
+Πρόσβαση  
+Αυτά όλα θα είναι προσβάσιμα μόνο σε admin level

@@ -128,8 +128,38 @@ function MediaPage() {
   }, [files, folder, search, kindFilter, sort]);
 
   const paged = useMemo(() => visible.slice(0, visibleCount), [visible, visibleCount]);
-  // Reset pagination when filters change
-  useEffect(() => { setVisibleCount(PAGE_SIZE); }, [folder, search, kindFilter, sort, view]);
+
+  // Cursor-based stability: remember the last visible file's name (its "cursor")
+  // so that when files change (new upload, refetch) with the SAME filters,
+  // we keep it in view instead of resetting to the top N by index.
+  const cursorRef = useRef<string | null>(null);
+  const filterSig = `${folder}|${search.trim().toLowerCase()}|${kindFilter}|${sort}`;
+  const lastFilterSig = useRef(filterSig);
+
+  useEffect(() => {
+    // Filters changed → reset pagination and cursor.
+    if (lastFilterSig.current !== filterSig) {
+      lastFilterSig.current = filterSig;
+      cursorRef.current = null;
+      setVisibleCount(PAGE_SIZE);
+      return;
+    }
+    // Same filters but the list changed: extend visibleCount so the previously
+    // last-visible file remains visible. Anchor by name (stable cursor).
+    if (cursorRef.current) {
+      const idx = visible.findIndex((f) => f.name === cursorRef.current);
+      if (idx >= 0) {
+        const needed = Math.max(idx + 1, PAGE_SIZE);
+        setVisibleCount((c) => (c < needed ? Math.min(needed, visible.length) : c));
+      }
+    }
+  }, [filterSig, visible]);
+
+  // Track the last visible item's name whenever the paged slice changes.
+  useEffect(() => {
+    cursorRef.current = paged.length ? paged[paged.length - 1].name : null;
+  }, [paged]);
+
   // Infinite scroll sentinel
   useEffect(() => {
     if (view !== "grid") return;
@@ -141,6 +171,7 @@ function MediaPage() {
     io.observe(el);
     return () => io.disconnect();
   }, [view, visible.length, paged.length]);
+
 
   // Mutations
   const delMutation = useMutation({

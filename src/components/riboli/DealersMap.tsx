@@ -103,7 +103,7 @@ export function DealersMap({ pins }: { pins: DealerPin[] }) {
   useEffect(() => {
     const setMode = (greedy: boolean) => {
       if (!mapRef.current) return;
-      mapRef.current.setOptions({ gestureHandling: greedy ? "greedy" : "none" });
+      mapRef.current.setOptions({ gestureHandling: greedy ? "greedy" : "none", scrollwheel: greedy });
     };
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Meta" || e.key === "Control" || e.metaKey || e.ctrlKey) setMode(true);

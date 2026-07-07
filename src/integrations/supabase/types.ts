@@ -14,6 +14,84 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_events: {
+        Row: {
+          created_at: string
+          event_type: string
+          id: string
+          meta: Json
+          model_slug: string | null
+          path: string | null
+          session_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_type: string
+          id?: string
+          meta?: Json
+          model_slug?: string | null
+          path?: string | null
+          session_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_type?: string
+          id?: string
+          meta?: Json
+          model_slug?: string | null
+          path?: string | null
+          session_id?: string | null
+        }
+        Relationships: []
+      }
+      dealers: {
+        Row: {
+          active: boolean
+          city: string | null
+          country: string | null
+          created_at: string
+          email: string | null
+          id: string
+          lat: number | null
+          lng: number | null
+          name: string
+          order_index: number
+          phone: string | null
+          updated_at: string
+          website: string | null
+        }
+        Insert: {
+          active?: boolean
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          name: string
+          order_index?: number
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Update: {
+          active?: boolean
+          city?: string | null
+          country?: string | null
+          created_at?: string
+          email?: string | null
+          id?: string
+          lat?: number | null
+          lng?: number | null
+          name?: string
+          order_index?: number
+          phone?: string | null
+          updated_at?: string
+          website?: string | null
+        }
+        Relationships: []
+      }
       model_gallery: {
         Row: {
           caption: string | null
@@ -115,8 +193,39 @@ export type Database = {
         }
         Relationships: []
       }
+      page_blocks: {
+        Row: {
+          block_key: string
+          content: Json
+          id: string
+          page_slug: string
+          published: boolean
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          block_key: string
+          content?: Json
+          id?: string
+          page_slug: string
+          published?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          block_key?: string
+          content?: Json
+          id?: string
+          page_slug?: string
+          published?: boolean
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: []
+      }
       quote_requests: {
         Row: {
+          assigned_to: string | null
           canopy_color: string
           country: string | null
           created_at: string
@@ -128,11 +237,14 @@ export type Database = {
           id: string
           message: string | null
           model_slug: string
+          notes: string | null
           phone: string | null
           status: string
           tube_color: string
+          updated_at: string
         }
         Insert: {
+          assigned_to?: string | null
           canopy_color: string
           country?: string | null
           created_at?: string
@@ -144,11 +256,14 @@ export type Database = {
           id?: string
           message?: string | null
           model_slug: string
+          notes?: string | null
           phone?: string | null
           status?: string
           tube_color: string
+          updated_at?: string
         }
         Update: {
+          assigned_to?: string | null
           canopy_color?: string
           country?: string | null
           created_at?: string
@@ -160,9 +275,11 @@ export type Database = {
           id?: string
           message?: string | null
           model_slug?: string
+          notes?: string | null
           phone?: string | null
           status?: string
           tube_color?: string
+          updated_at?: string
         }
         Relationships: []
       }
@@ -201,7 +318,7 @@ export type Database = {
       }
     }
     Enums: {
-      app_role: "admin" | "moderator" | "user"
+      app_role: "admin" | "moderator" | "user" | "editor"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -329,7 +446,7 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      app_role: ["admin", "moderator", "user"],
+      app_role: ["admin", "moderator", "user", "editor"],
     },
   },
 } as const

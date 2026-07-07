@@ -1,71 +1,74 @@
-# Populate CMS with existing content & media
+# CMS Content — Native UI Editor (χωρίς JSON)
 
-Το admin CMS λειτουργεί, αλλά είναι άδειο. Θα το γεμίσουμε με ΟΛΟ το υπάρχον περιεχόμενο του site, ώστε ο admin να μπορεί να το επεξεργαστεί απευθείας.
+Σκοπός: να διαχειρίζεται ο admin τα content blocks με φιλικές φόρμες (πεδία, λίστες, drag-to-reorder, media picker) αντί για raw JSON.
 
-## 1. Content blocks (seed migration)
+## 1. Schema-driven editor
 
-Θα δημιουργήσουμε μία migration που κάνει `INSERT` στο `page_blocks` όλα τα κείμενα που είναι σήμερα hardcoded στα components. Δομή: `page_slug` / `block_key` / `content` (JSON) / `published=true`.
+Δημιουργούμε ένα μητρώο σχημάτων ανά `page_slug/block_key` (π.χ. `home/heritage`, `home/dealers_cta`, `about/team`, `models/hero` κλπ) σε νέο αρχείο `src/lib/cms/schemas.ts`. Κάθε πεδίο ορίζεται με τύπο:
 
-**Home (`page_slug=home`)**
-- `hero` — eyebrow, title lines (The/Aegean/Sea), body copy, CTA labels
-- `stats` — αριθμοί & labels (hulls delivered, years, κ.λπ.)
-- `pillars` — τα 3-4 pillars (title + body το καθένα)
-- `heritage` — eyebrow, title, intro + array με τα 5 milestones (2000/2007/2013/2019/2025)
-- `experiences` — eyebrow, title + τα 4 experience cards (eyebrow/title/body/image_key)
-- `anatomy` — title, intro + τα hotspots του RIB (id/label/description)
-- `tech_construction` — title, intro + τα tech bullets
-- `featured_models` — eyebrow, title + τα 3 model cards (R-520 / R-680 / R-950)
-- `dealers_cta` — title, body, CTA
+- `text` (μονή γραμμή)
+- `textarea` (πολλαπλές γραμμές, με προαιρετικό `rows`)
+- `richtext` (bold/italic/link — Tiptap ή απλός markdown editor)
+- `number`
+- `url` / `href`
+- `image` (media picker από το bucket `media`)
+- `select` (σταθερές επιλογές)
+- `list` (επαναλαμβανόμενα items με sub-schema, με drag handle για reorder, add/remove, duplicate)
 
-**Models pages (`page_slug=models` / `models-r520` / `models-r680` / `models-r950`)**
-- `hero` (title, tagline, hero image key)
-- `overview` (intro copy)
-- `specs` (array με key/value: LOA, beam, deadrise, dry weight, fuel, max hp, κ.λπ.)
-- `features` (bullet list)
-- `gallery` (array με image keys)
+Παράδειγμα (`home/heritage`):
+```
+eyebrow: text
+title: textarea
+intro: textarea
+milestones: list of { year: number, title: text, body: textarea }
+```
 
-**Static pages**
-- `about` → `hero`, `story`, `values`, `team`
-- `contact` → `hero`, `info` (address, phone, email), `hours`
-- `dealers` → `hero`, `intro`
-- `configurator` → `hero`, `intro`
+Έτσι ο χρήστης βλέπει labels στα Ελληνικά (π.χ. "Επικεφαλίδα", "Ορόσημα") και όχι JSON keys.
 
-Οι εικόνες αναφέρονται μέσα στο JSON με `image_key` (π.χ. `"hero.jpg"`), ώστε να δένουν με το Media Library.
+## 2. Νέα σελίδα επεξεργασίας
 
-## 2. Media library (seed)
+- `/_authenticated/admin/content/$page/$block` — δεδικασμένη σελίδα με φόρμα ενός block.
+- Η υπάρχουσα `/admin/content` γίνεται λίστα: γκρουπαρισμένα blocks ανά σελίδα, με κουμπί "Επεξεργασία" που πάει στη νέα route (αντί για JSON preview).
+- Πάνω δεξιά: Save / Publish toggle / Preview site link / Discard changes.
+- Auto-save draft σε localStorage + explicit Save στη βάση.
 
-Οι εικόνες στο `src/assets/` (`hero.jpg`, `anatomy-rib.jpg`, `model-r520.jpg`, `model-r680.jpg`, `model-r950.jpg`, `tech-detail.jpg`) θα ανέβουν στο υπάρχον `media` storage bucket με script σε ένα server function που τρέχει μια φορά (admin-gated `seedMedia`), ή απευθείας από τον agent με `supabase--storage_upload`. Θα φαίνονται στο `/admin/media` ώστε ο admin να τις κατεβάζει/αντικαθιστά.
+## 3. Media picker
 
-Επίσης θα δούμε αν υπάρχει πίνακας `model_gallery` — αν ναι, θα φορτώσουμε references στις παραπάνω εικόνες.
+- Reusable component `<MediaPickerField>` που ανοίγει dialog με τα αρχεία του `media` bucket (χρησιμοποιεί ήδη τα `adminListMedia` που έχουμε).
+- Επιλογή αρχείου → αποθήκευση του `path` στο content, με thumbnail preview στη φόρμα.
+- Upload νέου αρχείου από τη διαχείριση απευθείας μέσα στον picker.
 
-## 3. Wire the frontend (fallback pattern)
+## 4. Repeatable lists (π.χ. team, milestones, values)
 
-Στα components (`Hero`, `Heritage`, `Experiences`, `AnatomyRIB`, `TechConstruction`, `Stats`, `Pillars`, `FeaturedModels`, `DealersCTA`, model pages, about/contact) θα προσθέσουμε ένα hook `usePageBlock(page, key)` που:
-- Κάνει public read από `page_blocks` (RLS: `published=true` για anon) μέσω TanStack Query
-- Επιστρέφει το JSON content, με **fallback στα υπάρχοντα defaults** αν το block λείπει / offline
-- Έτσι το site δεν σπάει ποτέ, και οι αλλαγές του admin φαίνονται live
+- Component `<RepeatableList>` με:
+  - Drag handle (dnd-kit) για reorder
+  - "Προσθήκη" / "Διπλασιασμός" / "Διαγραφή"
+  - Collapse/expand κάθε item, με τίτλο-preview (π.χ. `title` του item)
 
-## 4. Small UX βελτίωση στο `/admin/content`
+## 5. Escape hatch: JSON mode
 
-Επειδή θα έχουμε ~25 blocks, θα προσθέσουμε:
-- Group by page (υπάρχει ήδη)
-- Ένα βοηθητικό preview όνομα κάθε block (π.χ. πρώτο `title` field του JSON)
-- Κουμπί "Duplicate" για γρήγορο templating
+Toggle "Advanced (JSON)" σε κάθε form για power users ή για blocks χωρίς schema. Έτσι δεν χάνουμε ευελιξία για custom blocks που δεν έχουμε ακόμα ορίσει schema.
 
----
+## 6. Νέο block από UI
 
-## Technical notes
+- Κουμπί "Νέο block" → dialog που ζητά `page_slug` + `block_key` από dropdown με τα γνωστά schemas (ή "custom" για JSON mode).
+- Prefill με defaults από το schema.
 
-- Μία migration `INSERT ... ON CONFLICT (page_slug, block_key) DO NOTHING` — δεν χαλάει τυχόν επεξεργασίες που έχει ήδη κάνει ο admin.
-- Public RLS policy στο `page_blocks`: `SELECT` για `anon` όπου `published = true` (αν δεν υπάρχει ήδη — θα ελέγξω).
-- Upload εικόνων: `supabase--storage_upload` από τον agent για κάθε αρχείο στο `src/assets/`, path στο bucket `media/site/<filename>`.
-- `usePageBlock` hook: μικρό, με `queryKey: ["page_block", page, key]`, `staleTime: 5min`.
-- Δεν αλλάζουμε το visual design, μόνο την πηγή του κειμένου.
+## 7. Validation & UX polish
 
-## Deliverables
+- Zod validation ανά schema, inline errors.
+- Sticky action bar (Save/Publish) όσο σκρολάρεις.
+- Toast confirmations με sonner.
+- "Unsaved changes" warning όταν αλλάζει route.
+- Preview link ανοίγει τη δημόσια σελίδα σε νέο tab.
 
-1. Migration: seed `page_blocks` με ~25 blocks
-2. Media bucket: 6 εικόνες ανεβασμένες
-3. `usePageBlock` hook + server fn `getPageBlock(page, key)`
-4. Refactor των παραπάνω components να διαβάζουν από το hook με fallback
-5. Μικρή βελτίωση `/admin/content` (preview label, duplicate)
+## Τεχνικές λεπτομέρειες
+
+- Νέα αρχεία: `src/lib/cms/schemas.ts`, `src/lib/cms/types.ts`, `src/components/admin/cms/SchemaForm.tsx`, `TextField.tsx`, `TextareaField.tsx`, `ImageField.tsx`, `RepeatableList.tsx`, `MediaPicker.tsx`, `JsonFallback.tsx`, `src/routes/_authenticated/admin.content.$page.$block.tsx`.
+- Update: `src/routes/_authenticated/admin.content.tsx` (list view), `src/lib/admin.functions.ts` (add `adminGetBlock`, `adminUpsertBlock`, `adminDeleteBlock` αν λείπουν).
+- Depend: `dnd-kit/core` + `dnd-kit/sortable` για reorder· ήδη έχουμε shadcn/tanstack query/sonner.
+- Fallback στη public πλευρά μένει ίδιο (`usePageBlock` με defaults) — δεν αλλάζει τίποτα στο site.
+
+## Rollout
+
+Ξεκινάω με τα schemas για τα ήδη σπαρμένα blocks (home, about, contact, dealers, configurator, models), ώστε ο χρήστης να δει αμέσως native UI παντού. Custom/άγνωστα blocks πέφτουν αυτόματα σε JSON mode.

@@ -1,80 +1,52 @@
-# Admin → System (Τεχνικά site)
+# Database Explorer στο Admin Panel
 
-Νέα admin σελίδα `/admin/system` (admin-only) που συγκεντρώνει όλα τα τεχνικά/λειτουργικά στοιχεία του site σε ένα dashboard.
-
-## Τι θα βλέπει ο admin
-
-**1. Domain & Hosting**
-
-- Preview URL, Published URL, Custom domains (αν υπάρχουν)
-- Publish status + visibility (public/private)
-- Hosting: Lovable (Cloudflare Workers edge runtime)
-- Region/edge info, τελευταίο deploy timestamp
-
-**2. Backend (Lovable Cloud)**
-
-- Cloud status (ACTIVE_HEALTHY / restarting / κτλ) με χρωματιστό badge
-- Database: πλήθος πινάκων, μέγεθος, connections
-- Storage: buckets, συνολικό μέγεθος αρχείων
-- Auth: σύνολο χρηστών, νέοι (7d), τελευταία σύνδεση
-
-**3. AI Usage & Tokens (Lovable AI Gateway)**
-
-- Credits: υπόλοιπο workspace, χρήση τρέχουσας περιόδου
-- Τελευταίες 20 AI κλήσεις (μοντέλο, tokens, cost, status, timestamp)
-- Aggregates 7d/30d: σύνολο requests, tokens (in/out), cost, error rate
-- Group by model + operation
-
-**4. API & Secrets**
-
-- Λίστα configured secrets (μόνο ονόματα, όχι τιμές)
-- Λίστα ενεργών connectors (Google Maps κτλ.)
-- Public API endpoints του project (`/api/public/*` αν υπάρχουν)
-- Supabase publishable key (masked), URL
-
-**5. Runtime & Performance**
-
-- Node/runtime info, build version (commit hash αν διαθέσιμο)
-- Server function endpoints count
-- Πρόσφατα server errors (τελευταία 24h) από τα logs
-
-## Δομή
-
-- Route: `src/routes/_authenticated/admin.system.tsx` (admin-only, όχι editor)
-- Nav item "System" στο `AdminShell` με `adminOnly: true` + `Server` icon
-- Server functions σε `src/lib/system.functions.ts`:
-  - `getSystemInfoQueryOptions()` → domain/hosting/backend/secrets/DB/storage/auth counts
-  - `getAiUsageQueryOptions(range)` → credits + aggregated AI stats
-  - `getRecentAiCallsQueryOptions(limit)` → πρόσφατες κλήσεις
-- Όλα με `.middleware([requireSupabaseAuth])` + έλεγχος `has_role(admin)`
-
-## Πηγές δεδομένων (mapping)
-
-
-| Section        | Πηγή                                                                                                                                             |
-| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------ |
-| URLs / publish | Env vars (`VITE_SUPABASE_URL`, project URL) + hardcoded από γνωστά project URLs                                                                  |
-| Cloud status   | Query στο `information_schema` για DB size/tables, `storage.objects` για storage size, `auth.users` count                                        |
-| AI usage       | Fallback: aggregation από `analytics_events` αν καταγράφονται· διαφορετικά placeholder με μήνυμα "Διαθέσιμο μέσω Lovable dashboard" + link       |
-| Secrets        | Στατική λίστα ονομάτων που ξέρουμε ότι χρησιμοποιούνται (Google Maps browser key, Supabase keys)· δεν γίνεται runtime enumeration από τον server |
-| Errors         | Query σε `analytics_events` με type='error' αν υπάρχει, αλλιώς κενό state                                                                        |
-
-
-Σημαντικό: τα Lovable-workspace credits/AI logs (list_ai_gateway_requests, get_credit_balance) είναι εργαλεία της πλατφόρμας Lovable — δεν είναι προσβάσιμα runtime από το app. Στη σελίδα θα εμφανίζεται σχετική ενημέρωση με link στο Lovable dashboard για αυτά τα πεδία, ενώ τα υπόλοιπα (DB, storage, users, domain, secrets) θα είναι πλήρως live.
+Νέα admin-only σελίδα `/admin/database` που δίνει πλήρη πρόσβαση CRUD στους πίνακες του `public` schema και read-only στους χρήστες του `auth`.
 
 ## UI
 
-- Grid από `Card`s με κατηγορίες, KPI numbers πάνω, λεπτομέρειες κάτω
-- Badges για status (healthy/warning/error)
-- Copy-to-clipboard σε URLs/keys
-- Refresh button + auto-refresh κάθε 30s για status
-- Πίνακας για πρόσφατες AI κλήσεις με filtering by model
+- **Route**: `src/routes/_authenticated/admin.database.tsx` (admin-only, `noindex`).
+- **Nav**: νέο item "Database" στο `AdminShell` (icon: `Database`, `adminOnly: true`).
+- **Layout**: 2 στήλες
+  - Sidebar αριστερά: λίστα πινάκων ομαδοποιημένη σε "Public" (8 tables) και "Auth" (users, read-only badge).
+  - Δεξιά: table viewer του επιλεγμένου πίνακα.
 
-## Τεχνικές λεπτομέρειες
+### Table viewer
+- Header: όνομα πίνακα, row count, κουμπιά **Refresh**, **New row** (disabled για auth.users), **Export CSV**.
+- Toolbar: global search (ILIKE στα text columns), column visibility toggle, sort by column, page size (25/50/100).
+- Grid: sticky headers, virtual/pagination scroll, κάθε cell με proper formatter (json → collapsed preview, timestamp → local, boolean → badge, uuid → monospace copy, media urls → thumbnail).
+- Row actions: **Edit** (drawer) και **Delete** (confirm). Hidden για auth.users.
+- Bulk select + bulk delete.
 
-- Χρήση `useSuspenseQuery` με `ensureQueryData` στον loader (κάτω από `_authenticated`, ασφαλές)
-- DB queries μέσω `context.supabase` (RLS as admin user)· auth.users count μέσω `supabaseAdmin` (dynamic import μέσα στον handler)
-- Head: `title: "System — RIBALI Admin"`, `robots: noindex`
+### Edit drawer
+- Auto-generated form από το schema (τύποι από `information_schema`).
+- Fields: text/number/boolean/date/json editor (Monaco-lite ή textarea με validation), enum → select, foreign keys → text input με hint του referenced table.
+- Read-only columns: `id`, `created_at`, `updated_at`.
+- Validation errors από Postgres εμφανίζονται inline.
 
-Πρόσβαση  
-Αυτά όλα θα είναι προσβάσιμα μόνο σε admin level
+## Backend (`src/lib/database.functions.ts`)
+
+Όλα με `.middleware([requireSupabaseAuth])` + `assertAdmin` (ήδη υπάρχει pattern στο `system.functions.ts`).
+
+- `listSchemas()` → επιστρέφει static allowlist: public tables + `auth.users`.
+- `describeTable({ schema, table })` → columns (name, type, nullable, default, is_pk, fk_ref) από `information_schema`.
+- `queryTable({ schema, table, search, sort, page, pageSize, filters })` → rows + total count. Χρησιμοποιεί `supabaseAdmin` για να παρακάμψει RLS (admin-only). Για `auth.users` καλεί `supabaseAdmin.auth.admin.listUsers`.
+- `insertRow({ table, values })` → μόνο public schema.
+- `updateRow({ table, pk, values })` → μόνο public schema.
+- `deleteRows({ table, ids })` → μόνο public schema, bulk.
+- `exportTableCsv({ table, filters })` → επιστρέφει CSV string.
+
+Allowlist πινάκων hardcoded (τα 8 public tables) για να αποκλείεται πρόσβαση σε system schemas (`storage`, `vault`, `supabase_functions`, κτλ).
+
+## Security
+
+- Όλα τα endpoints ελέγχουν `has_role(admin)` — editor role ΔΕΝ έχει πρόσβαση.
+- Writes επιτρέπονται μόνο σε whitelist πινάκων του public schema.
+- `auth.users` πάντα read-only.
+- Confirmation dialog με πληκτρολόγηση `DELETE` για bulk delete >5 γραμμές.
+- Καμία εκτέλεση raw SQL από τον χρήστη (αποφεύγουμε SQL injection surface).
+
+## Τεχνικά
+
+- React Query με `queryKey: ['admin','db',table,params]`, `staleTime: 0`, keepPreviousData για smooth pagination.
+- Reuse: `Table`, `Sheet`/`Drawer`, `Dialog`, `Input`, `Select` από shadcn.
+- CSV export client-side από τα φορτωμένα rows (ή server για full export).

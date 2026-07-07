@@ -10,6 +10,7 @@ import {
   BarChart3,
   Users,
   Server,
+  Database,
   LogOut,
   ExternalLink,
 } from "lucide-react";
@@ -51,6 +52,7 @@ const items: NavItem[] = [
   { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
   { title: "Settings", url: "/admin/settings", icon: Users, adminOnly: true },
   { title: "System", url: "/admin/system", icon: Server, adminOnly: true },
+  { title: "Database", url: "/admin/database", icon: Database, adminOnly: true },
 ];
 
 function AppSidebar({ role, email }: { role: "admin" | "editor" | null; email: string | null }) {

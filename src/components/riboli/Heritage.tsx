@@ -20,6 +20,8 @@ const FALLBACK = {
 
 export function Heritage() {
   const root = useRef<HTMLElement>(null);
+  const block = usePageBlock("home", "heritage", FALLBACK);
+  const milestones = (block.milestones ?? FALLBACK.milestones) as Milestone[];
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -80,16 +82,16 @@ export function Heritage() {
       <div className="max-w-[1600px] mx-auto px-6 md:px-10 py-28 md:py-40 grid lg:grid-cols-[1fr_1.4fr] gap-16">
         <div className="heritage-title lg:sticky lg:top-24 self-start">
           <div className="text-[11px] uppercase tracking-[0.3em] text-paper/60">
-            Heritage
+            {block.eyebrow}
           </div>
-          <h2 className="font-display text-5xl md:text-7xl leading-[0.9] mt-4">
-            A quarter century<br />on the water
+          <h2 className="font-display text-5xl md:text-7xl leading-[0.9] mt-4 whitespace-pre-line">
+            {block.title}
           </h2>
           <p className="mt-8 text-paper/70 max-w-sm leading-relaxed">
-            Twenty-five years, five hundred hulls, one obsession — the way a boat
-            behaves at speed in a Force 5.
+            {block.intro}
           </p>
         </div>
+
 
         <ol className="heritage-list relative pl-10 border-l border-paper/15">
           <div

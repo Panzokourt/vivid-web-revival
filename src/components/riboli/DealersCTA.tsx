@@ -1,6 +1,16 @@
 import { useLayoutEffect, useRef } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { MagneticButton } from "@/components/riboli/MagneticButton";
+import { usePageBlock } from "@/lib/page-blocks";
+
+const FALLBACK = {
+  eyebrow: "Dealers Network",
+  title: "Step aboard \n the RIBALI family",
+  body: "Find your nearest authorised partner and schedule a private sea trial across the Mediterranean and beyond.",
+  cta_label: "Find a dealer",
+  cta_href: "/dealers",
+  marquee: "FIND A DEALER · FIND A DEALER ·",
+};
 
 export function DealersCTA() {
   const root = useRef<HTMLElement>(null);

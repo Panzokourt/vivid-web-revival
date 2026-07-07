@@ -1,95 +1,79 @@
-# Admin CMS — Publish · Reorder · Rich text · Versioning
+## Στόχος
+Τα αρχεία στο `/admin/media` εμφανίζονται ως σπασμένα εικονίδια γιατί (α) το bucket `media` είναι **private** άρα το `.../object/public/media/...` επιστρέφει 401, και (β) το UI χειρίζεται μόνο images. Θα διορθώσουμε την προεπισκόπηση για ΟΛΟΥΣ τους τύπους αρχείων και θα κάνουμε upgrade το UX της σελίδας σε standard media library.
 
-Τέσσερα features σε ένα plan. Δουλεύουν πάνω στο υπάρχον `page_blocks` και δεν αλλάζουν το public read path (`usePageBlock`).
+---
 
-## 1. Publish / Unpublish (per-block & per-page)
+## 1) Fix προεπισκόπησης (όλοι οι τύποι)
 
-**Per-block:** `published` υπάρχει ήδη. Πρόσθεση `Switch` inline στην κάρτα κάθε block στη λίστα `/admin/content` (χωρίς άνοιγμα dialog) → mutation `adminSetBlockPublished({id, published})`, optimistic update.
+**Server (`adminListMedia` σε `src/lib/admin.functions.ts`):**
+- Δημιουργία **signed URL** ανά αρχείο (`createSignedUrls`, TTL 1 ώρα) αντί για public URL.
+- Επιστροφή extra πεδίων: `mime_type` (από `metadata.mimetype`), `updated_at`.
+- Νέο fn `adminGetSignedUrl(name, expires_in)` για long-lived προεπισκόπηση / download.
 
-**Per-page:** κουμπιά "Δημοσίευση όλων" / "Απόκρυψη όλων" στο header κάθε page group → bulk update μέσω `adminSetPagePublished({page_slug, published})`. Confirm dialog πριν την εκτέλεση.
+**UI:**
+- Νέο helper `getFileKind(mime, name)` → `image | video | audio | pdf | doc | archive | font | other`.
+- Νέο component `FilePreview` που δείχνει:
+  - `image` → `<img>` με signed URL
+  - `video` → `<video>` με poster + play icon
+  - `audio` → waveform placeholder + `<audio>` controls στο details drawer
+  - `pdf` → κόκκινο icon με "PDF" badge
+  - `doc / archive / font / other` → generic icon με extension badge (`.docx`, `.zip`, `.woff2`, κλπ.)
+- Ο upload input δέχεται πλέον `accept="*"` (όχι μόνο `image/*`).
 
-Νέα server fns στο `src/lib/admin.functions.ts`. RLS ήδη επιτρέπει update σε admin/editor.
+---
 
-## 2. Drag & Drop reorder
+## 2) Standard media-library UX
 
-**Package:** `@dnd-kit/core` + `@dnd-kit/sortable` + `@dnd-kit/utilities` (μικρά, accessible).
+**Toolbar (πάνω από το grid):**
+- **Search** input (filter by filename).
+- **Type filter** chips: All / Images / Videos / Docs / Other.
+- **Sort by**: Newest / Oldest / Name A→Z / Size ↓.
+- **View toggle**: Grid ⇄ List.
+- **Multi-select mode** με "Select all" + **bulk delete**.
 
-**Στα list items** (μέσα σε block, π.χ. milestones, team): αντικαθιστώ τα ↑↓ κουμπιά στο `SchemaForm.tsx` με drag handle (grip icon). Το ↑↓ μένει ως fallback για keyboard/touch.
+**Upload:**
+- **Drag-and-drop zone** που καλύπτει όλη τη σελίδα (highlight border όταν σέρνεις).
+- **Multi-file upload** (queue) με **progress bar** ανά αρχείο.
+- Επιλογή folder / prefix (`site/`, `models/`, `dealers/`) πριν το upload — dropdown "Upload to…".
+- Client-side validation: max 20 MB, warning για duplicate name.
 
-**Στα blocks ανά page:** νέα στήλη `sort_order INT` στο `page_blocks` (schema migration). Server fn `adminReorderBlocks({page_slug, ordered_ids})` που κάνει bulk update του `sort_order`. Στη λίστα `/admin/content` τα blocks μέσα σε κάθε page group γίνονται sortable. Το `usePageBlock` δεν επηρεάζεται (φέρνει με key), αλλά όπου διαβάζουμε λίστες blocks θα ταξινομούμε κατά `sort_order`.
+**File cards (grid view):**
+- Thumbnail (ανάλογα με τον τύπο), overlay hover με actions.
+- Info: filename (truncate + tooltip), size, dimensions (για images), τύπος badge, ημερομηνία.
+- Actions: **Preview** (modal), **Copy URL**, **Download**, **Rename**, **Delete**.
 
-## 3. Rich text editor
+**List view:** πίνακας με στήλες Name / Type / Size / Modified / Actions.
 
-**Package:** `@tiptap/react` + `@tiptap/starter-kit` + `@tiptap/extension-link`. Μικρή toolbar: **B**, *I*, link, unlink, clear formatting.
+**Details drawer (Sheet) όταν κάνεις κλικ σε αρχείο:**
+- Μεγάλο preview, metadata (path, mime, size, dimensions, created/updated), copy URL, download, delete, "Where is it used" (basic scan σε `page_blocks.content` για την διαδρομή).
 
-Νέος τύπος πεδίου `richtext` στο `src/lib/cms/schemas.ts`. Αποθηκεύεται ως **HTML string** στο ίδιο JSON content (backward compatible — υπάρχουσες σελίδες που χρησιμοποιούν το πεδίο ως plain text μπορούν να αναβαθμιστούν με `dangerouslySetInnerHTML` όπου χρειάζεται).
+**Folders sidebar (αριστερά):**
+- Λίστα prefixes (`/`, `site/`, `models/`, `dealers/`, `uploads/`) με counts. Click → filter.
+- "New folder" (δημιουργεί prefix στο επόμενο upload).
 
-**Rollout:** αρχικά μετατρέπω σε `richtext` τα πιο "λεκτικά" πεδία: `intro` (heritage), `body` (dealers_cta, experiences item, values item, chapters item, team bio, confirmation body). Οι υπάρχοντες components που είναι ήδη συνδεδεμένοι (Heritage, DealersCTA) παίρνουν helper `<RichText html={...} />` για safe render με allowlist tags.
+**Άλλα:**
+- Empty state με CTA "Drag files here or click Upload".
+- Loading skeletons αντί για "Loading…".
+- Toast σε bulk actions ("3 αρχεία διαγράφηκαν").
+- Confirm dialog (shadcn `AlertDialog`) αντί για `confirm()`.
+- Pagination / lazy load όταν >200 αρχεία.
 
-**Sanitization:** χρήση `sanitize-html` server-side στο upsert για να μην περνάει scripts. Client-side ο Tiptap ήδη περιορίζει τα tags.
+---
 
-## 4. Ιστορικό εκδόσεων (versioning)
+## Technical
 
-**Schema (migration):**
+**Files να αλλάξουν:**
+- `src/lib/admin.functions.ts` — signed URLs, mime, νέα fns: `adminGetSignedUrl`, `adminBulkDeleteMedia`, `adminRenameMedia`.
+- `src/routes/_authenticated/admin.media.tsx` — νέο layout (folders sidebar + toolbar + grid/list + drawer).
 
-```sql
-CREATE TABLE public.page_block_versions (
-  id uuid primary key default gen_random_uuid(),
-  block_id uuid not null references public.page_blocks(id) on delete cascade,
-  page_slug text not null,
-  block_key text not null,
-  content jsonb not null,
-  published boolean not null,
-  version int not null,               -- incrementing per block_id
-  change_summary text,                -- optional label
-  created_at timestamptz not null default now(),
-  created_by uuid references auth.users(id)
-);
-CREATE INDEX ... ON page_block_versions(block_id, version DESC);
-```
+**Νέα:**
+- `src/components/admin/media/FilePreview.tsx` — thumbnail ανά τύπο.
+- `src/components/admin/media/FileIcon.tsx` — generic file icons.
+- `src/components/admin/media/UploadDropzone.tsx` — drag-drop + queue + progress.
+- `src/components/admin/media/FileDetailsSheet.tsx` — details drawer.
+- `src/components/admin/media/MediaToolbar.tsx` — search/filter/sort/view.
+- `src/lib/media-utils.ts` — `getFileKind`, `formatSize`, `getExtension`.
 
-+ GRANTs (`authenticated`, `service_role`), RLS (admin/editor SELECT/INSERT, admin DELETE, no updates), και **trigger** στο `page_blocks` που σε κάθε `INSERT`/`UPDATE` γράφει snapshot στο `page_block_versions` με auto-incrementing `version`.
+**Public site:** ο `MediaPicker` (`src/components/admin/cms/MediaPicker.tsx`) και όσα σημεία χρησιμοποιούν URLs από media θα δουλεύουν κανονικά — signed URLs έχουν TTL 1h, οπότε γι' αυτά που πρέπει να "μείνουν" (πχ στο site content) θα εκθέσουμε ξεχωριστό helper που είτε επιστρέφει long-lived signed URL είτε (προτίμηση) γίνεται το bucket public — θα ρωτήσω τον χρήστη κατά τη διάρκεια της υλοποίησης αν προτιμά public bucket. Fallback: TTL 7 μέρες, refresh στο rendering.
 
-**Retention:** κρατάμε τις τελευταίες **50 versions** ανά block μέσω trigger cleanup (DELETE όπου `version <= max_version - 50`). Αν θέλεις άλλο όριο πες μου.
-
-**UI: "History" drawer/dialog** από την καρτέλα edit κάθε block:
-
-- Λίστα versions (νεότερη πρώτη): timestamp, χρήστης (email), κουμπιά **Preview**, **Restore**, **Diff**.
-- **Preview:** ανοίγει read-only το SchemaForm με το παλιό content.
-- **Restore:** confirm → server fn `adminRestoreBlockVersion({version_id})` που κάνει `UPDATE page_blocks SET content = v.content, published = v.published` (και ο trigger γράφει νέα έκδοση αυτόματα, οπότε το restore είναι κι αυτό αναστρέψιμο).
-- **Diff:** JSON diff view (unified) — απλή γραμμοπρόεκταση με highlighting (χρήση `diff` package για line-diff του JSON pretty-print). Αν το θεωρείς overkill, το κόβω αρχικά.
-
-**Server fns:**
-- `adminListBlockVersions(block_id)` — pagination 50.
-- `adminGetBlockVersion(version_id)`.
-- `adminRestoreBlockVersion(version_id)`.
-
-**Global "Recent changes":** μικρή σελίδα/tab `/admin/content/history` που δείχνει τις τελευταίες 100 αλλαγές σε όλα τα blocks (για γρήγορο audit / "τι άλλαξε σήμερα").
-
-## Τεχνικές λεπτομέρειες / αρχεία
-
-- **Migration:** `page_block_versions` + `sort_order` σε `page_blocks` + trigger + RLS + GRANT.
-- **Server fns (`src/lib/admin.functions.ts`):** `adminSetBlockPublished`, `adminSetPagePublished`, `adminReorderBlocks`, `adminListBlockVersions`, `adminGetBlockVersion`, `adminRestoreBlockVersion`, `adminRecentChanges`.
-- **Νέα αρχεία:**
-  - `src/components/admin/cms/RichTextField.tsx` (Tiptap)
-  - `src/components/admin/cms/RichText.tsx` (public render με sanitize)
-  - `src/components/admin/cms/SortableList.tsx` (dnd-kit wrapper για item rows)
-  - `src/components/admin/cms/SortableBlockGrid.tsx` (dnd-kit για κάρτες block)
-  - `src/components/admin/cms/HistoryDialog.tsx` (versions list + preview/restore/diff)
-  - `src/routes/_authenticated/admin.content.history.tsx` (global recent changes)
-- **Updated:**
-  - `src/lib/cms/schemas.ts` (τύπος `richtext`, opt-in σε συγκεκριμένα πεδία)
-  - `src/components/admin/cms/SchemaForm.tsx` (render richtext, dnd handles)
-  - `src/routes/_authenticated/admin.content.tsx` (per-block toggle, per-page bulk, DnD reorder, History button)
-  - `src/components/riboli/Heritage.tsx`, `DealersCTA.tsx` (RichText render όπου έγιναν rich)
-- **Deps (bun add):** `@dnd-kit/core @dnd-kit/sortable @dnd-kit/utilities @tiptap/react @tiptap/starter-kit @tiptap/extension-link sanitize-html diff` + `@types/sanitize-html @types/diff`.
-
-## Rollout order
-
-1. Migration (schema + trigger + sort_order) — απαιτεί approval.
-2. Publish toggles + bulk (γρήγορη νίκη).
-3. DnD reorder (items + blocks).
-4. Rich text (Tiptap component + opt-in πεδία + public render).
-5. Version history dialog + global recent changes.
-
-Public site δεν αλλάζει — μόνο ο admin. Fallback σε plain text παραμένει για blocks που δεν έχουν rich content ακόμη.
+**Χωρίς αλλαγή:** RLS/policies, `page_blocks`, public site components.

@@ -86,26 +86,42 @@ export function DealersMap({ pins }: { pins: DealerPin[] }) {
     if (!mapWrap) return;
 
     const onWheel = (e: WheelEvent) => {
+      // When ⌘/Ctrl is held, let Google Maps handle wheel zoom + drag natively (greedy mode).
+      if (e.metaKey || e.ctrlKey) return;
+      // Otherwise, block wheel so the page doesn't scroll and the map stays still.
       e.preventDefault();
       e.stopPropagation();
       e.stopImmediatePropagation();
-
-      if (!mapRef.current || (!e.metaKey && !e.ctrlKey)) return;
-
-      zoomDeltaRef.current += e.deltaY;
-      if (Math.abs(zoomDeltaRef.current) < 80) return;
-
-      const currentZoom = mapRef.current.getZoom() ?? 4;
-      const direction = zoomDeltaRef.current > 0 ? -1 : 1;
-      const nextZoom = Math.max(3, Math.min(14, currentZoom + direction));
-      mapRef.current.setZoom(nextZoom);
-      zoomDeltaRef.current = 0;
     };
 
     mapWrap.addEventListener("wheel", onWheel, { passive: false, capture: true });
     return () =>
       mapWrap.removeEventListener("wheel", onWheel, { capture: true } as any);
   }, []);
+
+  // Toggle Google Maps gestureHandling based on ⌘/Ctrl so users can pan + zoom while the key is held.
+  useEffect(() => {
+    const setMode = (greedy: boolean) => {
+      if (!mapRef.current) return;
+      mapRef.current.setOptions({ gestureHandling: greedy ? "greedy" : "none" });
+    };
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Meta" || e.key === "Control" || e.metaKey || e.ctrlKey) setMode(true);
+    };
+    const onKeyUp = (e: KeyboardEvent) => {
+      if (!e.metaKey && !e.ctrlKey) setMode(false);
+    };
+    const onBlur = () => setMode(false);
+    window.addEventListener("keydown", onKeyDown);
+    window.addEventListener("keyup", onKeyUp);
+    window.addEventListener("blur", onBlur);
+    return () => {
+      window.removeEventListener("keydown", onKeyDown);
+      window.removeEventListener("keyup", onKeyUp);
+      window.removeEventListener("blur", onBlur);
+    };
+  }, []);
+
 
   useEffect(() => {
     let cancelled = false;

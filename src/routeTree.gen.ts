@@ -27,6 +27,7 @@ import { Route as AuthenticatedAdminMediaRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminLeadsRouteImport } from './routes/_authenticated/admin.leads'
 import { Route as AuthenticatedAdminDealersRouteImport } from './routes/_authenticated/admin.dealers'
 import { Route as AuthenticatedAdminContentRouteImport } from './routes/_authenticated/admin.content'
+import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -120,6 +121,12 @@ const AuthenticatedAdminContentRoute =
     path: '/admin/content',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminAnalyticsRoute =
+  AuthenticatedAdminAnalyticsRouteImport.update({
+    id: '/admin/analytics',
+    path: '/admin/analytics',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -133,6 +140,7 @@ export interface FileRoutesByFullPath {
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/content': typeof AuthenticatedAdminContentRoute
   '/admin/dealers': typeof AuthenticatedAdminDealersRoute
   '/admin/leads': typeof AuthenticatedAdminLeadsRoute
@@ -152,6 +160,7 @@ export interface FileRoutesByTo {
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
+  '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/content': typeof AuthenticatedAdminContentRoute
   '/admin/dealers': typeof AuthenticatedAdminDealersRoute
   '/admin/leads': typeof AuthenticatedAdminLeadsRoute
@@ -173,6 +182,7 @@ export interface FileRoutesById {
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
+  '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/content': typeof AuthenticatedAdminContentRoute
   '/_authenticated/admin/dealers': typeof AuthenticatedAdminDealersRoute
   '/_authenticated/admin/leads': typeof AuthenticatedAdminLeadsRoute
@@ -194,6 +204,7 @@ export interface FileRouteTypes {
     | '/models/r-520'
     | '/models/r-680'
     | '/models/r-950'
+    | '/admin/analytics'
     | '/admin/content'
     | '/admin/dealers'
     | '/admin/leads'
@@ -213,6 +224,7 @@ export interface FileRouteTypes {
     | '/models/r-520'
     | '/models/r-680'
     | '/models/r-950'
+    | '/admin/analytics'
     | '/admin/content'
     | '/admin/dealers'
     | '/admin/leads'
@@ -233,6 +245,7 @@ export interface FileRouteTypes {
     | '/models/r-520'
     | '/models/r-680'
     | '/models/r-950'
+    | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/content'
     | '/_authenticated/admin/dealers'
     | '/_authenticated/admin/leads'
@@ -381,10 +394,18 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminContentRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/analytics': {
+      id: '/_authenticated/admin/analytics'
+      path: '/admin/analytics'
+      fullPath: '/admin/analytics'
+      preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
   }
 }
 
 interface AuthenticatedRouteRouteChildren {
+  AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
   AuthenticatedAdminContentRoute: typeof AuthenticatedAdminContentRoute
   AuthenticatedAdminDealersRoute: typeof AuthenticatedAdminDealersRoute
   AuthenticatedAdminLeadsRoute: typeof AuthenticatedAdminLeadsRoute
@@ -394,6 +415,7 @@ interface AuthenticatedRouteRouteChildren {
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
+  AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
   AuthenticatedAdminContentRoute: AuthenticatedAdminContentRoute,
   AuthenticatedAdminDealersRoute: AuthenticatedAdminDealersRoute,
   AuthenticatedAdminLeadsRoute: AuthenticatedAdminLeadsRoute,

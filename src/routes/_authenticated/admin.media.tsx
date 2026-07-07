@@ -801,3 +801,69 @@ function MetaRow({ label, value, mono }: { label: string; value: string; mono?: 
     </div>
   );
 }
+
+function FolderActionDialog({
+  action, onClose, existingFolders, onRename, onDelete, renaming, deleting,
+}: {
+  action: FolderAction;
+  onClose: () => void;
+  existingFolders: string[];
+  onRename: (from: string, to: string) => void;
+  onDelete: (prefix: string) => void;
+  renaming: boolean;
+  deleting: boolean;
+}) {
+  const [name, setName] = useState("");
+  useEffect(() => { setName(action?.folder ?? ""); }, [action]);
+
+  if (!action) return null;
+
+  if (action.kind === "rename") {
+    const clean = name.trim().replace(/[^a-zA-Z0-9_-]/g, "");
+    const invalid = !clean || existingFolders.includes(clean) && clean !== action.folder;
+    return (
+      <Dialog open onOpenChange={(o) => !o && onClose()}>
+        <DialogContent>
+          <SheetHeader>
+            <SheetTitle>Μετονομασία φακέλου "{action.folder}"</SheetTitle>
+            <SheetDescription>Όλα τα αρχεία θα μεταφερθούν στη νέα διαδρομή.</SheetDescription>
+          </SheetHeader>
+          <div className="mt-4">
+            <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Νέο όνομα" autoFocus />
+            {invalid && clean && existingFolders.includes(clean) && (
+              <div className="text-xs text-red-600 mt-2">Ο φάκελος "{clean}" υπάρχει ήδη.</div>
+            )}
+          </div>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button variant="outline" onClick={onClose}>Ακύρωση</Button>
+            <Button
+              onClick={() => onRename(action.folder, clean)}
+              disabled={invalid || renaming || clean === action.folder}
+            >{renaming ? "Μετονομασία…" : "Μετονομασία"}</Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
+
+  return (
+    <AlertDialog open onOpenChange={(o) => !o && onClose()}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Διαγραφή φακέλου "{action.folder}";</AlertDialogTitle>
+          <AlertDialogDescription>
+            Θα διαγραφούν ΟΛΑ τα αρχεία μέσα στον φάκελο. Η ενέργεια είναι μη αναστρέψιμη.
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel>Ακύρωση</AlertDialogCancel>
+          <AlertDialogAction
+            className="bg-red-600 hover:bg-red-700"
+            disabled={deleting}
+            onClick={() => onDelete(action.folder)}
+          >{deleting ? "Διαγραφή…" : "Διαγραφή"}</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  );
+}

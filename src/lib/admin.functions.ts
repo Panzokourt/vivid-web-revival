@@ -524,32 +524,50 @@ export const adminRevokeRole = createServerFn({ method: "POST" })
   });
 
 // ─── Media (Storage) ────────────────────────────────────────────────────────
+export type MediaFile = {
+  name: string;
+  size: number;
+  mime_type: string | null;
+  created_at: string | null;
+  updated_at: string | null;
+  url: string;
+};
+
 export const adminListMedia = createServerFn({ method: "GET" })
   .middleware([requireSupabaseAuth])
-  .handler(async ({ context }) => {
-    const SUPABASE_URL = process.env.SUPABASE_URL!;
-    const prefixes = ["", "site"];
-    const results: Array<{ name: string; size: number; created_at: string | null; url: string }> = [];
+  .handler(async ({ context }): Promise<MediaFile[]> => {
+    const prefixes = ["", "site", "models", "dealers", "uploads"];
+    const collected: Array<Omit<MediaFile, "url"> & { path: string }> = [];
     for (const prefix of prefixes) {
       const { data, error } = await context.supabase.storage.from("media").list(prefix, {
-        limit: 200,
+        limit: 500,
         sortBy: { column: "created_at", order: "desc" },
       });
-      if (error) throw new Error(error.message);
+      if (error) continue; // missing prefix is fine
       for (const f of data ?? []) {
         if (!f.name || f.name.startsWith(".")) continue;
-        // Skip subfolder entries (their metadata is null)
-        if (!f.metadata) continue;
+        if (!f.metadata) continue; // skip folder entries
         const fullPath = prefix ? `${prefix}/${f.name}` : f.name;
-        results.push({
+        const meta = f.metadata as { size?: number; mimetype?: string } | null;
+        collected.push({
           name: fullPath,
-          size: (f.metadata as { size?: number } | null)?.size ?? 0,
+          path: fullPath,
+          size: meta?.size ?? 0,
+          mime_type: meta?.mimetype ?? null,
           created_at: f.created_at ?? null,
-          url: `${SUPABASE_URL}/storage/v1/object/public/media/${fullPath.split("/").map(encodeURIComponent).join("/")}`,
+          updated_at: (f as { updated_at?: string }).updated_at ?? null,
         });
       }
     }
-    return results;
+    if (collected.length === 0) return [];
+    // Sign all URLs in one batch (1h TTL — refreshed on every list fetch).
+    const { data: signed, error: signErr } = await context.supabase.storage
+      .from("media")
+      .createSignedUrls(collected.map((c) => c.path), 60 * 60);
+    if (signErr) throw new Error(signErr.message);
+    const urlMap = new Map<string, string>();
+    for (const s of signed ?? []) if (s.path && s.signedUrl) urlMap.set(s.path, s.signedUrl);
+    return collected.map(({ path, ...rest }) => ({ ...rest, url: urlMap.get(path) ?? "" }));
   });
 
 export const adminMediaQueryOptions = () =>
@@ -565,3 +583,15 @@ export const adminDeleteMedia = createServerFn({ method: "POST" })
     if (error) throw new Error(error.message);
     return { ok: true };
   });
+
+export const adminBulkDeleteMedia = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw) => z.object({ names: z.array(z.string().min(1).max(500)).min(1).max(200) }).parse(raw))
+  .handler(async ({ context, data }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Forbidden: admin required");
+    const { error } = await context.supabase.storage.from("media").remove(data.names);
+    if (error) throw new Error(error.message);
+    return { ok: true, count: data.names.length };
+  });
+

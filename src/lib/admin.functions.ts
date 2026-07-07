@@ -595,3 +595,117 @@ export const adminBulkDeleteMedia = createServerFn({ method: "POST" })
     return { ok: true, count: data.names.length };
   });
 
+// Move a batch of files to a target folder (or root when to_folder === "").
+export const adminMoveMediaFiles = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw) =>
+    z.object({
+      names: z.array(z.string().min(1).max(500)).min(1).max(200),
+      to_folder: z.string().max(200).regex(/^([a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*)?$/).default(""),
+    }).parse(raw),
+  )
+  .handler(async ({ context, data }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Forbidden: admin required");
+    const prefix = data.to_folder ? `${data.to_folder}/` : "";
+    let moved = 0;
+    for (const from of data.names) {
+      const base = from.includes("/") ? from.slice(from.lastIndexOf("/") + 1) : from;
+      const to = `${prefix}${base}`;
+      if (to === from) continue;
+      const { error } = await context.supabase.storage.from("media").move(from, to);
+      if (!error) moved++;
+    }
+    return { ok: true, count: moved };
+  });
+
+// Rename a folder = move every file whose path starts with `${from}/` to `${to}/…`.
+export const adminRenameMediaFolder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw) =>
+    z.object({
+      from: z.string().min(1).max(200).regex(/^[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*$/),
+      to: z.string().min(1).max(200).regex(/^[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*$/),
+    }).parse(raw),
+  )
+  .handler(async ({ context, data }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Forbidden: admin required");
+    if (data.from === data.to) return { ok: true, count: 0 };
+    const { data: list, error } = await context.supabase.storage.from("media").list(data.from, { limit: 1000 });
+    if (error) throw new Error(error.message);
+    let moved = 0;
+    for (const f of list ?? []) {
+      if (!f.name || !f.metadata) continue;
+      const { error: mErr } = await context.supabase.storage.from("media").move(`${data.from}/${f.name}`, `${data.to}/${f.name}`);
+      if (!mErr) moved++;
+    }
+    return { ok: true, count: moved };
+  });
+
+// Delete a whole folder = remove every file whose path starts with `${prefix}/`.
+export const adminDeleteMediaFolder = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw) =>
+    z.object({
+      prefix: z.string().min(1).max(200).regex(/^[a-zA-Z0-9_-]+(\/[a-zA-Z0-9_-]+)*$/),
+    }).parse(raw),
+  )
+  .handler(async ({ context, data }) => {
+    const { data: isAdmin } = await context.supabase.rpc("has_role", { _user_id: context.userId, _role: "admin" });
+    if (!isAdmin) throw new Error("Forbidden: admin required");
+    const { data: list, error } = await context.supabase.storage.from("media").list(data.prefix, { limit: 1000 });
+    if (error) throw new Error(error.message);
+    const paths = (list ?? []).filter((f) => f.name && f.metadata).map((f) => `${data.prefix}/${f.name}`);
+    if (paths.length === 0) return { ok: true, count: 0 };
+    const { error: rmErr } = await context.supabase.storage.from("media").remove(paths);
+    if (rmErr) throw new Error(rmErr.message);
+    return { ok: true, count: paths.length };
+  });
+
+// Set a specific media field on a block. `path` is dot notation (e.g. "image_key" or "items.2.image_key").
+export const adminSetBlockMediaField = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw) =>
+    z.object({
+      block_id: z.string().uuid(),
+      path: z.string().min(1).max(200).regex(/^[a-zA-Z0-9_.]+$/),
+      value: z.string().min(1).max(500),
+    }).parse(raw),
+  )
+  .handler(async ({ context, data }) => {
+    const { data: block, error } = await context.supabase
+      .from("page_blocks")
+      .select("content")
+      .eq("id", data.block_id)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!block) throw new Error("Block not found");
+
+    // Deep-set the value at the dotted path (numeric segments = array indices).
+    const content = (block.content && typeof block.content === "object" ? { ...(block.content as Record<string, unknown>) } : {}) as Record<string, unknown>;
+    const segs = data.path.split(".");
+    let cursor: Record<string, unknown> | unknown[] = content;
+    for (let i = 0; i < segs.length - 1; i++) {
+      const key = segs[i];
+      const idx = /^\d+$/.test(key) ? Number(key) : key;
+      const next = (cursor as Record<string | number, unknown>)[idx as never];
+      if (next && typeof next === "object") {
+        (cursor as Record<string | number, unknown>)[idx as never] = Array.isArray(next) ? [...next] : { ...(next as Record<string, unknown>) };
+      } else {
+        (cursor as Record<string | number, unknown>)[idx as never] = /^\d+$/.test(segs[i + 1]) ? [] : {};
+      }
+      cursor = (cursor as Record<string | number, unknown>)[idx as never] as Record<string, unknown> | unknown[];
+    }
+    const last = segs[segs.length - 1];
+    (cursor as Record<string | number, unknown>)[(/^\d+$/.test(last) ? Number(last) : last) as never] = data.value;
+
+    const { error: uErr } = await context.supabase
+      .from("page_blocks")
+      .update({ content, updated_by: context.userId })
+      .eq("id", data.block_id);
+    if (uErr) throw new Error(uErr.message);
+    return { ok: true };
+  });
+
+

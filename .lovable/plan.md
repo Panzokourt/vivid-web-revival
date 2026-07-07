@@ -1,63 +1,82 @@
-## SEO / GEO / AEO + Responsive Audit — Πλάνο
+# RIBALI Admin CMS
 
-### Τι είναι ήδη καλά
-- Όλες οι routes εκτός από `/` και `/configurator` έχουν σωστό `head()` με title, description, og:*, twitter, canonical.
-- Semantic H1 υπάρχει σε κάθε major page (Home Hero, About, Models, Model details, Dealers, Contact, Configurator).
-- Viewport meta + charset σωστά στο `__root.tsx`.
+Χτίζουμε custom in-app διαχειριστικό στο `/admin` με το ίδιο editorial design του site (paper/ink/copper, shadcn UI). Backend πάνω στο υπάρχον Lovable Cloud — δεν προσθέτουμε εξωτερικό headless CMS.
 
-### Τι λείπει / πρέπει να διορθωθεί
+## 1. Auth & Roles
 
-**1. Homepage (`src/routes/index.tsx`) — δεν έχει `head()`**
-- Προσθήκη title, description, og:*, twitter, canonical, `og:url` για `/`.
-- Το `<Hero>` δεν φαίνεται να έχει `<h1>` — επιβεβαίωση/προσθήκη semantic H1 με το brand tagline.
+- Email + password μέσω Lovable Cloud auth (χωρίς Google, χωρίς public signup).
+- Route `/auth` (login-only, όχι signup form) + gated layout `_authenticated/`.
+- Ξεχωριστός πίνακας `user_roles` υπάρχει ήδη με `app_role`. Προσθέτουμε role `editor` (admin/editor) και security definer `has_role`.
+- `/admin/*` προστατεύεται από `beforeLoad` που ζητά ρόλο admin ή editor. Non-admins → redirect στο `/`.
+- Πρώτος admin: seed μέσω migration (θα ζητηθεί το email σου).
 
-**2. Configurator title generic**
-- Ενημέρωση `src/routes/configurator.tsx` ώστε ο title να περιέχει "RIBALI" + canonical + og:url.
+## 2. Πληροφοριακή αρχιτεκτονική admin
 
-**3. Structured data (JSON-LD) — AEO/GEO κρίσιμο**
-- `__root.tsx`: Organization + WebSite JSON-LD (name, url, logo, sameAs κενό placeholder, contactPoint).
-- `about.tsx` ή homepage: LocalBusiness JSON-LD με τη διεύθυνση Piraeus, τηλέφωνο, ωράριο, geo coordinates (37.9364, 23.6511) — αυτό είναι το GEO signal.
-- Κάθε model route (r-520/r-680/r-950): Product JSON-LD (name, description, image, brand: RIBALI, offers optional).
-- `dealers.tsx`: BreadcrumbList + ItemList με τους dealers ως LocalBusiness entries (κάθε ένας με address/geo).
-- `contact.tsx`: ContactPage schema.
+```text
+/admin
+ ├── Dashboard        KPIs: leads σήμερα/μήνα, top model, latest quotes
+ ├── Models           λίστα R-520/R-680/R-950 → edit specs, hero, tag, order
+ │    └── Gallery     drag-reorder, upload, caption
+ ├── Leads            quote_requests: filter status, view detail, mark contacted, CSV export
+ ├── Dealers          CRUD (νέος πίνακας) — name, city, country, lat/lng, contact
+ ├── Content          page blocks (hero, heritage, experiences, stats, about, contact)
+ ├── Media            Supabase Storage bucket "media" browser + upload
+ ├── Analytics        views/leads/conversion charts (recharts) από events table
+ └── Settings         users & roles (invite, promote, revoke)
+```
 
-**4. robots.txt (λείπει)**
-- `public/robots.txt`: `User-agent: * / Allow: /` + `Sitemap: https://vivid-web-revival.lovable.app/sitemap.xml`.
+## 3. Database changes (migration)
 
-**5. sitemap.xml (λείπει)**
-- Νέο `src/routes/sitemap[.]xml.ts` (server route) με entries: `/`, `/about`, `/models`, `/models/r-520`, `/models/r-680`, `/models/r-950`, `/dealers`, `/contact`, `/configurator`.
+Νέοι/ενημερωμένοι πίνακες:
 
-**6. llms.txt για AEO (AI answer engines)**
-- `public/llms.txt`: H1 "RIBALI", περιγραφή brand, λίστα δημόσιων σελίδων με links + περιγραφές — έτσι διαβάζουν ChatGPT/Perplexity/Claude το site.
+- `app_role` enum → προσθήκη `'editor'`.
+- `dealers` (name, city, country, lat, lng, phone, email, website, order_index, active).
+- `page_blocks` (page_slug, block_key, content jsonb, updated_at, updated_by) — key/value store για hero/heritage/experiences/κτλ.
+- `quote_requests` → προσθήκη `status` transitions (`new|contacted|qualified|closed`), `notes`, `assigned_to`.
+- `analytics_events` (event_type, path, model_slug, meta jsonb, created_at) — αντικαθιστά external analytics για basic KPIs.
+- Storage bucket `media` (public read, admin write).
 
-**7. og:image**
-- Προσθήκη σε κάθε leaf route (about, models list, r-520/680/950, dealers, contact, home) του υπάρχοντος hero/model image ως absolute URL. Δεν φτιάχνουμε νέα assets — χρησιμοποιούμε τα ήδη imported.
+RLS:
+- Δημόσιο SELECT παραμένει για `models`, `model_gallery`, `dealers`, `page_blocks` (μόνο published rows).
+- Admin/editor: full CRUD μέσω `has_role(auth.uid(), 'admin' OR 'editor')`.
+- `quote_requests`: μόνο admin/editor βλέπει· INSERT παραμένει anon με τα υπάρχοντα validation checks.
+- `user_roles`: μόνο admin γράφει.
 
-**8. Performance (LCP finding)**
-- `Hero`: στην LCP εικόνα, να μπει `fetchpriority="high"`, ρητά width/height, χωρίς `loading="lazy"`.
-- `head().links` του index route: `preload as="image"` για το hero.
+## 4. Frontend υλοποίηση
 
-**9. Responsive / mobile audit**
-- Επαλήθευση ότι τα υπερμεγέθη hero titles (`text-[13vw]`, `text-[14vw]`, `text-[22vw]`) δεν σπάνε overflow σε mobile — προσθήκη `break-words`/`overflow-hidden` σε παρόντες containers όπου χρειάζεται.
-- Έλεγχος `DealersMap` layout σε mobile (grid → stack).
-- Έλεγχος `Nav` mobile menu.
-- Πρόσθεση `min-w-0` σε flex text rows όπου headers γίνονται clipped.
-- Δεν αλλάζουμε γενικό design — μόνο fixes όπου πραγματικά σπάει.
+- shadcn primitives: `Sidebar`, `Table` (TanStack Table), `Dialog`, `Form` (react-hook-form + zod), `Tabs`, `Toast`.
+- Layout: sidebar αριστερά (RIBALI mark, sections, sign-out), top bar με crumbs + user menu.
+- Design tokens ίδιοι με το site (paper/ink/copper), light theme.
+- Data: TanStack Query + `createServerFn` με `requireSupabaseAuth` + role check για κάθε mutation.
+- Media upload: signed URL μέσω server fn, upload client → Supabase Storage → επιστροφή public URL για gallery/hero.
+- Rich content: για page_blocks χρησιμοποιούμε structured JSON forms (όχι WYSIWYG) — π.χ. Hero έχει fields `eyebrow`, `title`, `subtitle`, `cta_label`, `cta_href`.
 
-**10. alt text σε images**
-- 13 `<img>` vs 13 `alt=` → φαίνεται καλυμμένο, αλλά θα γίνει spot-check ότι όλα τα alts είναι περιγραφικά (όχι κενά ή "image").
+## 5. Analytics
 
-### Αρχεία που θα αλλάξουν
-- `src/routes/index.tsx` — head() + JSON-LD Organization/LocalBusiness + preload hero
-- `src/routes/__root.tsx` — Organization + WebSite JSON-LD, `og:site_name`
-- `src/routes/configurator.tsx` — πλήρες head + canonical
-- `src/routes/about.tsx` — προσθήκη og:image + optional LocalBusiness
-- `src/routes/models.tsx` + `models.r-520.tsx` + `models.r-680.tsx` + `models.r-950.tsx` — og:image + Product JSON-LD
-- `src/routes/dealers.tsx` — og:image + ItemList JSON-LD
-- `src/routes/contact.tsx` — og:image + ContactPage schema
-- `src/components/riboli/Hero.tsx` — LCP img attrs, H1 verify
-- Responsive spot-fixes σε 2-3 components όπου εντοπιστεί overflow
-- Νέα: `public/robots.txt`, `public/llms.txt`, `src/routes/sitemap[.]xml.ts`
+- Lightweight tracker στο `__root.tsx`: POST στο `/api/track` (server route) που γράφει σε `analytics_events`.
+- Events: `page_view`, `model_view`, `configurator_open`, `quote_submitted`.
+- Dashboard: recharts line/bar για last 30 days, top pages, conversion rate (leads/views).
 
-### Τι ΔΕΝ αλλάζει
-- Design/styling, animations, copy, business logic, backend, χρώματα, fonts.
+## 6. Wiring στο υπόλοιπο site
+
+- `FeaturedModels`, `ModelPage`, `DealersMap`, `Hero`, `Heritage`, `Experiences` διαβάζουν από τα νέα server fns αντί για hardcoded arrays όπου δεν το κάνουν ήδη.
+- Fallback: αν το DB return είναι κενό, μένουν τα υπάρχοντα defaults για να μη σπάσει το site κατά τη μετάβαση.
+
+## 7. Βήματα υλοποίησης
+
+1. Migration: enum update, `dealers`, `page_blocks`, `analytics_events`, `quote_requests` extras, storage bucket, RLS + GRANTs.
+2. Seed πρώτου admin (θα σου ζητηθεί email).
+3. `/auth` login page + `_authenticated/` layout + admin role gate.
+4. `/admin` shell (sidebar + layout + dashboard skeleton).
+5. Modules ένα‑ένα: Models → Gallery → Leads → Dealers → Content → Media → Analytics → Settings.
+6. Σύνδεση public site με τα νέα data sources.
+7. Analytics tracker + dashboard.
+8. QA (mobile responsive admin, role permissions, RLS spot-checks).
+
+## Τεχνικά (συνοπτικά)
+
+- Stack: TanStack Start, TanStack Query, shadcn/ui, Tailwind, Lovable Cloud (Supabase), createServerFn με `requireSupabaseAuth`, Supabase Storage.
+- Δεν εκθέτουμε service role στο client· όλες οι admin ενέργειες περνούν από server fns που κάνουν role check με `has_role`.
+- Email templates auth (password reset) θα στηθούν μέσω managed Lovable auth emails όταν χρειαστεί.
+
+Πες μου το email του πρώτου admin και ξεκινάω με το migration + auth gate.

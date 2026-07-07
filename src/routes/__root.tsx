@@ -173,11 +173,35 @@ function RootShell({ children }: { children: ReactNode }) {
 
 function RootComponent() {
   const { queryClient } = Route.useRouteContext();
+  const router = useRouter();
+
+  // Lightweight analytics: log page_view on route changes (browser only).
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const track = async (path: string) => {
+      try {
+        const { supabase } = await import("@/integrations/supabase/client");
+        await supabase.from("analytics_events").insert({
+          event_type: "page_view",
+          path,
+          meta: { referrer: document.referrer || null },
+        });
+      } catch {
+        // swallow — analytics must never break the site
+      }
+    };
+    void track(window.location.pathname);
+    const unsub = router.subscribe("onResolved", (e) => {
+      const path = e.toLocation.pathname;
+      if (!path.startsWith("/admin") && !path.startsWith("/auth")) void track(path);
+    });
+    return () => unsub();
+  }, [router]);
 
   return (
     <QueryClientProvider client={queryClient}>
       <LoaderOverlay />
-      
+
       <Cursor />
       <SmoothScroll />
       <ScrollProgress />

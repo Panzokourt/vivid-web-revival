@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
-import { adminPageBlocksQueryOptions, adminSetBlockMediaField } from "@/lib/admin.functions";
+import { adminPageBlocksQueryOptions, adminSetBlockMediaField, adminClearBlockMediaField } from "@/lib/admin.functions";
 import { getSchema, type Field, type FieldType } from "@/lib/cms/schemas";
 import {
   Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription,
@@ -10,8 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
-import { Search, ImageIcon, Film, FileText, Check } from "lucide-react";
+import { Search, ImageIcon, Film, FileText, Check, X } from "lucide-react";
 import { getFileKind } from "@/lib/media-utils";
+
 
 type MediaFieldType = Extract<FieldType, "image" | "video" | "document">;
 const MEDIA_TYPES: MediaFieldType[] = ["image", "video", "document"];

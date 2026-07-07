@@ -1,6 +1,8 @@
 import { useLayoutEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { usePageBlock } from "@/lib/page-blocks";
+import { EditableField } from "@/components/editor/EditableField";
 import r680 from "@/assets/model-r680.jpg";
 import r950 from "@/assets/model-r950.jpg";
 import r520 from "@/assets/model-r520.jpg";
@@ -16,6 +18,7 @@ const models = [
 export function FeaturedModels() {
   const root = useRef<HTMLElement>(null);
   const track = useRef<HTMLDivElement>(null);
+  const block = usePageBlock("home", "featured_models", { eyebrow: "The Collection", title: "Models" });
 
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;
@@ -52,8 +55,12 @@ export function FeaturedModels() {
       <div className="px-6 md:px-10 pt-16 md:pt-20 pb-6 shrink-0">
         <div className="models-eyebrow flex items-end justify-between gap-6 max-w-[1600px] mx-auto">
           <div>
-            <div className="text-[11px] uppercase tracking-[0.3em] text-ink/50">The Collection</div>
-            <h2 className="font-display text-5xl md:text-7xl leading-none mt-2">Models</h2>
+            <EditableField page="home" block="featured_models" field="eyebrow" type="text" label="Eyebrow" as="div" className="text-[11px] uppercase tracking-[0.3em] text-ink/50">
+              {String(block.eyebrow ?? "")}
+            </EditableField>
+            <EditableField page="home" block="featured_models" field="title" type="text" label="Title" as="div" className="font-display text-5xl md:text-7xl leading-none mt-2">
+              <h2 className="font-display text-5xl md:text-7xl leading-none">{String(block.title ?? "")}</h2>
+            </EditableField>
           </div>
           <div className="text-[11px] uppercase tracking-[0.3em] text-ink/50 hidden md:block">
             Scroll <span className="text-ink/80">→</span>

@@ -2,6 +2,7 @@ import { useLayoutEffect, useRef } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { usePageBlock } from "@/lib/page-blocks";
 import { RichText } from "@/components/admin/cms/RichText";
+import { EditableField } from "@/components/editor/EditableField";
 
 type Milestone = { year: number; title: string; body: string };
 

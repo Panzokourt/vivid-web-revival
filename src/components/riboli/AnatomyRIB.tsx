@@ -1,37 +1,21 @@
 import { useLayoutEffect, useRef, useState } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import anatomyImg from "@/assets/anatomy-rib.jpg";
+import { usePageBlock } from "@/lib/page-blocks";
+import { EditableField } from "@/components/editor/EditableField";
 
-const hotspots = [
-  {
-    id: "hull",
-    title: "Deep-V hull",
-    body: "22° deadrise, hand-laid GRP layup — planted through Aegean chop, dry at speed.",
-    x: 45,
-    y: 78,
-  },
-  {
-    id: "tubes",
-    title: "ORCA Hypalon tubes",
-    body: "1670 dtex fabric, hot-welded seams, 10-year UV rating. The industry benchmark.",
-    x: 22,
-    y: 62,
-  },
-  {
-    id: "console",
-    title: "Driver-forward console",
-    body: "Wraparound windshield, glass helm, leaning-post seat as standard.",
-    x: 48,
-    y: 48,
-  },
-  {
-    id: "deck",
-    title: "Modular deck",
-    body: "Bow sunpad, aft bench, stowage bays — reconfigured to how you actually use the boat.",
-    x: 70,
-    y: 55,
-  },
-] as const;
+type Hotspot = { id: string; title: string; body: string; x: number; y: number };
+
+const FALLBACK = {
+  eyebrow: "Anatomy of a RIB",
+  title: "Built from four ideas",
+  hotspots: [
+    { id: "hull", title: "Deep-V hull", body: "22° deadrise, hand-laid GRP layup — planted through Aegean chop, dry at speed.", x: 45, y: 78 },
+    { id: "tubes", title: "ORCA Hypalon tubes", body: "1670 dtex fabric, hot-welded seams, 10-year UV rating. The industry benchmark.", x: 22, y: 62 },
+    { id: "console", title: "Driver-forward console", body: "Wraparound windshield, glass helm, leaning-post seat as standard.", x: 48, y: 48 },
+    { id: "deck", title: "Modular deck", body: "Bow sunpad, aft bench, stowage bays — reconfigured to how you actually use the boat.", x: 70, y: 55 },
+  ] as Hotspot[],
+};
 
 export function AnatomyRIB() {
   const root = useRef<HTMLElement>(null);

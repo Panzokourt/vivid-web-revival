@@ -10,7 +10,7 @@ import { resolveAsset } from "@/lib/asset-map";
 type HeroContent = {
   sr_heading: string;
   eyebrow: string;
-  title_lines: string;
+  title_lines: string | string[];
   top_right_word: string;
   mid_left_body: string;
   bottom_right_body: string;

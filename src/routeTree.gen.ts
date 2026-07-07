@@ -29,6 +29,7 @@ import { Route as AuthenticatedAdminLeadsRouteImport } from './routes/_authentic
 import { Route as AuthenticatedAdminDealersRouteImport } from './routes/_authenticated/admin.dealers'
 import { Route as AuthenticatedAdminContentRouteImport } from './routes/_authenticated/admin.content'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
+import { Route as AuthenticatedAdminContentHistoryRouteImport } from './routes/_authenticated/admin.content.history'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
@@ -134,6 +135,12 @@ const AuthenticatedAdminAnalyticsRoute =
     path: '/admin/analytics',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminContentHistoryRoute =
+  AuthenticatedAdminContentHistoryRouteImport.update({
+    id: '/history',
+    path: '/history',
+    getParentRoute: () => AuthenticatedAdminContentRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -148,13 +155,14 @@ export interface FileRoutesByFullPath {
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
-  '/admin/content': typeof AuthenticatedAdminContentRoute
+  '/admin/content': typeof AuthenticatedAdminContentRouteWithChildren
   '/admin/dealers': typeof AuthenticatedAdminDealersRoute
   '/admin/leads': typeof AuthenticatedAdminLeadsRoute
   '/admin/media': typeof AuthenticatedAdminMediaRoute
   '/admin/models': typeof AuthenticatedAdminModelsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
+  '/admin/content/history': typeof AuthenticatedAdminContentHistoryRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -169,13 +177,14 @@ export interface FileRoutesByTo {
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
-  '/admin/content': typeof AuthenticatedAdminContentRoute
+  '/admin/content': typeof AuthenticatedAdminContentRouteWithChildren
   '/admin/dealers': typeof AuthenticatedAdminDealersRoute
   '/admin/leads': typeof AuthenticatedAdminLeadsRoute
   '/admin/media': typeof AuthenticatedAdminMediaRoute
   '/admin/models': typeof AuthenticatedAdminModelsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
+  '/admin/content/history': typeof AuthenticatedAdminContentHistoryRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -192,13 +201,14 @@ export interface FileRoutesById {
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
-  '/_authenticated/admin/content': typeof AuthenticatedAdminContentRoute
+  '/_authenticated/admin/content': typeof AuthenticatedAdminContentRouteWithChildren
   '/_authenticated/admin/dealers': typeof AuthenticatedAdminDealersRoute
   '/_authenticated/admin/leads': typeof AuthenticatedAdminLeadsRoute
   '/_authenticated/admin/media': typeof AuthenticatedAdminMediaRoute
   '/_authenticated/admin/models': typeof AuthenticatedAdminModelsRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
+  '/_authenticated/admin/content/history': typeof AuthenticatedAdminContentHistoryRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -222,6 +232,7 @@ export interface FileRouteTypes {
     | '/admin/models'
     | '/admin/settings'
     | '/admin/'
+    | '/admin/content/history'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -243,6 +254,7 @@ export interface FileRouteTypes {
     | '/admin/models'
     | '/admin/settings'
     | '/admin'
+    | '/admin/content/history'
   id:
     | '__root__'
     | '/'
@@ -265,6 +277,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/models'
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/'
+    | '/_authenticated/admin/content/history'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -421,12 +434,34 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/content/history': {
+      id: '/_authenticated/admin/content/history'
+      path: '/history'
+      fullPath: '/admin/content/history'
+      preLoaderRoute: typeof AuthenticatedAdminContentHistoryRouteImport
+      parentRoute: typeof AuthenticatedAdminContentRoute
+    }
   }
 }
 
+interface AuthenticatedAdminContentRouteChildren {
+  AuthenticatedAdminContentHistoryRoute: typeof AuthenticatedAdminContentHistoryRoute
+}
+
+const AuthenticatedAdminContentRouteChildren: AuthenticatedAdminContentRouteChildren =
+  {
+    AuthenticatedAdminContentHistoryRoute:
+      AuthenticatedAdminContentHistoryRoute,
+  }
+
+const AuthenticatedAdminContentRouteWithChildren =
+  AuthenticatedAdminContentRoute._addFileChildren(
+    AuthenticatedAdminContentRouteChildren,
+  )
+
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminAnalyticsRoute: typeof AuthenticatedAdminAnalyticsRoute
-  AuthenticatedAdminContentRoute: typeof AuthenticatedAdminContentRoute
+  AuthenticatedAdminContentRoute: typeof AuthenticatedAdminContentRouteWithChildren
   AuthenticatedAdminDealersRoute: typeof AuthenticatedAdminDealersRoute
   AuthenticatedAdminLeadsRoute: typeof AuthenticatedAdminLeadsRoute
   AuthenticatedAdminMediaRoute: typeof AuthenticatedAdminMediaRoute
@@ -437,7 +472,7 @@ interface AuthenticatedRouteRouteChildren {
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminAnalyticsRoute: AuthenticatedAdminAnalyticsRoute,
-  AuthenticatedAdminContentRoute: AuthenticatedAdminContentRoute,
+  AuthenticatedAdminContentRoute: AuthenticatedAdminContentRouteWithChildren,
   AuthenticatedAdminDealersRoute: AuthenticatedAdminDealersRoute,
   AuthenticatedAdminLeadsRoute: AuthenticatedAdminLeadsRoute,
   AuthenticatedAdminMediaRoute: AuthenticatedAdminMediaRoute,

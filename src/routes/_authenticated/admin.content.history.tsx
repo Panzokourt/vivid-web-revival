@@ -9,7 +9,7 @@ import { Badge } from "@/components/ui/badge";
 import { toast } from "sonner";
 import { RotateCcw } from "lucide-react";
 
-export const Route = createFileRoute("/_authenticated/admin/content.history")({
+export const Route = createFileRoute("/_authenticated/admin/content/history")({
   head: () => ({ meta: [{ title: "Ιστορικό — RIBALI Admin" }, { name: "robots", content: "noindex" }] }),
   component: () => <AdminShell><HistoryPage /></AdminShell>,
 });

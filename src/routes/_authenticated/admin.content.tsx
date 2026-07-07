@@ -1,4 +1,4 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { useServerFn } from "@tanstack/react-start";
 import { useMemo, useState } from "react";
@@ -7,6 +7,9 @@ import {
   adminPageBlocksQueryOptions,
   adminUpsertPageBlock,
   adminDeletePageBlock,
+  adminSetBlockPublished,
+  adminSetPagePublished,
+  adminReorderBlocks,
 } from "@/lib/admin.functions";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -18,9 +21,11 @@ import { Badge } from "@/components/ui/badge";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { toast } from "sonner";
-import { Plus, Pencil, Trash2, Code, ExternalLink } from "lucide-react";
+import { Plus, Pencil, Trash2, Code, ExternalLink, History, Eye, EyeOff } from "lucide-react";
 import { getSchema, SCHEMA_OPTIONS } from "@/lib/cms/schemas";
 import { SchemaForm } from "@/components/admin/cms/SchemaForm";
+import { Sortable } from "@/components/admin/cms/Sortable";
+import { HistoryDialog } from "@/components/admin/cms/HistoryDialog";
 
 export const Route = createFileRoute("/_authenticated/admin/content")({
   head: () => ({ meta: [{ title: "Content — RIBALI Admin" }, { name: "robots", content: "noindex" }] }),
@@ -34,6 +39,7 @@ type Block = {
   content: Record<string, unknown>;
   published: boolean;
   updated_at: string;
+  sort_order: number;
 };
 
 const PAGE_LABELS: Record<string, string> = {
@@ -49,8 +55,13 @@ function ContentPage() {
   const { data: blocks = [], isLoading } = useQuery(adminPageBlocksQueryOptions());
   const [editing, setEditing] = useState<Block | null>(null);
   const [creating, setCreating] = useState(false);
-  const del = useServerFn(adminDeletePageBlock);
+  const [historyOf, setHistoryOf] = useState<Block | null>(null);
   const qc = useQueryClient();
+
+  const del = useServerFn(adminDeletePageBlock);
+  const setBlockPub = useServerFn(adminSetBlockPublished);
+  const setPagePub = useServerFn(adminSetPagePublished);
+  const reorder = useServerFn(adminReorderBlocks);
 
   const delMutation = useMutation({
     mutationFn: (id: string) => del({ data: { id } }),
@@ -61,12 +72,54 @@ function ContentPage() {
     onError: (e) => toast.error(e instanceof Error ? e.message : "Η διαγραφή απέτυχε"),
   });
 
+  const pubMutation = useMutation({
+    mutationFn: (v: { id: string; published: boolean }) => setBlockPub({ data: v }),
+    onMutate: async ({ id, published }) => {
+      await qc.cancelQueries({ queryKey: ["admin", "page_blocks"] });
+      const prev = qc.getQueryData<Block[]>(["admin", "page_blocks"]);
+      qc.setQueryData<Block[]>(["admin", "page_blocks"], (old) =>
+        (old ?? []).map((b) => (b.id === id ? { ...b, published } : b)),
+      );
+      return { prev };
+    },
+    onError: (e, _v, ctx) => {
+      if (ctx?.prev) qc.setQueryData(["admin", "page_blocks"], ctx.prev);
+      toast.error(e instanceof Error ? e.message : "Η αλλαγή απέτυχε");
+    },
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "page_blocks"] }),
+  });
+
+  const pagePubMutation = useMutation({
+    mutationFn: (v: { page_slug: string; published: boolean }) => setPagePub({ data: v }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["admin", "page_blocks"] });
+      toast.success("Ενημερώθηκαν τα blocks της σελίδας");
+    },
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Η ενέργεια απέτυχε"),
+  });
+
+  const reorderMutation = useMutation({
+    mutationFn: (v: { page_slug: string; ordered_ids: string[] }) => reorder({ data: v }),
+    onSuccess: () => qc.invalidateQueries({ queryKey: ["admin", "page_blocks"] }),
+    onError: (e) => toast.error(e instanceof Error ? e.message : "Η αναδιάταξη απέτυχε"),
+  });
+
   const grouped = useMemo(() => {
     return (blocks as Block[]).reduce<Record<string, Block[]>>((acc, b) => {
       (acc[b.page_slug] ??= []).push(b);
       return acc;
     }, {});
   }, [blocks]);
+
+  const handleReorder = (page_slug: string, next: Block[]) => {
+    qc.setQueryData<Block[]>(["admin", "page_blocks"], (old) => {
+      if (!old) return old;
+      const others = old.filter((b) => b.page_slug !== page_slug);
+      const withNewOrder = next.map((b, i) => ({ ...b, sort_order: (i + 1) * 10 }));
+      return [...others, ...withNewOrder];
+    });
+    reorderMutation.mutate({ page_slug, ordered_ids: next.map((b) => b.id) });
+  };
 
   return (
     <div className="space-y-6">
@@ -75,10 +128,13 @@ function ContentPage() {
           <div className="text-[11px] uppercase tracking-[0.3em] text-ink/50">Pages</div>
           <h1 className="text-3xl font-display mt-1">Περιεχόμενο σελίδων</h1>
           <p className="text-sm text-ink/60 mt-2">
-            Επεξεργάσου εύκολα τα blocks κάθε σελίδας με φιλικές φόρμες. Οι αλλαγές εμφανίζονται στο site μέσα σε λίγα δευτερόλεπτα.
+            Επεξεργάσου blocks με φιλικές φόρμες, σύρε για αναδιάταξη, δημοσίευσε/απόκρυψε άμεσα και επανάφερε παλιές εκδόσεις.
           </p>
         </div>
-        <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4 mr-2" />Νέο block</Button>
+        <div className="flex gap-2">
+          <Link to="/admin/content/history"><Button variant="outline"><History className="h-4 w-4 mr-2" />Ιστορικό</Button></Link>
+          <Button onClick={() => setCreating(true)}><Plus className="h-4 w-4 mr-2" />Νέο block</Button>
+        </div>
       </header>
 
       {isLoading ? (
@@ -89,60 +145,90 @@ function ContentPage() {
         <div className="space-y-8">
           {Object.entries(grouped).map(([page, items]) => (
             <div key={page}>
-              <div className="flex items-baseline justify-between mb-3">
-                <div className="text-[11px] uppercase tracking-[0.3em] text-ink/50">
-                  {PAGE_LABELS[page] ?? page} <span className="text-ink/30">· {page}</span>
+              <div className="flex items-baseline justify-between mb-3 gap-2 flex-wrap">
+                <div className="flex items-baseline gap-3">
+                  <div className="text-[11px] uppercase tracking-[0.3em] text-ink/50">
+                    {PAGE_LABELS[page] ?? page} <span className="text-ink/30">· {page}</span>
+                  </div>
+                  <a
+                    href={page === "home" ? "/" : `/${page}`}
+                    target="_blank"
+                    rel="noreferrer"
+                    className="text-xs text-ink/60 hover:text-copper inline-flex items-center gap-1"
+                  >
+                    Προβολή <ExternalLink className="h-3 w-3" />
+                  </a>
                 </div>
-                <a
-                  href={page === "home" ? "/" : `/${page}`}
-                  target="_blank"
-                  rel="noreferrer"
-                  className="text-xs text-ink/60 hover:text-copper inline-flex items-center gap-1"
-                >
-                  Προβολή <ExternalLink className="h-3 w-3" />
-                </a>
+                <div className="flex gap-1">
+                  <Button
+                    size="sm" variant="outline"
+                    onClick={() => confirm(`Δημοσίευση ΟΛΩΝ των blocks της σελίδας "${page}";`) && pagePubMutation.mutate({ page_slug: page, published: true })}
+                  >
+                    <Eye className="h-4 w-4 mr-1" /> Δημοσίευση όλων
+                  </Button>
+                  <Button
+                    size="sm" variant="outline"
+                    onClick={() => confirm(`Απόκρυψη ΟΛΩΝ των blocks της σελίδας "${page}";`) && pagePubMutation.mutate({ page_slug: page, published: false })}
+                  >
+                    <EyeOff className="h-4 w-4 mr-1" /> Απόκρυψη όλων
+                  </Button>
+                </div>
               </div>
-              <div className="grid gap-3 md:grid-cols-2">
-                {items.map((b) => {
-                  const schema = getSchema(b.page_slug, b.block_key);
-                  const preview =
-                    (b.content?.title as string) ??
-                    (b.content?.eyebrow as string) ??
-                    "";
-                  return (
-                    <Card key={b.id} className="p-4 flex flex-col gap-3">
-                      <div className="flex items-start justify-between gap-2">
-                        <div className="min-w-0">
-                          <div className="font-medium truncate">
-                            {schema ? schema.title.split("·").slice(1).join("·").trim() || schema.title : b.block_key}
+
+              <div className="grid gap-3">
+                <Sortable
+                  items={items}
+                  onReorder={(next) => handleReorder(page, next)}
+                  renderItem={(b, handle) => {
+                    const schema = getSchema(b.page_slug, b.block_key);
+                    const preview =
+                      (typeof b.content?.title === "string" ? (b.content.title as string) : "") ||
+                      (typeof b.content?.eyebrow === "string" ? (b.content.eyebrow as string) : "") ||
+                      "";
+                    return (
+                      <Card className="p-4 flex items-start gap-3 mb-3">
+                        <div className="pt-1">{handle}</div>
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <div className="font-medium truncate">
+                                {schema ? schema.title.split("·").slice(1).join("·").trim() || schema.title : b.block_key}
+                              </div>
+                              <div className="text-[11px] text-ink/40 mt-0.5">
+                                {b.page_slug} / {b.block_key}
+                                {!schema && <span className="ml-2 text-amber-700">· advanced (JSON)</span>}
+                              </div>
+                              {preview && (
+                                <div className="text-xs text-ink/60 mt-2 line-clamp-2 whitespace-pre-line">{preview}</div>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1 shrink-0">
+                              <div className="flex items-center gap-1.5 mr-1">
+                                <Switch
+                                  checked={b.published}
+                                  onCheckedChange={(v) => pubMutation.mutate({ id: b.id, published: v })}
+                                />
+                                {b.published ? <Badge>Live</Badge> : <Badge variant="outline">Draft</Badge>}
+                              </div>
+                              <Button variant="ghost" size="sm" title="Ιστορικό" onClick={() => setHistoryOf(b)}>
+                                <History className="h-4 w-4" />
+                              </Button>
+                              <Button variant="ghost" size="sm" title="Επεξεργασία" onClick={() => setEditing(b)}>
+                                <Pencil className="h-4 w-4" />
+                              </Button>
+                              <Button
+                                variant="ghost" size="sm" title="Διαγραφή"
+                                onClick={() => confirm(`Διαγραφή του "${b.block_key}";`) && delMutation.mutate(b.id)}
+                              >
+                                <Trash2 className="h-4 w-4 text-red-600" />
+                              </Button>
+                            </div>
                           </div>
-                          <div className="text-[11px] text-ink/40 mt-0.5">
-                            {b.page_slug} / {b.block_key}
-                            {!schema && <span className="ml-2 text-amber-700">· advanced (JSON)</span>}
-                          </div>
-                          {preview && (
-                            <div className="text-xs text-ink/60 mt-2 line-clamp-2 whitespace-pre-line">{preview}</div>
-                          )}
                         </div>
-                        <div className="flex gap-1 shrink-0">
-                          <Button variant="ghost" size="sm" onClick={() => setEditing(b)}>
-                            <Pencil className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => confirm(`Διαγραφή του "${b.block_key}";`) && delMutation.mutate(b.id)}
-                          >
-                            <Trash2 className="h-4 w-4 text-red-600" />
-                          </Button>
-                        </div>
-                      </div>
-                      <div>
-                        {b.published ? <Badge>Δημοσιευμένο</Badge> : <Badge variant="outline">Πρόχειρο</Badge>}
-                      </div>
-                    </Card>
-                  );
-                })}
+                      </Card>
+                    );
+                  }}
+                />
               </div>
             </div>
           ))}
@@ -153,6 +239,14 @@ function ContentPage() {
         <EditBlockDialog
           block={editing}
           onClose={() => setEditing(null)}
+          onOpenHistory={() => { setHistoryOf(editing); setEditing(null); }}
+        />
+      )}
+      {historyOf && (
+        <HistoryDialog
+          blockId={historyOf.id}
+          onClose={() => setHistoryOf(null)}
+          onRestored={() => setHistoryOf(null)}
         />
       )}
       {creating && (
@@ -162,7 +256,7 @@ function ContentPage() {
   );
 }
 
-function EditBlockDialog({ block, onClose }: { block: Block; onClose: () => void }) {
+function EditBlockDialog({ block, onClose, onOpenHistory }: { block: Block; onClose: () => void; onOpenHistory: () => void }) {
   const upsert = useServerFn(adminUpsertPageBlock);
   const qc = useQueryClient();
   const schema = getSchema(block.page_slug, block.block_key);
@@ -190,6 +284,8 @@ function EditBlockDialog({ block, onClose }: { block: Block; onClose: () => void
     },
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: ["admin", "page_blocks"] });
+      qc.invalidateQueries({ queryKey: ["admin", "block_versions", block.id] });
+      qc.invalidateQueries({ queryKey: ["admin", "recent_changes"] });
       toast.success("Αποθηκεύτηκε");
       onClose();
     },
@@ -202,22 +298,25 @@ function EditBlockDialog({ block, onClose }: { block: Block; onClose: () => void
         <DialogHeader>
           <DialogTitle className="flex items-center justify-between gap-4">
             <span>{schema ? schema.title : `${block.page_slug} / ${block.block_key}`}</span>
-            {schema && (
-              <Button
-                type="button"
-                size="sm"
-                variant="ghost"
-                onClick={() => {
-                  if (!jsonMode) setJsonText(JSON.stringify(content, null, 2));
-                  else {
-                    try { setContent(JSON.parse(jsonText)); setJsonError(null); } catch { setJsonError("Μη έγκυρο JSON"); return; }
-                  }
-                  setJsonMode(!jsonMode);
-                }}
-              >
-                <Code className="h-4 w-4 mr-1" /> {jsonMode ? "Φόρμα" : "JSON"}
+            <div className="flex items-center gap-1">
+              <Button type="button" size="sm" variant="ghost" onClick={onOpenHistory}>
+                <History className="h-4 w-4 mr-1" /> Ιστορικό
               </Button>
-            )}
+              {schema && (
+                <Button
+                  type="button" size="sm" variant="ghost"
+                  onClick={() => {
+                    if (!jsonMode) setJsonText(JSON.stringify(content, null, 2));
+                    else {
+                      try { setContent(JSON.parse(jsonText)); setJsonError(null); } catch { setJsonError("Μη έγκυρο JSON"); return; }
+                    }
+                    setJsonMode(!jsonMode);
+                  }}
+                >
+                  <Code className="h-4 w-4 mr-1" /> {jsonMode ? "Φόρμα" : "JSON"}
+                </Button>
+              )}
+            </div>
           </DialogTitle>
         </DialogHeader>
 
@@ -319,3 +418,6 @@ function NewBlockDialog({ onClose, onCreated }: { onClose: () => void; onCreated
     </Dialog>
   );
 }
+
+// Trigger DialogTrigger import (kept in case referenced elsewhere in tree)
+export { DialogTrigger };

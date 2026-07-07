@@ -6,6 +6,7 @@ import img3 from "@/assets/model-r950.jpg";
 import img4 from "@/assets/model-r520.jpg";
 import { usePageBlock } from "@/lib/page-blocks";
 import { EditableField } from "@/components/editor/EditableField";
+import { EditableItemControls, EditableAddButton } from "@/components/editor/EditableList";
 
 type Experience = { img: string; eyebrow: string; title: string; body: string };
 

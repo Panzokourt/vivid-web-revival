@@ -9,6 +9,7 @@ import {
   Image as ImageIcon,
   BarChart3,
   Users,
+  Server,
   LogOut,
   ExternalLink,
 } from "lucide-react";
@@ -49,6 +50,7 @@ const items: NavItem[] = [
   { title: "Media", url: "/admin/media", icon: ImageIcon },
   { title: "Analytics", url: "/admin/analytics", icon: BarChart3 },
   { title: "Settings", url: "/admin/settings", icon: Users, adminOnly: true },
+  { title: "System", url: "/admin/system", icon: Server, adminOnly: true },
 ];
 
 function AppSidebar({ role, email }: { role: "admin" | "editor" | null; email: string | null }) {

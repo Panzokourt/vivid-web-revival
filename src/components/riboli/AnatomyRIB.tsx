@@ -20,6 +20,8 @@ const FALLBACK = {
 export function AnatomyRIB() {
   const root = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
+  const block = usePageBlock("home", "anatomy", FALLBACK);
+  const hotspots = (block.hotspots ?? FALLBACK.hotspots) as Hotspot[];
 
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;
@@ -43,7 +45,7 @@ export function AnatomyRIB() {
       return () => st.scrollTrigger?.kill();
     }, root);
     return () => ctx.revert();
-  }, []);
+  }, [hotspots.length]);
 
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;
@@ -56,6 +58,8 @@ export function AnatomyRIB() {
     }, root);
     return () => ctx.revert();
   }, [active]);
+
+  const current = hotspots[active] ?? hotspots[0];
 
   return (
     <section
@@ -98,23 +102,29 @@ export function AnatomyRIB() {
 
         {/* Copy column */}
         <div className="relative">
-          <div className="text-[11px] uppercase tracking-[0.3em] text-paper/60">
-            Anatomy of a RIB
-          </div>
-          <h2 className="font-display text-5xl md:text-7xl leading-[0.9] mt-4">
-            Built from four ideas
-          </h2>
+          <EditableField page="home" block="anatomy" field="eyebrow" type="text" label="Eyebrow" as="div" className="text-[11px] uppercase tracking-[0.3em] text-paper/60">
+            {block.eyebrow}
+          </EditableField>
+          <EditableField page="home" block="anatomy" field="title" type="textarea" label="Title" as="div" className="mt-4">
+            <h2 className="font-display text-5xl md:text-7xl leading-[0.9] whitespace-pre-line">
+              {block.title}
+            </h2>
+          </EditableField>
 
           <div key={active} className="anatomy-copy-active mt-10 max-w-md">
             <div className="text-[11px] uppercase tracking-[0.3em] text-copper">
               0{active + 1} — of 0{hotspots.length}
             </div>
-            <div className="font-display text-3xl md:text-4xl mt-3">
-              {hotspots[active].title}
-            </div>
-            <p className="mt-4 text-paper/80 leading-relaxed">
-              {hotspots[active].body}
-            </p>
+            <EditableField page="home" block="anatomy" field={`hotspots.${active}.title`} type="text" label={`Hotspot ${active + 1} title`} as="div" className="mt-3">
+              <div className="font-display text-3xl md:text-4xl">
+                {current.title}
+              </div>
+            </EditableField>
+            <EditableField page="home" block="anatomy" field={`hotspots.${active}.body`} type="textarea" label={`Hotspot ${active + 1} body`} as="div" className="mt-4">
+              <p className="text-paper/80 leading-relaxed">
+                {current.body}
+              </p>
+            </EditableField>
           </div>
 
           <ol className="mt-10 flex gap-2">

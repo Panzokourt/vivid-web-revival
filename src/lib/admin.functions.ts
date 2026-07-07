@@ -1,7 +1,36 @@
 import { createServerFn } from "@tanstack/react-start";
 import { queryOptions } from "@tanstack/react-query";
 import { z } from "zod";
+import sanitizeHtml from "sanitize-html";
 import { requireSupabaseAuth } from "@/integrations/supabase/auth-middleware";
+
+const RICH_ALLOWED_TAGS = ["p", "br", "strong", "em", "u", "s", "a", "ul", "ol", "li", "code"];
+const RICH_ALLOWED_ATTR = { a: ["href", "target", "rel"] } as const;
+
+function sanitizeContent(input: unknown): unknown {
+  if (typeof input === "string") {
+    // Only sanitize obvious HTML strings; leave plain text alone
+    if (input.includes("<")) {
+      return sanitizeHtml(input, {
+        allowedTags: RICH_ALLOWED_TAGS,
+        allowedAttributes: RICH_ALLOWED_ATTR as unknown as sanitizeHtml.IOptions["allowedAttributes"],
+        allowedSchemes: ["http", "https", "mailto", "tel"],
+        transformTags: {
+          a: sanitizeHtml.simpleTransform("a", { rel: "noopener noreferrer" }),
+        },
+      });
+    }
+    return input;
+  }
+  if (Array.isArray(input)) return input.map(sanitizeContent);
+  if (input && typeof input === "object") {
+    const out: Record<string, unknown> = {};
+    for (const [k, v] of Object.entries(input as Record<string, unknown>)) out[k] = sanitizeContent(v);
+    return out;
+  }
+  return input;
+}
+
 
 // ─── Role check for gate ────────────────────────────────────────────────────
 export const getMyAdminRole = createServerFn({ method: "GET" })

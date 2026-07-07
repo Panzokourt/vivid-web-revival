@@ -1,6 +1,7 @@
 import { useLayoutEffect, useRef } from "react";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { usePageBlock } from "@/lib/page-blocks";
+import { RichText } from "@/components/admin/cms/RichText";
 
 type Milestone = { year: number; title: string; body: string };
 
@@ -87,9 +88,7 @@ export function Heritage() {
           <h2 className="font-display text-5xl md:text-7xl leading-[0.9] mt-4 whitespace-pre-line">
             {block.title}
           </h2>
-          <p className="mt-8 text-paper/70 max-w-sm leading-relaxed">
-            {block.intro}
-          </p>
+          <RichText html={block.intro} className="mt-8 text-paper/70 max-w-sm leading-relaxed" />
         </div>
 
 

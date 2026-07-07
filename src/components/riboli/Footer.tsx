@@ -1,22 +1,48 @@
 import { Link } from "@tanstack/react-router";
+import { usePageBlock } from "@/lib/page-blocks";
+import { EditableField } from "@/components/editor/EditableField";
+
+const FALLBACK = {
+  tagline: "Handcrafted RIBs for those who read the sea before the map.",
+  studio_line1: "Piraeus · Greece",
+  studio_line2: "+30 210 000 0000",
+  studio_line3: "hello@riboli.gr",
+  wordmark: "RIBALI",
+};
 
 export function Footer() {
+  const block = usePageBlock("home", "footer", FALLBACK);
+
   return (
     <footer id="footer" className="relative bg-ink text-paper overflow-hidden isolate">
       <div className="max-w-[1600px] mx-auto px-6 md:px-10 py-16 md:py-20">
         <div className="grid md:grid-cols-4 gap-10 border-b border-paper/15 pb-12">
           <div>
             <Link to="/" className="font-display text-3xl tracking-widest inline-block hover:text-copper transition-colors">RIBALI</Link>
-            <p className="mt-4 text-sm text-paper/60 max-w-xs leading-relaxed">
-              Handcrafted RIBs for those who read the sea before the map.
-            </p>
+            <EditableField page="home" block="footer" field="tagline" type="textarea" label="Tagline" as="div" className="mt-4 max-w-xs">
+              <p className="text-sm text-paper/60 leading-relaxed">
+                {block.tagline}
+              </p>
+            </EditableField>
           </div>
           <div>
             <div className="text-[11px] uppercase tracking-[0.3em] text-paper/50 mb-4">Studio</div>
             <ul className="space-y-2 text-sm text-paper/80">
-              <li>Piraeus · Greece</li>
-              <li>+30 210 000 0000</li>
-              <li>hello@riboli.gr</li>
+              <li>
+                <EditableField page="home" block="footer" field="studio_line1" type="text" label="Studio line 1">
+                  {block.studio_line1}
+                </EditableField>
+              </li>
+              <li>
+                <EditableField page="home" block="footer" field="studio_line2" type="text" label="Studio line 2">
+                  {block.studio_line2}
+                </EditableField>
+              </li>
+              <li>
+                <EditableField page="home" block="footer" field="studio_line3" type="text" label="Studio line 3">
+                  {block.studio_line3}
+                </EditableField>
+              </li>
             </ul>
           </div>
           <div>
@@ -42,7 +68,7 @@ export function Footer() {
             © {new Date().getFullYear()} RIBALI Marine · Built in Greece
           </div>
           <div className="font-display text-[18vw] md:text-[12vw] leading-[0.8] text-outline text-paper/40 select-none">
-            RIBALI
+            {block.wordmark}
           </div>
         </div>
       </div>

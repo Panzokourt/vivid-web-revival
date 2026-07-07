@@ -3,6 +3,42 @@ import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { MagneticButton } from "@/components/riboli/MagneticButton";
 import { HeroGraphics } from "@/components/riboli/HeroGraphics";
 import heroImg from "@/assets/hero.jpg";
+import { usePageBlock } from "@/lib/page-blocks";
+import { EditableField } from "@/components/editor/EditableField";
+import { resolveAsset } from "@/lib/asset-map";
+
+type HeroContent = {
+  sr_heading: string;
+  eyebrow: string;
+  title_lines: string;
+  top_right_word: string;
+  mid_left_body: string;
+  bottom_right_body: string;
+  bottom_center_label: string;
+  bottom_center_title: string;
+  cta_label: string;
+  cta_href: string;
+  image_key: string;
+};
+
+const FALLBACK: HeroContent = {
+  sr_heading: "RIBALI — Handcrafted RIB Boats from the Aegean",
+  eyebrow: "Handcrafted",
+  title_lines: "Ribali\n680",
+  top_right_word: "Rib",
+  mid_left_body: "Built by hand\non the shores\nof Greece",
+  bottom_right_body: "Editorial performance craft\nfor open water",
+  bottom_center_label: "Performance",
+  bottom_center_title: "Deep-V\nHulls",
+  cta_label: "Book",
+  cta_href: "#models",
+  image_key: "hero.jpg",
+};
+
+function isUrl(s?: string) {
+  if (!s) return false;
+  return /^(https?:|data:|blob:|\/)/.test(s);
+}
 
 // Text-shadow that keeps every label legible on both sky and hull
 const TEXT_SHADOW = "0 2px 24px rgba(0,0,0,0.55), 0 0 2px rgba(0,0,0,0.35)";
@@ -10,6 +46,12 @@ const DISPLAY_SHADOW = "drop-shadow(0 4px 30px rgba(0,0,0,0.45))";
 
 export function Hero() {
   const root = useRef<HTMLElement>(null);
+  const block = usePageBlock<HeroContent>("home", "hero", FALLBACK);
+  const lines = (block.title_lines ?? FALLBACK.title_lines).split("\n").filter(Boolean);
+  const mainWord = lines[0] ?? "Ribali";
+  const bigWord = lines[1] ?? "680";
+  const imgSrc = isUrl(block.image_key) ? block.image_key! : resolveAsset(block.image_key) ?? heroImg;
+
 
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;
@@ -79,19 +121,20 @@ export function Hero() {
       className="relative h-screen min-h-[720px] w-full overflow-hidden bg-ink text-paper isolate"
     >
       {/* Semantic H1 for SEO — visually hidden; decorative display words remain aria-hidden */}
-      <h1 className="sr-only">RIBALI — Handcrafted RIB Boats from the Aegean</h1>
+      <h1 className="sr-only">{block.sr_heading}</h1>
 
       {/* Full-bleed hero media */}
       <div className="h-media absolute inset-0 z-0">
 
         <img
-          src={heroImg}
+          src={imgSrc}
           alt="RIBALI handcrafted RIB on the Aegean sea"
           className="h-full w-full object-cover object-center"
           style={{ filter: "contrast(1.05) saturate(0.9)" }}
           fetchPriority="high"
           decoding="async"
         />
+
 
         {/* Legibility gradients */}
         <div
@@ -117,12 +160,13 @@ export function Hero() {
       <HeroGraphics containerRef={root} variant="minimal" />
 
       {/* 1. Top-left */}
-      <div
+      <EditableField
+        page="home" block="hero" field="eyebrow" type="text" label="Eyebrow" as="div"
         className="h-corner absolute top-24 left-6 md:left-10 z-20 text-[11px] uppercase tracking-[0.3em] text-paper/90"
-        style={{ textShadow: TEXT_SHADOW }}
       >
-        Handcrafted
-      </div>
+        <span style={{ textShadow: TEXT_SHADOW }}>{block.eyebrow}</span>
+      </EditableField>
+
 
       {/* 2. Top-center mark */}
       <div
@@ -144,7 +188,7 @@ export function Hero() {
           style={{ filter: DISPLAY_SHADOW }}
           aria-hidden
         >
-          {chars("Rib")}
+          {chars(block.top_right_word ?? "Rib")}
         </div>
         <svg
           className="h-corner mt-2 text-paper/70"
@@ -155,14 +199,16 @@ export function Hero() {
       </div>
 
       {/* 4. Mid-left body triad */}
-      <div
+      <EditableField
+        page="home" block="hero" field="mid_left_body" type="textarea" label="Mid-left body" as="div"
         className="h-body absolute left-6 md:left-10 top-1/2 -translate-y-1/2 z-20 max-w-[220px] text-paper/95 text-sm md:text-base leading-snug"
-        style={{ textShadow: TEXT_SHADOW }}
       >
-        Built by hand<br />on the shores<br />of Greece
-      </div>
+        <span style={{ textShadow: TEXT_SHADOW, whiteSpace: "pre-line" }}>
+          {block.mid_left_body}
+        </span>
+      </EditableField>
 
-      {/* 5. Mid — outlined "Riboli" */}
+      {/* 5. Mid — outlined main word */}
       <div className="absolute inset-x-0 top-[46%] -translate-y-1/2 z-10 flex items-center justify-center pointer-events-none px-6">
         <div
           className="h-display-aegean font-display leading-[0.85] tracking-tight text-[14vw] md:text-[11vw] text-outline-thick text-paper max-w-full"
@@ -170,18 +216,18 @@ export function Hero() {
           style={{ filter: DISPLAY_SHADOW }}
           aria-hidden
         >
-          {chars("Ribali")}
+          {chars(mainWord)}
         </div>
       </div>
 
-      {/* 6. Mid-right — solid "680", anchored inside the viewport */}
+      {/* 6. Mid-right — solid big word */}
       <div className="absolute top-[54%] -translate-y-1/2 right-6 md:right-10 z-20 pointer-events-none max-w-[45vw]">
         <div
           className="h-display-sea font-display leading-[0.85] tracking-tight text-paper text-[16vw] md:text-[12vw]"
           data-hover-parallax="0.014"
           style={{ filter: DISPLAY_SHADOW }}
         >
-          {chars("680")}
+          {chars(bigWord)}
         </div>
       </div>
 
@@ -189,10 +235,12 @@ export function Hero() {
       <div className="absolute bottom-10 left-6 md:left-10 z-30 flex flex-col items-start gap-6">
         <MagneticButton
           as="a"
-          href="#models"
+          href={block.cta_href || "#models"}
           className="h-book group inline-flex items-center gap-3 bg-paper text-ink px-8 py-4 text-[11px] uppercase tracking-[0.3em] hover:bg-copper hover:text-paper transition-colors"
         >
-          Book
+          <EditableField page="home" block="hero" field="cta_label" type="text" label="CTA label">
+            {block.cta_label}
+          </EditableField>
           <span className="text-lg leading-none group-hover:rotate-90 transition-transform">+</span>
         </MagneticButton>
         <div
@@ -211,21 +259,29 @@ export function Hero() {
         className="h-body absolute bottom-10 left-1/2 -translate-x-1/2 z-20 text-center text-paper"
         style={{ textShadow: TEXT_SHADOW }}
       >
-        <div className="text-xs md:text-sm uppercase tracking-[0.25em] font-semibold text-paper/80">
-          Performance
-        </div>
-        <div className="mt-2 text-base md:text-xl uppercase tracking-[0.15em] font-semibold leading-tight">
-          Deep-V<br />Hulls
-        </div>
+        <EditableField
+          page="home" block="hero" field="bottom_center_label" type="text" label="Bottom label" as="div"
+          className="text-xs md:text-sm uppercase tracking-[0.25em] font-semibold text-paper/80"
+        >
+          {block.bottom_center_label}
+        </EditableField>
+        <EditableField
+          page="home" block="hero" field="bottom_center_title" type="textarea" label="Bottom title" as="div"
+          className="mt-2 text-base md:text-xl uppercase tracking-[0.15em] font-semibold leading-tight"
+        >
+          <span style={{ whiteSpace: "pre-line" }}>{block.bottom_center_title}</span>
+        </EditableField>
       </div>
 
       {/* 9. Bottom-right body */}
-      <div
+      <EditableField
+        page="home" block="hero" field="bottom_right_body" type="textarea" label="Bottom-right body" as="div"
         className="h-body absolute bottom-10 right-6 md:right-10 z-20 max-w-[220px] text-right text-paper/95 text-sm md:text-base leading-snug"
-        style={{ textShadow: TEXT_SHADOW }}
       >
-        Editorial performance craft<br />for open water
-      </div>
+        <span style={{ textShadow: TEXT_SHADOW, whiteSpace: "pre-line" }}>
+          {block.bottom_right_body}
+        </span>
+      </EditableField>
     </section>
   );
 }

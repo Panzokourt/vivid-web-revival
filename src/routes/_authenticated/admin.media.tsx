@@ -564,31 +564,79 @@ function MediaPage() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Folder rename / delete */}
+      <FolderActionDialog
+        action={folderAction}
+        onClose={() => setFolderAction(null)}
+        existingFolders={Array.from(folders.keys()).filter((k) => k !== "root")}
+        onRename={(from, to) => renameFolderMutation.mutate({ from, to })}
+        onDelete={(prefix) => deleteFolderMutation.mutate(prefix)}
+        renaming={renameFolderMutation.isPending}
+        deleting={deleteFolderMutation.isPending}
+      />
+
+      {/* Insert into CMS block */}
+      <InsertIntoBlockDialog
+        mediaName={insertFile?.name ?? null}
+        mediaKind={insertFile ? getFileKind(insertFile.mime_type, insertFile.name) : null}
+        onClose={() => setInsertFile(null)}
+      />
     </div>
   );
 }
 
 // ────────────────────────────────────────────────────────────────
 
-function FolderItem({ label, count, active, onClick }: { label: string; count: number; active: boolean; onClick: () => void }) {
+function FolderItem({
+  label, count, active, onClick, onRename, onDelete,
+}: {
+  label: string; count: number; active: boolean; onClick: () => void;
+  onRename?: () => void; onDelete?: () => void;
+}) {
   return (
-    <button
-      onClick={onClick}
-      className={`w-full flex items-center justify-between px-3 py-1.5 rounded text-sm ${active ? "bg-ink text-white" : "text-ink/70 hover:bg-ink/5"}`}
-    >
-      <span className="inline-flex items-center gap-2 truncate">
-        <Folder className="h-3.5 w-3.5" /> {label}
-      </span>
-      <span className={`text-[11px] tabular-nums ${active ? "text-white/70" : "text-ink/40"}`}>{count}</span>
-    </button>
+    <div className={`group/folder flex items-center rounded ${active ? "bg-ink text-white" : "text-ink/70 hover:bg-ink/5"}`}>
+      <button
+        onClick={onClick}
+        className="flex-1 flex items-center justify-between px-3 py-1.5 text-sm min-w-0"
+      >
+        <span className="inline-flex items-center gap-2 truncate">
+          <Folder className="h-3.5 w-3.5 shrink-0" /> <span className="truncate">{label}</span>
+        </span>
+        <span className={`text-[11px] tabular-nums ${active ? "text-white/70" : "text-ink/40"}`}>{count}</span>
+      </button>
+      {(onRename || onDelete) && (
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <button
+              className={`opacity-0 group-hover/folder:opacity-100 p-1.5 mr-1 rounded ${active ? "hover:bg-white/10" : "hover:bg-ink/10"}`}
+              onClick={(e) => e.stopPropagation()}
+              aria-label="Ενέργειες φακέλου"
+            >
+              <MoreVertical className="h-3.5 w-3.5" />
+            </button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end">
+            {onRename && (
+              <DropdownMenuItem onClick={onRename}><Pencil className="h-3.5 w-3.5 mr-2" />Μετονομασία</DropdownMenuItem>
+            )}
+            {onDelete && (
+              <DropdownMenuItem onClick={onDelete} className="text-red-600 focus:text-red-600">
+                <Trash2 className="h-3.5 w-3.5 mr-2" />Διαγραφή φακέλου
+              </DropdownMenuItem>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      )}
+    </div>
   );
 }
 
 function FileCard({
-  file, selected, onToggleSelect, onOpen, onDetails, onCopy, onDelete,
+  file, selected, onToggleSelect, onOpen, onDetails, onInsert, onCopy, onDelete,
 }: {
   file: MediaFile; selected: boolean;
-  onToggleSelect: () => void; onOpen: () => void; onDetails: () => void;
+  onToggleSelect: () => void; onOpen: () => void; onDetails: () => void; onInsert: () => void;
   onCopy: () => void; onDelete: () => void;
 }) {
   const kind = getFileKind(file.mime_type, file.name);

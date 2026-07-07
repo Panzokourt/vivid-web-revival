@@ -7,8 +7,9 @@ import img4 from "@/assets/model-r520.jpg";
 import { usePageBlock } from "@/lib/page-blocks";
 import { EditableField } from "@/components/editor/EditableField";
 import { EditableItemControls, EditableAddButton } from "@/components/editor/EditableList";
+import { resolveAsset } from "@/lib/asset-map";
 
-type Experience = { img: string; eyebrow: string; title: string; body: string };
+type Experience = { img?: string; image_key?: string; eyebrow: string; title: string; body: string };
 
 const FALLBACK = {
   eyebrow: "How it's used",
@@ -104,7 +105,7 @@ export function Experiences() {
           >
             <div className="absolute inset-0 overflow-hidden">
               <img
-                src={e.img}
+                src={e.img && /^(https?:|data:|blob:|\/)/.test(e.img) ? e.img : resolveAsset(e.image_key ?? e.img)}
                 alt={e.title}
                 loading="lazy"
                 className="exp-img absolute inset-0 h-[120%] w-full object-cover"

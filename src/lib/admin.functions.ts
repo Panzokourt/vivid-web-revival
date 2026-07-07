@@ -702,7 +702,7 @@ export const adminSetBlockMediaField = createServerFn({ method: "POST" })
 
     const { error: uErr } = await context.supabase
       .from("page_blocks")
-      .update({ content, updated_by: context.userId })
+      .update({ content: content as never, updated_by: context.userId })
       .eq("id", data.block_id);
     if (uErr) throw new Error(uErr.message);
     return { ok: true };

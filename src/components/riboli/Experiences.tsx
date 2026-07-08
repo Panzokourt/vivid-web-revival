@@ -96,8 +96,10 @@ export function Experiences() {
 
       <div
         ref={track}
-        className="flex gap-6 md:gap-10 px-6 md:px-10 pb-10 will-change-transform flex-1 min-h-0 items-stretch"
+        className="flex gap-6 md:gap-10 px-6 md:px-10 pb-10 will-change-transform flex-1 min-h-0 items-stretch overflow-x-auto snap-x snap-mandatory scrollbar-none lg:overflow-visible lg:snap-none"
+        style={{ WebkitOverflowScrolling: "touch" }}
       >
+
         {items.map((e, i) => (
           <article
             key={i}

@@ -103,8 +103,9 @@ export function Experiences() {
         {items.map((e, i) => (
           <article
             key={i}
-            className="relative shrink-0 w-[85vw] md:w-[60vw] lg:w-[55vw] h-full bg-paper-2 overflow-hidden isolate"
+            className="relative shrink-0 w-[85vw] md:w-[60vw] lg:w-[55vw] h-full bg-paper-2 overflow-hidden isolate snap-center lg:snap-align-none"
           >
+
             <div className="absolute inset-0 overflow-hidden">
               <img
                 src={e.img && /^(https?:|data:|blob:|\/)/.test(e.img) ? e.img : resolveAsset(e.image_key ?? e.img)}

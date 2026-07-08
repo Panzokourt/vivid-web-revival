@@ -68,13 +68,18 @@ export function FeaturedModels() {
         </div>
       </div>
 
-      <div ref={track} className="flex gap-6 md:gap-10 px-6 md:px-10 pb-10 will-change-transform flex-1 min-h-0 items-stretch">
+      <div
+        ref={track}
+        className="flex gap-6 md:gap-10 px-6 md:px-10 pb-10 will-change-transform flex-1 min-h-0 items-stretch overflow-x-auto snap-x snap-mandatory scrollbar-none lg:overflow-visible lg:snap-none"
+        style={{ WebkitOverflowScrolling: "touch" }}
+      >
         {models.map((m) => (
           <Link
             key={m.to}
             to={m.to}
-            className="model-slide relative shrink-0 w-[85vw] md:w-[70vw] lg:w-[70vw] h-full bg-paper-2 overflow-hidden group block isolate"
+            className="model-slide relative shrink-0 w-[85vw] md:w-[70vw] lg:w-[70vw] h-full bg-paper-2 overflow-hidden group block isolate snap-center lg:snap-align-none"
           >
+
 
             <img
               src={m.img}

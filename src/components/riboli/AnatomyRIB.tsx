@@ -25,6 +25,8 @@ export function AnatomyRIB() {
 
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;
+    // Mobile / tablet: skip pinned scroll-jack. Hotspots are tap-driven.
+    if (!window.matchMedia("(min-width: 1024px)").matches) return;
     const ctx = gsap.context(() => {
       const steps = hotspots.length;
       const st = gsap.to({}, {
@@ -47,6 +49,7 @@ export function AnatomyRIB() {
     return () => ctx.revert();
   }, [hotspots.length]);
 
+
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;
     const ctx = gsap.context(() => {
@@ -65,8 +68,9 @@ export function AnatomyRIB() {
     <section
       ref={root}
       id="anatomy"
-      className="relative bg-ink text-paper overflow-hidden h-screen"
+      className="relative bg-ink text-paper overflow-hidden min-h-screen lg:h-screen"
     >
+
       <div className="max-w-[1600px] mx-auto px-6 md:px-10 h-full grid lg:grid-cols-[1.2fr_1fr] gap-10 items-center py-16">
         {/* Boat image with hotspots */}
         <div className="relative h-[45vh] lg:h-[70vh] w-full">

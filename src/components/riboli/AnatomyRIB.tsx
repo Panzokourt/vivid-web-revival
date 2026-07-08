@@ -25,6 +25,8 @@ export function AnatomyRIB() {
 
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;
+    // Mobile / tablet: skip pinned scroll-jack. Hotspots are tap-driven.
+    if (!window.matchMedia("(min-width: 1024px)").matches) return;
     const ctx = gsap.context(() => {
       const steps = hotspots.length;
       const st = gsap.to({}, {
@@ -46,6 +48,7 @@ export function AnatomyRIB() {
     }, root);
     return () => ctx.revert();
   }, [hotspots.length]);
+
 
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;

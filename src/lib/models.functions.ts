@@ -68,7 +68,7 @@ export const listModels = createServerFn({ method: "GET" }).handler(
     const { data, error } = await supabase
       .from("models")
       .select(
-        "id, slug, code, name, number, tag, tagline, length_m, max_hp, pax, hero_image, order_index",
+        "id, slug, code, name, number, tag, tagline, length_m, max_hp, pax, hero_image, order_index, series_slug, hull_material",
       )
       .order("order_index", { ascending: true });
     if (error) throw new Error(error.message);

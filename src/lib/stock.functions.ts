@@ -19,7 +19,7 @@ export type StockBoat = {
   available_from: string | null;
   test_drive_available: boolean;
   hero_image: string | null;
-  gallery: unknown;
+  gallery: string[];
   description: string | null;
   highlights: string[];
   status: "available" | "reserved" | "sold" | "hidden";
@@ -44,6 +44,7 @@ export const listStock = createServerFn({ method: "GET" }).handler(async (): Pro
   if (error) throw new Error(error.message);
   return (data ?? []).map((r) => ({
     ...r,
+    gallery: Array.isArray(r.gallery) ? (r.gallery as string[]) : [],
     highlights: Array.isArray(r.highlights) ? (r.highlights as string[]) : [],
   })) as StockBoat[];
 });

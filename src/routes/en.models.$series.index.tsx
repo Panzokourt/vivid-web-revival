@@ -1,6 +1,6 @@
 import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
-import { Route as SeriesRoute } from "@/routes/models.$series";
+import { Route as SeriesRoute } from "@/routes/models.$series.index";
 
 const SITE = "https://ribali.advize.gr";
 const forwardedLoader = SeriesRoute.options.loader as unknown as (ctx: unknown) => unknown;

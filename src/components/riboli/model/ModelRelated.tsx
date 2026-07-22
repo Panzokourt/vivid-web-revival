@@ -5,16 +5,10 @@ import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { modelsListQueryOptions } from "@/lib/models.functions";
 import { resolveAsset } from "@/lib/asset-map";
 
-const routeMap: Record<string, "/models/r-680" | "/models/r-950" | "/models/r-520"> = {
-  "r-680": "/models/r-680",
-  "r-950": "/models/r-950",
-  "r-520": "/models/r-520",
-};
-
 export function ModelRelated({ currentSlug }: { currentSlug: string }) {
   const root = useRef<HTMLElement>(null);
   const { data } = useSuspenseQuery(modelsListQueryOptions());
-  const related = data.filter((m) => m.slug !== currentSlug && routeMap[m.slug]);
+  const related = data.filter((m) => m.slug !== currentSlug);
 
 
   useLayoutEffect(() => {
@@ -50,7 +44,8 @@ export function ModelRelated({ currentSlug }: { currentSlug: string }) {
           {related.map((m) => (
             <Link
               key={m.slug}
-              to={routeMap[m.slug]}
+              to="/models/$series/$model"
+              params={{ series: m.series_slug ?? "odyssey", model: m.slug }}
               className="mr-item group relative block h-[60vh] overflow-hidden bg-paper-2"
             >
 

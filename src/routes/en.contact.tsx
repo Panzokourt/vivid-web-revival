@@ -1,3 +1,4 @@
+import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Route as ContactRoute } from "@/routes/contact";
 
@@ -17,5 +18,10 @@ export const Route = createFileRoute("/en/contact")({
       { rel: "alternate", hrefLang: "en", href: `${SITE}/en/contact` },
     ],
   }),
-  component: ContactRoute.options.component!,
+  component: EnPage,
 });
+
+function EnPage() {
+  const C = ContactRoute.options.component as unknown as React.ComponentType;
+  return <C />;
+}

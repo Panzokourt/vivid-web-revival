@@ -1,3 +1,4 @@
+import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Route as ConfigRoute } from "@/routes/configurator";
 
@@ -17,5 +18,10 @@ export const Route = createFileRoute("/en/configurator")({
       { rel: "alternate", hrefLang: "en", href: `${SITE}/en/configurator` },
     ],
   }),
-  component: ConfigRoute.options.component!,
+  component: EnPage,
 });
+
+function EnPage() {
+  const C = ConfigRoute.options.component as unknown as React.ComponentType;
+  return <C />;
+}

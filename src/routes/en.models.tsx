@@ -1,3 +1,4 @@
+import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Route as ModelsRoute } from "@/routes/models";
 
@@ -20,5 +21,10 @@ export const Route = createFileRoute("/en/models")({
       { rel: "alternate", hrefLang: "en", href: `${SITE}/en/models` },
     ],
   }),
-  component: ModelsRoute.options.component!,
+  component: EnPage,
 });
+
+function EnPage() {
+  const C = ModelsRoute.options.component as unknown as React.ComponentType;
+  return <C />;
+}

@@ -1,3 +1,4 @@
+import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Route as StockRoute } from "@/routes/stock";
 
@@ -20,5 +21,10 @@ export const Route = createFileRoute("/en/stock")({
       { rel: "alternate", hrefLang: "en", href: `${SITE}/en/stock` },
     ],
   }),
-  component: StockRoute.options.component!,
+  component: EnPage,
 });
+
+function EnPage() {
+  const C = StockRoute.options.component as unknown as React.ComponentType;
+  return <C />;
+}

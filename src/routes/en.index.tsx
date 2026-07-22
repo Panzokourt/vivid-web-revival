@@ -1,3 +1,4 @@
+import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Route as HomeRoute } from "@/routes/index";
 
@@ -20,5 +21,10 @@ export const Route = createFileRoute("/en/")({
       { rel: "alternate", hrefLang: "x-default", href: `${SITE}/` },
     ],
   }),
-  component: HomeRoute.options.component!,
+  component: EnPage,
 });
+
+function EnPage() {
+  const C = HomeRoute.options.component as unknown as React.ComponentType;
+  return <C />;
+}

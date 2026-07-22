@@ -11,6 +11,7 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as StockRouteImport } from './routes/stock'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ModelsRouteImport } from './routes/models'
 import { Route as EnRouteImport } from './routes/en'
 import { Route as DealersRouteImport } from './routes/dealers'
 import { Route as ContactRouteImport } from './routes/contact'
@@ -56,6 +57,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   path: '/sitemap.xml',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ModelsRoute = ModelsRouteImport.update({
+  id: '/models',
+  path: '/models',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const EnRoute = EnRouteImport.update({
   id: '/en',
   path: '/en',
@@ -96,9 +102,9 @@ const IndexRoute = IndexRouteImport.update({
   getParentRoute: () => rootRouteImport,
 } as any)
 const ModelsIndexRoute = ModelsIndexRouteImport.update({
-  id: '/models/',
-  path: '/models/',
-  getParentRoute: () => rootRouteImport,
+  id: '/',
+  path: '/',
+  getParentRoute: () => ModelsRoute,
 } as any)
 const EnIndexRoute = EnIndexRouteImport.update({
   id: '/',
@@ -106,19 +112,19 @@ const EnIndexRoute = EnIndexRouteImport.update({
   getParentRoute: () => EnRoute,
 } as any)
 const ModelsR950Route = ModelsR950RouteImport.update({
-  id: '/models/r-950',
-  path: '/models/r-950',
-  getParentRoute: () => rootRouteImport,
+  id: '/r-950',
+  path: '/r-950',
+  getParentRoute: () => ModelsRoute,
 } as any)
 const ModelsR680Route = ModelsR680RouteImport.update({
-  id: '/models/r-680',
-  path: '/models/r-680',
-  getParentRoute: () => rootRouteImport,
+  id: '/r-680',
+  path: '/r-680',
+  getParentRoute: () => ModelsRoute,
 } as any)
 const ModelsR520Route = ModelsR520RouteImport.update({
-  id: '/models/r-520',
-  path: '/models/r-520',
-  getParentRoute: () => rootRouteImport,
+  id: '/r-520',
+  path: '/r-520',
+  getParentRoute: () => ModelsRoute,
 } as any)
 const EnStockRoute = EnStockRouteImport.update({
   id: '/stock',
@@ -146,9 +152,9 @@ const EnAboutRoute = EnAboutRouteImport.update({
   getParentRoute: () => EnRoute,
 } as any)
 const ModelsSeriesIndexRoute = ModelsSeriesIndexRouteImport.update({
-  id: '/models/$series/',
-  path: '/models/$series/',
-  getParentRoute: () => rootRouteImport,
+  id: '/$series/',
+  path: '/$series/',
+  getParentRoute: () => ModelsRoute,
 } as any)
 const EnModelsIndexRoute = EnModelsIndexRouteImport.update({
   id: '/models/',
@@ -161,9 +167,9 @@ const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   getParentRoute: () => AuthenticatedRouteRoute,
 } as any)
 const ModelsSeriesModelRoute = ModelsSeriesModelRouteImport.update({
-  id: '/models/$series/$model',
-  path: '/models/$series/$model',
-  getParentRoute: () => rootRouteImport,
+  id: '/$series/$model',
+  path: '/$series/$model',
+  getParentRoute: () => ModelsRoute,
 } as any)
 const AuthenticatedAdminSystemRoute =
   AuthenticatedAdminSystemRouteImport.update({
@@ -242,6 +248,7 @@ export interface FileRoutesByFullPath {
   '/contact': typeof ContactRoute
   '/dealers': typeof DealersRoute
   '/en': typeof EnRouteWithChildren
+  '/models': typeof ModelsRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stock': typeof StockRoute
   '/en/about': typeof EnAboutRoute
@@ -317,6 +324,7 @@ export interface FileRoutesById {
   '/contact': typeof ContactRoute
   '/dealers': typeof DealersRoute
   '/en': typeof EnRouteWithChildren
+  '/models': typeof ModelsRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stock': typeof StockRoute
   '/en/about': typeof EnAboutRoute
@@ -356,6 +364,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dealers'
     | '/en'
+    | '/models'
     | '/sitemap.xml'
     | '/stock'
     | '/en/about'
@@ -430,6 +439,7 @@ export interface FileRouteTypes {
     | '/contact'
     | '/dealers'
     | '/en'
+    | '/models'
     | '/sitemap.xml'
     | '/stock'
     | '/en/about'
@@ -469,14 +479,9 @@ export interface RootRouteChildren {
   ContactRoute: typeof ContactRoute
   DealersRoute: typeof DealersRoute
   EnRoute: typeof EnRouteWithChildren
+  ModelsRoute: typeof ModelsRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StockRoute: typeof StockRoute
-  ModelsR520Route: typeof ModelsR520Route
-  ModelsR680Route: typeof ModelsR680Route
-  ModelsR950Route: typeof ModelsR950Route
-  ModelsIndexRoute: typeof ModelsIndexRoute
-  ModelsSeriesModelRoute: typeof ModelsSeriesModelRoute
-  ModelsSeriesIndexRoute: typeof ModelsSeriesIndexRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -493,6 +498,13 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/models': {
+      id: '/models'
+      path: '/models'
+      fullPath: '/models'
+      preLoaderRoute: typeof ModelsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/en': {
@@ -553,10 +565,10 @@ declare module '@tanstack/react-router' {
     }
     '/models/': {
       id: '/models/'
-      path: '/models'
+      path: '/'
       fullPath: '/models/'
       preLoaderRoute: typeof ModelsIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ModelsRoute
     }
     '/en/': {
       id: '/en/'
@@ -567,24 +579,24 @@ declare module '@tanstack/react-router' {
     }
     '/models/r-950': {
       id: '/models/r-950'
-      path: '/models/r-950'
+      path: '/r-950'
       fullPath: '/models/r-950'
       preLoaderRoute: typeof ModelsR950RouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ModelsRoute
     }
     '/models/r-680': {
       id: '/models/r-680'
-      path: '/models/r-680'
+      path: '/r-680'
       fullPath: '/models/r-680'
       preLoaderRoute: typeof ModelsR680RouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ModelsRoute
     }
     '/models/r-520': {
       id: '/models/r-520'
-      path: '/models/r-520'
+      path: '/r-520'
       fullPath: '/models/r-520'
       preLoaderRoute: typeof ModelsR520RouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ModelsRoute
     }
     '/en/stock': {
       id: '/en/stock'
@@ -623,10 +635,10 @@ declare module '@tanstack/react-router' {
     }
     '/models/$series/': {
       id: '/models/$series/'
-      path: '/models/$series'
+      path: '/$series'
       fullPath: '/models/$series/'
       preLoaderRoute: typeof ModelsSeriesIndexRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ModelsRoute
     }
     '/en/models/': {
       id: '/en/models/'
@@ -644,10 +656,10 @@ declare module '@tanstack/react-router' {
     }
     '/models/$series/$model': {
       id: '/models/$series/$model'
-      path: '/models/$series/$model'
+      path: '/$series/$model'
       fullPath: '/models/$series/$model'
       preLoaderRoute: typeof ModelsSeriesModelRouteImport
-      parentRoute: typeof rootRouteImport
+      parentRoute: typeof ModelsRoute
     }
     '/_authenticated/admin/system': {
       id: '/_authenticated/admin/system'
@@ -806,6 +818,27 @@ const EnRouteChildren: EnRouteChildren = {
 
 const EnRouteWithChildren = EnRoute._addFileChildren(EnRouteChildren)
 
+interface ModelsRouteChildren {
+  ModelsR520Route: typeof ModelsR520Route
+  ModelsR680Route: typeof ModelsR680Route
+  ModelsR950Route: typeof ModelsR950Route
+  ModelsIndexRoute: typeof ModelsIndexRoute
+  ModelsSeriesModelRoute: typeof ModelsSeriesModelRoute
+  ModelsSeriesIndexRoute: typeof ModelsSeriesIndexRoute
+}
+
+const ModelsRouteChildren: ModelsRouteChildren = {
+  ModelsR520Route: ModelsR520Route,
+  ModelsR680Route: ModelsR680Route,
+  ModelsR950Route: ModelsR950Route,
+  ModelsIndexRoute: ModelsIndexRoute,
+  ModelsSeriesModelRoute: ModelsSeriesModelRoute,
+  ModelsSeriesIndexRoute: ModelsSeriesIndexRoute,
+}
+
+const ModelsRouteWithChildren =
+  ModelsRoute._addFileChildren(ModelsRouteChildren)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -815,14 +848,9 @@ const rootRouteChildren: RootRouteChildren = {
   ContactRoute: ContactRoute,
   DealersRoute: DealersRoute,
   EnRoute: EnRouteWithChildren,
+  ModelsRoute: ModelsRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StockRoute: StockRoute,
-  ModelsR520Route: ModelsR520Route,
-  ModelsR680Route: ModelsR680Route,
-  ModelsR950Route: ModelsR950Route,
-  ModelsIndexRoute: ModelsIndexRoute,
-  ModelsSeriesModelRoute: ModelsSeriesModelRoute,
-  ModelsSeriesIndexRoute: ModelsSeriesIndexRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

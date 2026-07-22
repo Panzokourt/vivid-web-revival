@@ -334,8 +334,11 @@ export type Database = {
           country: string | null
           created_at: string
           email: string
+          engine_brand: string | null
           engine_hp: number
           equipment: Json
+          finance_down_payment: number | null
+          finance_months: number | null
           full_name: string
           hull_color: string
           id: string
@@ -343,7 +346,10 @@ export type Database = {
           model_slug: string
           notes: string | null
           phone: string | null
+          price_breakdown: Json | null
           status: string
+          total_price_eur: number | null
+          trailer_id: string | null
           tube_color: string
           updated_at: string
         }
@@ -353,8 +359,11 @@ export type Database = {
           country?: string | null
           created_at?: string
           email: string
+          engine_brand?: string | null
           engine_hp: number
           equipment?: Json
+          finance_down_payment?: number | null
+          finance_months?: number | null
           full_name: string
           hull_color: string
           id?: string
@@ -362,7 +371,10 @@ export type Database = {
           model_slug: string
           notes?: string | null
           phone?: string | null
+          price_breakdown?: Json | null
           status?: string
+          total_price_eur?: number | null
+          trailer_id?: string | null
           tube_color: string
           updated_at?: string
         }
@@ -372,8 +384,11 @@ export type Database = {
           country?: string | null
           created_at?: string
           email?: string
+          engine_brand?: string | null
           engine_hp?: number
           equipment?: Json
+          finance_down_payment?: number | null
+          finance_months?: number | null
           full_name?: string
           hull_color?: string
           id?: string
@@ -381,7 +396,10 @@ export type Database = {
           model_slug?: string
           notes?: string | null
           phone?: string | null
+          price_breakdown?: Json | null
           status?: string
+          total_price_eur?: number | null
+          trailer_id?: string | null
           tube_color?: string
           updated_at?: string
         }

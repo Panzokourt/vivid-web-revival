@@ -8,34 +8,36 @@ export type AppLocale = "el" | "en";
 export const SUPPORTED_LOCALES: AppLocale[] = ["el", "en"];
 export const DEFAULT_LOCALE: AppLocale = "el";
 
-let initialized = false;
+// Initialise synchronously at module import so both SSR and client renders
+// have a usable i18n instance before the first useTranslation() call.
+if (!i18n.isInitialized) {
+  const chain = typeof window !== "undefined"
+    ? i18n.use(LanguageDetector).use(initReactI18next)
+    : i18n.use(initReactI18next);
+  chain.init({
+    resources: {
+      el: { common: el },
+      en: { common: en },
+    },
+    lng: DEFAULT_LOCALE,
+    fallbackLng: DEFAULT_LOCALE,
+    defaultNS: "common",
+    supportedLngs: SUPPORTED_LOCALES,
+    nonExplicitSupportedLngs: true,
+    interpolation: { escapeValue: false },
+    detection: {
+      order: ["localStorage", "navigator", "htmlTag"],
+      lookupLocalStorage: "ribali_locale",
+      caches: ["localStorage"],
+    },
+    returnNull: false,
+  });
+}
 
 export function initI18n(initialLocale?: AppLocale) {
-  if (initialized) return i18n;
-  initialized = true;
-
-  i18n
-    .use(LanguageDetector)
-    .use(initReactI18next)
-    .init({
-      resources: {
-        el: { common: el },
-        en: { common: en },
-      },
-      lng: initialLocale,
-      fallbackLng: DEFAULT_LOCALE,
-      defaultNS: "common",
-      supportedLngs: SUPPORTED_LOCALES,
-      nonExplicitSupportedLngs: true,
-      interpolation: { escapeValue: false },
-      detection: {
-        order: ["localStorage", "navigator", "htmlTag"],
-        lookupLocalStorage: "ribali_locale",
-        caches: ["localStorage"],
-      },
-      returnNull: false,
-    });
-
+  if (initialLocale && i18n.language !== initialLocale) {
+    void i18n.changeLanguage(initialLocale);
+  }
   return i18n;
 }
 

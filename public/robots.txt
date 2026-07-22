@@ -1,4 +1,4 @@
 User-agent: *
 Allow: /
 
-Sitemap: https://vivid-web-revival.lovable.app/sitemap.xml
+Sitemap: https://ribali.advize.gr/sitemap.xml

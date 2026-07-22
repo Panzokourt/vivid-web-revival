@@ -1,0 +1,53 @@
+{
+  "nav": {
+    "models": "Models",
+    "odyssey": "Odyssey · Polyester",
+    "alu": "Alu Series · Aluminium",
+    "stock": "Stock",
+    "about": "About",
+    "dealers": "Dealers",
+    "contact": "Contact",
+    "configure": "Configure",
+    "menu": "Menu"
+  },
+  "footer": {
+    "tagline": "Handcrafted boats for those who read the sea before the chart.",
+    "studio": "Studio",
+    "showroom": "Showroom",
+    "explore": "Explore",
+    "legal": "Legal",
+    "rights": "All rights reserved."
+  },
+  "cta": {
+    "request_quote": "Request a quote",
+    "configure_your": "Configure yours",
+    "view_all_models": "View all models",
+    "find_dealer": "Find a dealer",
+    "book_test_drive": "Book a test drive",
+    "learn_more": "Learn more",
+    "back": "Back",
+    "download_pdf": "Download PDF"
+  },
+  "common": {
+    "loading": "Loading…",
+    "error": "Something went wrong",
+    "retry": "Try again",
+    "close": "Close",
+    "submit": "Submit",
+    "cancel": "Cancel",
+    "save": "Save",
+    "language": "Language"
+  },
+  "form": {
+    "name": "Full name",
+    "email": "Email",
+    "phone": "Phone",
+    "message": "Message",
+    "required": "Required field"
+  },
+  "language": {
+    "el": "Ελληνικά",
+    "en": "English",
+    "switch": "Switch language"
+  }
+}

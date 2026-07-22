@@ -21,6 +21,7 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ModelsR950RouteImport } from './routes/models.r-950'
 import { Route as ModelsR680RouteImport } from './routes/models.r-680'
 import { Route as ModelsR520RouteImport } from './routes/models.r-520'
+import { Route as ModelsSeriesRouteImport } from './routes/models.$series'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminSystemRouteImport } from './routes/_authenticated/admin.system'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
@@ -90,6 +91,11 @@ const ModelsR680Route = ModelsR680RouteImport.update({
 const ModelsR520Route = ModelsR520RouteImport.update({
   id: '/r-520',
   path: '/r-520',
+  getParentRoute: () => ModelsRoute,
+} as any)
+const ModelsSeriesRoute = ModelsSeriesRouteImport.update({
+  id: '/$series',
+  path: '/$series',
   getParentRoute: () => ModelsRoute,
 } as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
@@ -165,6 +171,7 @@ export interface FileRoutesByFullPath {
   '/dealers': typeof DealersRoute
   '/models': typeof ModelsRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/models/$series': typeof ModelsSeriesRoute
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
@@ -189,6 +196,7 @@ export interface FileRoutesByTo {
   '/dealers': typeof DealersRoute
   '/models': typeof ModelsRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/models/$series': typeof ModelsSeriesRoute
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
@@ -215,6 +223,7 @@ export interface FileRoutesById {
   '/dealers': typeof DealersRoute
   '/models': typeof ModelsRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/models/$series': typeof ModelsSeriesRoute
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
@@ -241,6 +250,7 @@ export interface FileRouteTypes {
     | '/dealers'
     | '/models'
     | '/sitemap.xml'
+    | '/models/$series'
     | '/models/r-520'
     | '/models/r-680'
     | '/models/r-950'
@@ -265,6 +275,7 @@ export interface FileRouteTypes {
     | '/dealers'
     | '/models'
     | '/sitemap.xml'
+    | '/models/$series'
     | '/models/r-520'
     | '/models/r-680'
     | '/models/r-950'
@@ -290,6 +301,7 @@ export interface FileRouteTypes {
     | '/dealers'
     | '/models'
     | '/sitemap.xml'
+    | '/models/$series'
     | '/models/r-520'
     | '/models/r-680'
     | '/models/r-950'
@@ -402,6 +414,13 @@ declare module '@tanstack/react-router' {
       path: '/r-520'
       fullPath: '/models/r-520'
       preLoaderRoute: typeof ModelsR520RouteImport
+      parentRoute: typeof ModelsRoute
+    }
+    '/models/$series': {
+      id: '/models/$series'
+      path: '/$series'
+      fullPath: '/models/$series'
+      preLoaderRoute: typeof ModelsSeriesRouteImport
       parentRoute: typeof ModelsRoute
     }
     '/_authenticated/admin/': {
@@ -529,12 +548,14 @@ const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
 interface ModelsRouteChildren {
+  ModelsSeriesRoute: typeof ModelsSeriesRoute
   ModelsR520Route: typeof ModelsR520Route
   ModelsR680Route: typeof ModelsR680Route
   ModelsR950Route: typeof ModelsR950Route
 }
 
 const ModelsRouteChildren: ModelsRouteChildren = {
+  ModelsSeriesRoute: ModelsSeriesRoute,
   ModelsR520Route: ModelsR520Route,
   ModelsR680Route: ModelsR680Route,
   ModelsR950Route: ModelsR950Route,

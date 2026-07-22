@@ -26,7 +26,10 @@
     "book_test_drive": "Book a test drive",
     "learn_more": "Learn more",
     "back": "Back",
-    "download_pdf": "Download PDF"
+    "download_pdf": "Download PDF",
+    "reserve": "Reserve",
+    "explore": "Explore",
+    "get_in_touch": "Get in touch"
   },
   "common": {
     "loading": "Loading…",
@@ -36,18 +39,52 @@
     "submit": "Submit",
     "cancel": "Cancel",
     "save": "Save",
-    "language": "Language"
+    "language": "Language",
+    "from": "From",
+    "eur": "€",
+    "length_m": "meters",
+    "hp": "HP",
+    "pax": "pax"
   },
   "form": {
     "name": "Full name",
     "email": "Email",
     "phone": "Phone",
     "message": "Message",
-    "required": "Required field"
+    "required": "Required field",
+    "sent": "Your message has been sent.",
+    "send_failed": "Sending failed."
   },
   "language": {
     "el": "Ελληνικά",
     "en": "English",
     "switch": "Switch language"
+  },
+  "stock": {
+    "title": "In-stock & Test Drive",
+    "empty": "No boats currently in stock.",
+    "condition": { "new": "New", "demo": "Demo", "used": "Used" },
+    "status": { "available": "Available", "reserved": "Reserved", "sold": "Sold" },
+    "test_drive": "Test Drive"
+  },
+  "configurator": {
+    "title": "RIBALI Configurator",
+    "presets": "RIBALI-ready presets",
+    "hull": "Hull",
+    "tubes": "Tubes",
+    "canopy": "Canopy",
+    "engine": "Engine",
+    "extras": "Extras",
+    "trailer": "Trailer",
+    "total": "Total",
+    "vat_included": "VAT 24% included",
+    "finance": "Finance"
+  },
+  "models": {
+    "series": "Series",
+    "polyester": "Polyester",
+    "aluminium": "Aluminium",
+    "specs": "Specifications",
+    "gallery": "Gallery"
   }
 }

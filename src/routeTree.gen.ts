@@ -12,6 +12,7 @@ import { Route as rootRouteImport } from './routes/__root'
 import { Route as StockRouteImport } from './routes/stock'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ModelsRouteImport } from './routes/models'
+import { Route as EnRouteImport } from './routes/en'
 import { Route as DealersRouteImport } from './routes/dealers'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConfiguratorRouteImport } from './routes/configurator'
@@ -19,12 +20,20 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as EnIndexRouteImport } from './routes/en.index'
 import { Route as ModelsR950RouteImport } from './routes/models.r-950'
 import { Route as ModelsR680RouteImport } from './routes/models.r-680'
 import { Route as ModelsR520RouteImport } from './routes/models.r-520'
 import { Route as ModelsSeriesRouteImport } from './routes/models.$series'
+import { Route as EnStockRouteImport } from './routes/en.stock'
+import { Route as EnModelsRouteImport } from './routes/en.models'
+import { Route as EnDealersRouteImport } from './routes/en.dealers'
+import { Route as EnContactRouteImport } from './routes/en.contact'
+import { Route as EnConfiguratorRouteImport } from './routes/en.configurator'
+import { Route as EnAboutRouteImport } from './routes/en.about'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as ModelsSeriesModelRouteImport } from './routes/models.$series.$model'
+import { Route as EnModelsSeriesRouteImport } from './routes/en.models.$series'
 import { Route as AuthenticatedAdminSystemRouteImport } from './routes/_authenticated/admin.system'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
 import { Route as AuthenticatedAdminModelsRouteImport } from './routes/_authenticated/admin.models'
@@ -34,6 +43,7 @@ import { Route as AuthenticatedAdminDealersRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminDatabaseRouteImport } from './routes/_authenticated/admin.database'
 import { Route as AuthenticatedAdminContentRouteImport } from './routes/_authenticated/admin.content'
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
+import { Route as EnModelsSeriesModelRouteImport } from './routes/en.models.$series.$model'
 import { Route as AuthenticatedAdminContentHistoryRouteImport } from './routes/_authenticated/admin.content.history'
 
 const StockRoute = StockRouteImport.update({
@@ -49,6 +59,11 @@ const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
 const ModelsRoute = ModelsRouteImport.update({
   id: '/models',
   path: '/models',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const EnRoute = EnRouteImport.update({
+  id: '/en',
+  path: '/en',
   getParentRoute: () => rootRouteImport,
 } as any)
 const DealersRoute = DealersRouteImport.update({
@@ -85,6 +100,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const EnIndexRoute = EnIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => EnRoute,
+} as any)
 const ModelsR950Route = ModelsR950RouteImport.update({
   id: '/r-950',
   path: '/r-950',
@@ -105,6 +125,36 @@ const ModelsSeriesRoute = ModelsSeriesRouteImport.update({
   path: '/$series',
   getParentRoute: () => ModelsRoute,
 } as any)
+const EnStockRoute = EnStockRouteImport.update({
+  id: '/stock',
+  path: '/stock',
+  getParentRoute: () => EnRoute,
+} as any)
+const EnModelsRoute = EnModelsRouteImport.update({
+  id: '/models',
+  path: '/models',
+  getParentRoute: () => EnRoute,
+} as any)
+const EnDealersRoute = EnDealersRouteImport.update({
+  id: '/dealers',
+  path: '/dealers',
+  getParentRoute: () => EnRoute,
+} as any)
+const EnContactRoute = EnContactRouteImport.update({
+  id: '/contact',
+  path: '/contact',
+  getParentRoute: () => EnRoute,
+} as any)
+const EnConfiguratorRoute = EnConfiguratorRouteImport.update({
+  id: '/configurator',
+  path: '/configurator',
+  getParentRoute: () => EnRoute,
+} as any)
+const EnAboutRoute = EnAboutRouteImport.update({
+  id: '/about',
+  path: '/about',
+  getParentRoute: () => EnRoute,
+} as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
@@ -114,6 +164,11 @@ const ModelsSeriesModelRoute = ModelsSeriesModelRouteImport.update({
   id: '/$model',
   path: '/$model',
   getParentRoute: () => ModelsSeriesRoute,
+} as any)
+const EnModelsSeriesRoute = EnModelsSeriesRouteImport.update({
+  id: '/$series',
+  path: '/$series',
+  getParentRoute: () => EnModelsRoute,
 } as any)
 const AuthenticatedAdminSystemRoute =
   AuthenticatedAdminSystemRouteImport.update({
@@ -167,6 +222,11 @@ const AuthenticatedAdminAnalyticsRoute =
     path: '/admin/analytics',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const EnModelsSeriesModelRoute = EnModelsSeriesModelRouteImport.update({
+  id: '/$model',
+  path: '/$model',
+  getParentRoute: () => EnModelsSeriesRoute,
+} as any)
 const AuthenticatedAdminContentHistoryRoute =
   AuthenticatedAdminContentHistoryRouteImport.update({
     id: '/history',
@@ -181,13 +241,21 @@ export interface FileRoutesByFullPath {
   '/configurator': typeof ConfiguratorRoute
   '/contact': typeof ContactRoute
   '/dealers': typeof DealersRoute
+  '/en': typeof EnRouteWithChildren
   '/models': typeof ModelsRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stock': typeof StockRoute
+  '/en/about': typeof EnAboutRoute
+  '/en/configurator': typeof EnConfiguratorRoute
+  '/en/contact': typeof EnContactRoute
+  '/en/dealers': typeof EnDealersRoute
+  '/en/models': typeof EnModelsRouteWithChildren
+  '/en/stock': typeof EnStockRoute
   '/models/$series': typeof ModelsSeriesRouteWithChildren
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
+  '/en/': typeof EnIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/content': typeof AuthenticatedAdminContentRouteWithChildren
   '/admin/database': typeof AuthenticatedAdminDatabaseRoute
@@ -197,9 +265,11 @@ export interface FileRoutesByFullPath {
   '/admin/models': typeof AuthenticatedAdminModelsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/system': typeof AuthenticatedAdminSystemRoute
+  '/en/models/$series': typeof EnModelsSeriesRouteWithChildren
   '/models/$series/$model': typeof ModelsSeriesModelRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/content/history': typeof AuthenticatedAdminContentHistoryRoute
+  '/en/models/$series/$model': typeof EnModelsSeriesModelRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -211,10 +281,17 @@ export interface FileRoutesByTo {
   '/models': typeof ModelsRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stock': typeof StockRoute
+  '/en/about': typeof EnAboutRoute
+  '/en/configurator': typeof EnConfiguratorRoute
+  '/en/contact': typeof EnContactRoute
+  '/en/dealers': typeof EnDealersRoute
+  '/en/models': typeof EnModelsRouteWithChildren
+  '/en/stock': typeof EnStockRoute
   '/models/$series': typeof ModelsSeriesRouteWithChildren
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
+  '/en': typeof EnIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/content': typeof AuthenticatedAdminContentRouteWithChildren
   '/admin/database': typeof AuthenticatedAdminDatabaseRoute
@@ -224,9 +301,11 @@ export interface FileRoutesByTo {
   '/admin/models': typeof AuthenticatedAdminModelsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/system': typeof AuthenticatedAdminSystemRoute
+  '/en/models/$series': typeof EnModelsSeriesRouteWithChildren
   '/models/$series/$model': typeof ModelsSeriesModelRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/content/history': typeof AuthenticatedAdminContentHistoryRoute
+  '/en/models/$series/$model': typeof EnModelsSeriesModelRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -237,13 +316,21 @@ export interface FileRoutesById {
   '/configurator': typeof ConfiguratorRoute
   '/contact': typeof ContactRoute
   '/dealers': typeof DealersRoute
+  '/en': typeof EnRouteWithChildren
   '/models': typeof ModelsRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stock': typeof StockRoute
+  '/en/about': typeof EnAboutRoute
+  '/en/configurator': typeof EnConfiguratorRoute
+  '/en/contact': typeof EnContactRoute
+  '/en/dealers': typeof EnDealersRoute
+  '/en/models': typeof EnModelsRouteWithChildren
+  '/en/stock': typeof EnStockRoute
   '/models/$series': typeof ModelsSeriesRouteWithChildren
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
+  '/en/': typeof EnIndexRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/content': typeof AuthenticatedAdminContentRouteWithChildren
   '/_authenticated/admin/database': typeof AuthenticatedAdminDatabaseRoute
@@ -253,9 +340,11 @@ export interface FileRoutesById {
   '/_authenticated/admin/models': typeof AuthenticatedAdminModelsRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/system': typeof AuthenticatedAdminSystemRoute
+  '/en/models/$series': typeof EnModelsSeriesRouteWithChildren
   '/models/$series/$model': typeof ModelsSeriesModelRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/content/history': typeof AuthenticatedAdminContentHistoryRoute
+  '/en/models/$series/$model': typeof EnModelsSeriesModelRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -266,13 +355,21 @@ export interface FileRouteTypes {
     | '/configurator'
     | '/contact'
     | '/dealers'
+    | '/en'
     | '/models'
     | '/sitemap.xml'
     | '/stock'
+    | '/en/about'
+    | '/en/configurator'
+    | '/en/contact'
+    | '/en/dealers'
+    | '/en/models'
+    | '/en/stock'
     | '/models/$series'
     | '/models/r-520'
     | '/models/r-680'
     | '/models/r-950'
+    | '/en/'
     | '/admin/analytics'
     | '/admin/content'
     | '/admin/database'
@@ -282,9 +379,11 @@ export interface FileRouteTypes {
     | '/admin/models'
     | '/admin/settings'
     | '/admin/system'
+    | '/en/models/$series'
     | '/models/$series/$model'
     | '/admin/'
     | '/admin/content/history'
+    | '/en/models/$series/$model'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -296,10 +395,17 @@ export interface FileRouteTypes {
     | '/models'
     | '/sitemap.xml'
     | '/stock'
+    | '/en/about'
+    | '/en/configurator'
+    | '/en/contact'
+    | '/en/dealers'
+    | '/en/models'
+    | '/en/stock'
     | '/models/$series'
     | '/models/r-520'
     | '/models/r-680'
     | '/models/r-950'
+    | '/en'
     | '/admin/analytics'
     | '/admin/content'
     | '/admin/database'
@@ -309,9 +415,11 @@ export interface FileRouteTypes {
     | '/admin/models'
     | '/admin/settings'
     | '/admin/system'
+    | '/en/models/$series'
     | '/models/$series/$model'
     | '/admin'
     | '/admin/content/history'
+    | '/en/models/$series/$model'
   id:
     | '__root__'
     | '/'
@@ -321,13 +429,21 @@ export interface FileRouteTypes {
     | '/configurator'
     | '/contact'
     | '/dealers'
+    | '/en'
     | '/models'
     | '/sitemap.xml'
     | '/stock'
+    | '/en/about'
+    | '/en/configurator'
+    | '/en/contact'
+    | '/en/dealers'
+    | '/en/models'
+    | '/en/stock'
     | '/models/$series'
     | '/models/r-520'
     | '/models/r-680'
     | '/models/r-950'
+    | '/en/'
     | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/content'
     | '/_authenticated/admin/database'
@@ -337,9 +453,11 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/models'
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/system'
+    | '/en/models/$series'
     | '/models/$series/$model'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/content/history'
+    | '/en/models/$series/$model'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -350,6 +468,7 @@ export interface RootRouteChildren {
   ConfiguratorRoute: typeof ConfiguratorRoute
   ContactRoute: typeof ContactRoute
   DealersRoute: typeof DealersRoute
+  EnRoute: typeof EnRouteWithChildren
   ModelsRoute: typeof ModelsRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StockRoute: typeof StockRoute
@@ -376,6 +495,13 @@ declare module '@tanstack/react-router' {
       path: '/models'
       fullPath: '/models'
       preLoaderRoute: typeof ModelsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/en': {
+      id: '/en'
+      path: '/en'
+      fullPath: '/en'
+      preLoaderRoute: typeof EnRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/dealers': {
@@ -427,6 +553,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/en/': {
+      id: '/en/'
+      path: '/'
+      fullPath: '/en/'
+      preLoaderRoute: typeof EnIndexRouteImport
+      parentRoute: typeof EnRoute
+    }
     '/models/r-950': {
       id: '/models/r-950'
       path: '/r-950'
@@ -455,6 +588,48 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ModelsSeriesRouteImport
       parentRoute: typeof ModelsRoute
     }
+    '/en/stock': {
+      id: '/en/stock'
+      path: '/stock'
+      fullPath: '/en/stock'
+      preLoaderRoute: typeof EnStockRouteImport
+      parentRoute: typeof EnRoute
+    }
+    '/en/models': {
+      id: '/en/models'
+      path: '/models'
+      fullPath: '/en/models'
+      preLoaderRoute: typeof EnModelsRouteImport
+      parentRoute: typeof EnRoute
+    }
+    '/en/dealers': {
+      id: '/en/dealers'
+      path: '/dealers'
+      fullPath: '/en/dealers'
+      preLoaderRoute: typeof EnDealersRouteImport
+      parentRoute: typeof EnRoute
+    }
+    '/en/contact': {
+      id: '/en/contact'
+      path: '/contact'
+      fullPath: '/en/contact'
+      preLoaderRoute: typeof EnContactRouteImport
+      parentRoute: typeof EnRoute
+    }
+    '/en/configurator': {
+      id: '/en/configurator'
+      path: '/configurator'
+      fullPath: '/en/configurator'
+      preLoaderRoute: typeof EnConfiguratorRouteImport
+      parentRoute: typeof EnRoute
+    }
+    '/en/about': {
+      id: '/en/about'
+      path: '/about'
+      fullPath: '/en/about'
+      preLoaderRoute: typeof EnAboutRouteImport
+      parentRoute: typeof EnRoute
+    }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
       path: '/admin'
@@ -468,6 +643,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/models/$series/$model'
       preLoaderRoute: typeof ModelsSeriesModelRouteImport
       parentRoute: typeof ModelsSeriesRoute
+    }
+    '/en/models/$series': {
+      id: '/en/models/$series'
+      path: '/$series'
+      fullPath: '/en/models/$series'
+      preLoaderRoute: typeof EnModelsSeriesRouteImport
+      parentRoute: typeof EnModelsRoute
     }
     '/_authenticated/admin/system': {
       id: '/_authenticated/admin/system'
@@ -532,6 +714,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminAnalyticsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/en/models/$series/$model': {
+      id: '/en/models/$series/$model'
+      path: '/$model'
+      fullPath: '/en/models/$series/$model'
+      preLoaderRoute: typeof EnModelsSeriesModelRouteImport
+      parentRoute: typeof EnModelsSeriesRoute
+    }
     '/_authenticated/admin/content/history': {
       id: '/_authenticated/admin/content/history'
       path: '/history'
@@ -586,6 +775,52 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface EnModelsSeriesRouteChildren {
+  EnModelsSeriesModelRoute: typeof EnModelsSeriesModelRoute
+}
+
+const EnModelsSeriesRouteChildren: EnModelsSeriesRouteChildren = {
+  EnModelsSeriesModelRoute: EnModelsSeriesModelRoute,
+}
+
+const EnModelsSeriesRouteWithChildren = EnModelsSeriesRoute._addFileChildren(
+  EnModelsSeriesRouteChildren,
+)
+
+interface EnModelsRouteChildren {
+  EnModelsSeriesRoute: typeof EnModelsSeriesRouteWithChildren
+}
+
+const EnModelsRouteChildren: EnModelsRouteChildren = {
+  EnModelsSeriesRoute: EnModelsSeriesRouteWithChildren,
+}
+
+const EnModelsRouteWithChildren = EnModelsRoute._addFileChildren(
+  EnModelsRouteChildren,
+)
+
+interface EnRouteChildren {
+  EnAboutRoute: typeof EnAboutRoute
+  EnConfiguratorRoute: typeof EnConfiguratorRoute
+  EnContactRoute: typeof EnContactRoute
+  EnDealersRoute: typeof EnDealersRoute
+  EnModelsRoute: typeof EnModelsRouteWithChildren
+  EnStockRoute: typeof EnStockRoute
+  EnIndexRoute: typeof EnIndexRoute
+}
+
+const EnRouteChildren: EnRouteChildren = {
+  EnAboutRoute: EnAboutRoute,
+  EnConfiguratorRoute: EnConfiguratorRoute,
+  EnContactRoute: EnContactRoute,
+  EnDealersRoute: EnDealersRoute,
+  EnModelsRoute: EnModelsRouteWithChildren,
+  EnStockRoute: EnStockRoute,
+  EnIndexRoute: EnIndexRoute,
+}
+
+const EnRouteWithChildren = EnRoute._addFileChildren(EnRouteChildren)
+
 interface ModelsSeriesRouteChildren {
   ModelsSeriesModelRoute: typeof ModelsSeriesModelRoute
 }
@@ -623,6 +858,7 @@ const rootRouteChildren: RootRouteChildren = {
   ConfiguratorRoute: ConfiguratorRoute,
   ContactRoute: ContactRoute,
   DealersRoute: DealersRoute,
+  EnRoute: EnRouteWithChildren,
   ModelsRoute: ModelsRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StockRoute: StockRoute,

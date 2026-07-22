@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { submitQuoteRequest } from "@/lib/quote.functions";
+import { formatEUR } from "@/lib/configurator-pricing";
+import type { PriceBreakdown } from "@/lib/configurator-pricing";
 
 type Props = {
   open: boolean;
@@ -11,7 +13,13 @@ type Props = {
     tubeColor: string;
     canopyColor: string;
     engineHp: number;
+    engineBrand: string;
     equipment: string[];
+    trailerId: string;
+    financeMonths: number;
+    financeDown: number;
+    totalPrice: number;
+    breakdown: PriceBreakdown;
   };
 };
 
@@ -85,8 +93,14 @@ export function QuoteDialog({ open, onClose, config }: Props) {
           <>
             <div className="text-[10px] uppercase tracking-[0.3em] text-copper mb-2">Request Quote</div>
             <h3 className="font-display text-3xl mb-1">Get pricing.</h3>
-            <p className="text-ink/60 text-xs mb-6">
-              {config.modelSlug.toUpperCase()} · {config.engineHp} HP · {config.equipment.length} extras
+            <p className="text-ink/60 text-xs mb-2">
+              {config.modelSlug.toUpperCase()} · {config.engineBrand} · {config.engineHp} HP · {config.equipment.length} extras
+            </p>
+            <p className="text-ink text-sm mb-6">
+              Total <span className="font-medium">{formatEUR(config.totalPrice)}</span>
+              {config.financeMonths > 0 && (
+                <span className="text-ink/50"> · {config.financeMonths}m financing</span>
+              )}
             </p>
 
             <form onSubmit={onSubmit} className="space-y-4">

@@ -412,6 +412,10 @@ function AboutPage() {
         </div>
       </section>
 
+      <WhyRibali />
+
+      <Heritage />
+
       {/* CTA */}
       <section className="px-6 md:px-10 py-20 md:py-32">
         <div className="max-w-5xl">

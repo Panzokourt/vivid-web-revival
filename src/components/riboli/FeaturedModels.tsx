@@ -14,6 +14,9 @@ export function FeaturedModels() {
   const root = useRef<HTMLElement>(null);
   const track = useRef<HTMLDivElement>(null);
   const block = usePageBlock("home", "featured_models", { eyebrow: "The Collection", title: "Models" });
+  const { data: allModels } = useSuspenseQuery(modelsListQueryOptions());
+  const models = allModels.slice(0, 6);
+
 
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;

@@ -7,7 +7,7 @@ import { seriesDetailQueryOptions } from "@/lib/models.functions";
 
 const SITE = "https://ribali.advize.gr";
 
-export const Route = createFileRoute("/models/$series")({
+export const Route = createFileRoute("/models/$series/")({
   loader: ({ context, params }) =>
     context.queryClient.ensureQueryData(seriesDetailQueryOptions(params.series)),
   head: ({ params }) => {

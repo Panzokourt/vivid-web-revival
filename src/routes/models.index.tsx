@@ -12,7 +12,7 @@ import {
 const SITE = "https://ribali.advize.gr";
 const CANONICAL = `${SITE}/models`;
 
-export const Route = createFileRoute("/models")({
+export const Route = createFileRoute("/models/")({
   loader: ({ context }) => {
     context.queryClient.ensureQueryData(seriesListQueryOptions());
     context.queryClient.ensureQueryData(modelsListQueryOptions());

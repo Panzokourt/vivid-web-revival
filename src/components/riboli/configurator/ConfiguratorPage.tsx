@@ -163,7 +163,7 @@ export function ConfiguratorPage() {
               {MODELS.map((m) => (
                 <button
                   key={m.slug}
-                  onClick={() => setModelSlug(m.slug)}
+                  onClick={() => { setModelSlug(m.slug); setActivePreset(null); }}
                   className={`px-5 py-3 text-[11px] uppercase tracking-[0.25em] border transition-colors ${
                     modelSlug === m.slug
                       ? "bg-ink text-paper border-ink"

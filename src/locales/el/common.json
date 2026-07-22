@@ -1,0 +1,53 @@
+{
+  "nav": {
+    "models": "Μοντέλα",
+    "odyssey": "Odyssey · Πολυεστέρας",
+    "alu": "Alu Series · Αλουμίνιο",
+    "stock": "Stock",
+    "about": "Εταιρεία",
+    "dealers": "Dealers",
+    "contact": "Επικοινωνία",
+    "configure": "Configure",
+    "menu": "Μενού"
+  },
+  "footer": {
+    "tagline": "Χειροποίητα σκάφη για όσους διαβάζουν τη θάλασσα πριν τον χάρτη.",
+    "studio": "Studio",
+    "showroom": "Showroom",
+    "explore": "Εξερεύνηση",
+    "legal": "Νομικά",
+    "rights": "Με επιφύλαξη παντός δικαιώματος."
+  },
+  "cta": {
+    "request_quote": "Ζήτησε προσφορά",
+    "configure_your": "Configure το δικό σου",
+    "view_all_models": "Δες όλα τα μοντέλα",
+    "find_dealer": "Βρες dealer",
+    "book_test_drive": "Κλείσε test drive",
+    "learn_more": "Μάθε περισσότερα",
+    "back": "Πίσω",
+    "download_pdf": "Κατέβασε PDF"
+  },
+  "common": {
+    "loading": "Φόρτωση…",
+    "error": "Κάτι πήγε στραβά",
+    "retry": "Δοκίμασε ξανά",
+    "close": "Κλείσιμο",
+    "submit": "Αποστολή",
+    "cancel": "Ακύρωση",
+    "save": "Αποθήκευση",
+    "language": "Γλώσσα"
+  },
+  "form": {
+    "name": "Ονοματεπώνυμο",
+    "email": "Email",
+    "phone": "Τηλέφωνο",
+    "message": "Μήνυμα",
+    "required": "Υποχρεωτικό πεδίο"
+  },
+  "language": {
+    "el": "Ελληνικά",
+    "en": "English",
+    "switch": "Άλλαξε γλώσσα"
+  }
+}

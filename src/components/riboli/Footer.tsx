@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import { usePageBlock } from "@/lib/page-blocks";
 import { EditableField } from "@/components/editor/EditableField";
 
@@ -14,6 +15,7 @@ const FALLBACK = {
 };
 
 export function Footer() {
+  const { t } = useTranslation();
   const block = usePageBlock("home", "footer", FALLBACK);
 
   return (
@@ -29,7 +31,7 @@ export function Footer() {
             </EditableField>
           </div>
           <div>
-            <div className="text-[11px] uppercase tracking-[0.3em] text-paper/50 mb-4">Studio</div>
+            <div className="text-[11px] uppercase tracking-[0.3em] text-paper/50 mb-4">{t("footer.studio")}</div>
             <ul className="space-y-2 text-sm text-paper/80">
               <li>
                 <EditableField page="home" block="footer" field="studio_line1" type="text" label="Studio line 1">
@@ -74,7 +76,7 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <div className="text-[11px] uppercase tracking-[0.3em] text-paper/50 mb-4">Legal</div>
+            <div className="text-[11px] uppercase tracking-[0.3em] text-paper/50 mb-4">{t("footer.legal")}</div>
             <ul className="space-y-2 text-sm text-paper/80">
               <li><a href="#" className="hover:text-copper">Privacy policy</a></li>
               <li><a href="#" className="hover:text-copper">Terms</a></li>

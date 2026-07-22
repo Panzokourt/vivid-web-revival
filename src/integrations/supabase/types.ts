@@ -49,6 +49,7 @@ export type Database = {
           canopy_color: string
           created_at: string
           description: string | null
+          description_en: string | null
           engine_hp: number
           equipment: Json
           featured: boolean
@@ -56,6 +57,7 @@ export type Database = {
           id: string
           model_slug: string
           name: string
+          name_en: string | null
           published: boolean
           slug: string
           sort_order: number
@@ -67,6 +69,7 @@ export type Database = {
           canopy_color: string
           created_at?: string
           description?: string | null
+          description_en?: string | null
           engine_hp: number
           equipment?: Json
           featured?: boolean
@@ -74,6 +77,7 @@ export type Database = {
           id?: string
           model_slug: string
           name: string
+          name_en?: string | null
           published?: boolean
           slug: string
           sort_order?: number
@@ -85,6 +89,7 @@ export type Database = {
           canopy_color?: string
           created_at?: string
           description?: string | null
+          description_en?: string | null
           engine_hp?: number
           equipment?: Json
           featured?: boolean
@@ -92,6 +97,7 @@ export type Database = {
           id?: string
           model_slug?: string
           name?: string
+          name_en?: string | null
           published?: boolean
           slug?: string
           sort_order?: number
@@ -188,10 +194,12 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          description_en: string | null
           hero_image: string | null
           hull_material: string
           id: string
           name: string
+          name_en: string | null
           published: boolean
           slug: string
           sort_order: number
@@ -201,10 +209,12 @@ export type Database = {
         Insert: {
           created_at?: string
           description?: string | null
+          description_en?: string | null
           hero_image?: string | null
           hull_material: string
           id?: string
           name: string
+          name_en?: string | null
           published?: boolean
           slug: string
           sort_order?: number
@@ -214,10 +224,12 @@ export type Database = {
         Update: {
           created_at?: string
           description?: string | null
+          description_en?: string | null
           hero_image?: string | null
           hull_material?: string
           id?: string
           name?: string
+          name_en?: string | null
           published?: boolean
           slug?: string
           sort_order?: number
@@ -232,6 +244,7 @@ export type Database = {
           code: string
           created_at: string
           description: string | null
+          description_en: string | null
           fuel_l: number | null
           hero_image: string | null
           hull_material: string | null
@@ -240,13 +253,16 @@ export type Database = {
           length_m: number | null
           max_hp: number | null
           name: string
+          name_en: string | null
           number: string
           order_index: number
+          overview_en: string | null
           pax: number | null
           series_slug: string | null
           slug: string
           tag: string | null
           tagline: string | null
+          tagline_en: string | null
           tube_material: string | null
           weight_kg: number | null
         }
@@ -255,6 +271,7 @@ export type Database = {
           code: string
           created_at?: string
           description?: string | null
+          description_en?: string | null
           fuel_l?: number | null
           hero_image?: string | null
           hull_material?: string | null
@@ -263,13 +280,16 @@ export type Database = {
           length_m?: number | null
           max_hp?: number | null
           name: string
+          name_en?: string | null
           number: string
           order_index?: number
+          overview_en?: string | null
           pax?: number | null
           series_slug?: string | null
           slug: string
           tag?: string | null
           tagline?: string | null
+          tagline_en?: string | null
           tube_material?: string | null
           weight_kg?: number | null
         }
@@ -278,6 +298,7 @@ export type Database = {
           code?: string
           created_at?: string
           description?: string | null
+          description_en?: string | null
           fuel_l?: number | null
           hero_image?: string | null
           hull_material?: string | null
@@ -286,13 +307,16 @@ export type Database = {
           length_m?: number | null
           max_hp?: number | null
           name?: string
+          name_en?: string | null
           number?: string
           order_index?: number
+          overview_en?: string | null
           pax?: number | null
           series_slug?: string | null
           slug?: string
           tag?: string | null
           tagline?: string | null
+          tagline_en?: string | null
           tube_material?: string | null
           weight_kg?: number | null
         }
@@ -314,6 +338,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           id: string
+          locale: string
           page_slug: string
           published: boolean
           version: number
@@ -325,6 +350,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          locale?: string
           page_slug: string
           published: boolean
           version: number
@@ -336,6 +362,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           id?: string
+          locale?: string
           page_slug?: string
           published?: boolean
           version?: number
@@ -355,6 +382,7 @@ export type Database = {
           block_key: string
           content: Json
           id: string
+          locale: string
           page_slug: string
           published: boolean
           sort_order: number
@@ -365,6 +393,7 @@ export type Database = {
           block_key: string
           content?: Json
           id?: string
+          locale?: string
           page_slug: string
           published?: boolean
           sort_order?: number
@@ -375,6 +404,7 @@ export type Database = {
           block_key?: string
           content?: Json
           id?: string
+          locale?: string
           page_slug?: string
           published?: boolean
           sort_order?: number
@@ -467,6 +497,7 @@ export type Database = {
           condition: string
           created_at: string
           description: string | null
+          description_en: string | null
           engine: string | null
           gallery: Json
           hero_image: string | null
@@ -484,6 +515,7 @@ export type Database = {
           sort_order: number
           status: string
           test_drive_available: boolean
+          title_en: string | null
           updated_at: string
           year: number | null
         }
@@ -492,6 +524,7 @@ export type Database = {
           condition: string
           created_at?: string
           description?: string | null
+          description_en?: string | null
           engine?: string | null
           gallery?: Json
           hero_image?: string | null
@@ -509,6 +542,7 @@ export type Database = {
           sort_order?: number
           status?: string
           test_drive_available?: boolean
+          title_en?: string | null
           updated_at?: string
           year?: number | null
         }
@@ -517,6 +551,7 @@ export type Database = {
           condition?: string
           created_at?: string
           description?: string | null
+          description_en?: string | null
           engine?: string | null
           gallery?: Json
           hero_image?: string | null
@@ -534,6 +569,7 @@ export type Database = {
           sort_order?: number
           status?: string
           test_drive_available?: boolean
+          title_en?: string | null
           updated_at?: string
           year?: number | null
         }

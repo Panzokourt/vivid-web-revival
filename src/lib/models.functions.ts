@@ -109,3 +109,54 @@ export const modelDetailQueryOptions = (slug: string) =>
     queryKey: ["models", slug],
     queryFn: () => getModelBySlug({ data: { slug } }),
   });
+
+export const listSeries = createServerFn({ method: "GET" }).handler(
+  async (): Promise<ModelSeries[]> => {
+    const supabase = serverClient();
+    const { data, error } = await supabase
+      .from("model_series")
+      .select("id, slug, name, tagline, description, hull_material, hero_image, sort_order")
+      .eq("published", true)
+      .order("sort_order", { ascending: true });
+    if (error) throw new Error(error.message);
+    return (data ?? []) as ModelSeries[];
+  },
+);
+
+export const getSeriesBySlug = createServerFn({ method: "GET" })
+  .inputValidator((raw) => z.object({ slug: z.string().min(1) }).parse(raw))
+  .handler(async ({ data }): Promise<{ series: ModelSeries; models: ModelListItem[] }> => {
+    const supabase = serverClient();
+    const { data: series, error } = await supabase
+      .from("model_series")
+      .select("id, slug, name, tagline, description, hull_material, hero_image, sort_order")
+      .eq("slug", data.slug)
+      .eq("published", true)
+      .maybeSingle();
+    if (error) throw new Error(error.message);
+    if (!series) throw notFound();
+
+    const { data: models, error: mErr } = await supabase
+      .from("models")
+      .select(
+        "id, slug, code, name, number, tag, tagline, length_m, max_hp, pax, hero_image, order_index, series_slug, hull_material",
+      )
+      .eq("series_slug", data.slug)
+      .order("length_m", { ascending: true });
+    if (mErr) throw new Error(mErr.message);
+
+    return { series: series as ModelSeries, models: (models ?? []) as ModelListItem[] };
+  });
+
+export const seriesListQueryOptions = () =>
+  queryOptions({
+    queryKey: ["model-series"],
+    queryFn: () => listSeries(),
+  });
+
+export const seriesDetailQueryOptions = (slug: string) =>
+  queryOptions({
+    queryKey: ["model-series", slug],
+    queryFn: () => getSeriesBySlug({ data: { slug } }),
+  });
+

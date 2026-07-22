@@ -9,7 +9,7 @@ import {
   seriesListQueryOptions,
 } from "@/lib/models.functions";
 
-const SITE = "https://vivid-web-revival.lovable.app";
+const SITE = "https://ribali.advize.gr";
 const CANONICAL = `${SITE}/models`;
 
 export const Route = createFileRoute("/models")({

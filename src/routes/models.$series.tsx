@@ -5,7 +5,7 @@ import { Footer } from "@/components/riboli/Footer";
 import { MagneticButton } from "@/components/riboli/MagneticButton";
 import { seriesDetailQueryOptions } from "@/lib/models.functions";
 
-const SITE = "https://vivid-web-revival.lovable.app";
+const SITE = "https://ribali.advize.gr";
 
 export const Route = createFileRoute("/models/$series")({
   loader: ({ context, params }) =>

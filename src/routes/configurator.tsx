@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { ConfiguratorPage } from "@/components/riboli/configurator/ConfiguratorPage";
 
-const CANONICAL = "https://vivid-web-revival.lovable.app/configurator";
+const CANONICAL = "https://ribali.advize.gr/configurator";
 
 export const Route = createFileRoute("/configurator")({
   head: () => ({

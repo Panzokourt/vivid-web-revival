@@ -22,7 +22,7 @@ export function Footer() {
   return (
     <footer id="footer" className="relative bg-ink text-paper overflow-hidden isolate">
       <div className="max-w-[1600px] mx-auto px-6 md:px-10 py-16 md:py-20">
-        <div className="grid md:grid-cols-5 gap-10 border-b border-paper/15 pb-12">
+        <div className="grid md:grid-cols-4 gap-10 border-b border-paper/15 pb-12">
           <div>
             <a href={localizeHref(prefix, "/")} className="font-display text-3xl tracking-widest inline-block hover:text-copper transition-colors">RIBALI</a>
             <EditableField page="home" block="footer" field="tagline" type="textarea" label="Tagline" as="div" className="mt-4 max-w-xs">
@@ -69,22 +69,17 @@ export function Footer() {
             </ul>
           </div>
           <div>
-            <div className="text-[11px] uppercase tracking-[0.3em] text-paper/50 mb-4">Follow</div>
+            <div className="text-[11px] uppercase tracking-[0.3em] text-paper/50 mb-4">{t("footer.explore")}</div>
             <ul className="space-y-2 text-sm text-paper/80">
-              <li><a href="#" className="hover:text-copper">Instagram</a></li>
-              <li><a href="#" className="hover:text-copper">YouTube</a></li>
-              <li><a href="#" className="hover:text-copper">LinkedIn</a></li>
-            </ul>
-          </div>
-          <div>
-            <div className="text-[11px] uppercase tracking-[0.3em] text-paper/50 mb-4">{t("footer.legal")}</div>
-            <ul className="space-y-2 text-sm text-paper/80">
-              <li><a href="#" className="hover:text-copper">Privacy policy</a></li>
-              <li><a href="#" className="hover:text-copper">Terms</a></li>
-              <li><a href="#" className="hover:text-copper">Cookies</a></li>
+              <li><a href={localizeHref(prefix, "/models")} className="hover:text-copper">{t("nav.models")}</a></li>
+              <li><a href={localizeHref(prefix, "/stock")} className="hover:text-copper">{t("nav.stock")}</a></li>
+              <li><a href={localizeHref(prefix, "/about")} className="hover:text-copper">{t("nav.about")}</a></li>
+              <li><a href={localizeHref(prefix, "/dealers")} className="hover:text-copper">{t("nav.dealers")}</a></li>
+              <li><a href={localizeHref(prefix, "/contact")} className="hover:text-copper">{t("nav.contact")}</a></li>
             </ul>
           </div>
         </div>
+
 
         <div className="pt-10 flex flex-col md:flex-row justify-between items-start md:items-end gap-8">
           <div className="text-[10px] uppercase tracking-[0.3em] text-paper/40">

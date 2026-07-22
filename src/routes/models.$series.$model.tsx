@@ -7,7 +7,7 @@ import {
   seriesDetailQueryOptions,
 } from "@/lib/models.functions";
 
-const SITE = "https://vivid-web-revival.lovable.app";
+const SITE = "https://ribali.advize.gr";
 
 export const Route = createFileRoute("/models/$series/$model")({
   loader: async ({ context, params }) => {

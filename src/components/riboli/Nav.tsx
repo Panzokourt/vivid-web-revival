@@ -48,14 +48,30 @@ export function Nav() {
       </Link>
       <div className="hidden md:flex space-x-8 lg:space-x-10 text-[11px] uppercase tracking-[0.25em]">
         {links.map((l) => (
-          <a
-            key={l.href}
-            href={l.href}
-            className={`transition-colors ${linkCls}`}
-            style={shadow}
-          >
-            {l.label}
-          </a>
+          <div key={l.href} className="relative group">
+            <a
+              href={l.href}
+              className={`transition-colors ${linkCls}`}
+              style={shadow}
+            >
+              {l.label}
+            </a>
+            {l.children && (
+              <div className="pointer-events-none group-hover:pointer-events-auto absolute left-1/2 -translate-x-1/2 top-full pt-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                <div className="bg-paper border border-ink/10 shadow-lg min-w-[220px] py-2">
+                  {l.children.map((c) => (
+                    <a
+                      key={c.href}
+                      href={c.href}
+                      className="block px-5 py-3 text-[10px] tracking-[0.2em] text-ink/70 hover:text-copper hover:bg-ink/5"
+                    >
+                      {c.label}
+                    </a>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         ))}
       </div>
       <div className="flex items-center gap-4">

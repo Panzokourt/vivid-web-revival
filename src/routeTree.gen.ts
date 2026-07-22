@@ -21,7 +21,9 @@ import { Route as IndexRouteImport } from './routes/index'
 import { Route as ModelsR950RouteImport } from './routes/models.r-950'
 import { Route as ModelsR680RouteImport } from './routes/models.r-680'
 import { Route as ModelsR520RouteImport } from './routes/models.r-520'
+import { Route as ModelsSeriesRouteImport } from './routes/models.$series'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
+import { Route as ModelsSeriesModelRouteImport } from './routes/models.$series.$model'
 import { Route as AuthenticatedAdminSystemRouteImport } from './routes/_authenticated/admin.system'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
 import { Route as AuthenticatedAdminModelsRouteImport } from './routes/_authenticated/admin.models'
@@ -92,10 +94,20 @@ const ModelsR520Route = ModelsR520RouteImport.update({
   path: '/r-520',
   getParentRoute: () => ModelsRoute,
 } as any)
+const ModelsSeriesRoute = ModelsSeriesRouteImport.update({
+  id: '/$series',
+  path: '/$series',
+  getParentRoute: () => ModelsRoute,
+} as any)
 const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
   id: '/admin/',
   path: '/admin/',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ModelsSeriesModelRoute = ModelsSeriesModelRouteImport.update({
+  id: '/$model',
+  path: '/$model',
+  getParentRoute: () => ModelsSeriesRoute,
 } as any)
 const AuthenticatedAdminSystemRoute =
   AuthenticatedAdminSystemRouteImport.update({
@@ -165,6 +177,7 @@ export interface FileRoutesByFullPath {
   '/dealers': typeof DealersRoute
   '/models': typeof ModelsRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/models/$series': typeof ModelsSeriesRouteWithChildren
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
@@ -177,6 +190,7 @@ export interface FileRoutesByFullPath {
   '/admin/models': typeof AuthenticatedAdminModelsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/system': typeof AuthenticatedAdminSystemRoute
+  '/models/$series/$model': typeof ModelsSeriesModelRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/content/history': typeof AuthenticatedAdminContentHistoryRoute
 }
@@ -189,6 +203,7 @@ export interface FileRoutesByTo {
   '/dealers': typeof DealersRoute
   '/models': typeof ModelsRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/models/$series': typeof ModelsSeriesRouteWithChildren
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
@@ -201,6 +216,7 @@ export interface FileRoutesByTo {
   '/admin/models': typeof AuthenticatedAdminModelsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/system': typeof AuthenticatedAdminSystemRoute
+  '/models/$series/$model': typeof ModelsSeriesModelRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/content/history': typeof AuthenticatedAdminContentHistoryRoute
 }
@@ -215,6 +231,7 @@ export interface FileRoutesById {
   '/dealers': typeof DealersRoute
   '/models': typeof ModelsRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/models/$series': typeof ModelsSeriesRouteWithChildren
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
@@ -227,6 +244,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/models': typeof AuthenticatedAdminModelsRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/system': typeof AuthenticatedAdminSystemRoute
+  '/models/$series/$model': typeof ModelsSeriesModelRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/content/history': typeof AuthenticatedAdminContentHistoryRoute
 }
@@ -241,6 +259,7 @@ export interface FileRouteTypes {
     | '/dealers'
     | '/models'
     | '/sitemap.xml'
+    | '/models/$series'
     | '/models/r-520'
     | '/models/r-680'
     | '/models/r-950'
@@ -253,6 +272,7 @@ export interface FileRouteTypes {
     | '/admin/models'
     | '/admin/settings'
     | '/admin/system'
+    | '/models/$series/$model'
     | '/admin/'
     | '/admin/content/history'
   fileRoutesByTo: FileRoutesByTo
@@ -265,6 +285,7 @@ export interface FileRouteTypes {
     | '/dealers'
     | '/models'
     | '/sitemap.xml'
+    | '/models/$series'
     | '/models/r-520'
     | '/models/r-680'
     | '/models/r-950'
@@ -277,6 +298,7 @@ export interface FileRouteTypes {
     | '/admin/models'
     | '/admin/settings'
     | '/admin/system'
+    | '/models/$series/$model'
     | '/admin'
     | '/admin/content/history'
   id:
@@ -290,6 +312,7 @@ export interface FileRouteTypes {
     | '/dealers'
     | '/models'
     | '/sitemap.xml'
+    | '/models/$series'
     | '/models/r-520'
     | '/models/r-680'
     | '/models/r-950'
@@ -302,6 +325,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/models'
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/system'
+    | '/models/$series/$model'
     | '/_authenticated/admin/'
     | '/_authenticated/admin/content/history'
   fileRoutesById: FileRoutesById
@@ -404,12 +428,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ModelsR520RouteImport
       parentRoute: typeof ModelsRoute
     }
+    '/models/$series': {
+      id: '/models/$series'
+      path: '/$series'
+      fullPath: '/models/$series'
+      preLoaderRoute: typeof ModelsSeriesRouteImport
+      parentRoute: typeof ModelsRoute
+    }
     '/_authenticated/admin/': {
       id: '/_authenticated/admin/'
       path: '/admin'
       fullPath: '/admin/'
       preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/models/$series/$model': {
+      id: '/models/$series/$model'
+      path: '/$model'
+      fullPath: '/models/$series/$model'
+      preLoaderRoute: typeof ModelsSeriesModelRouteImport
+      parentRoute: typeof ModelsSeriesRoute
     }
     '/_authenticated/admin/system': {
       id: '/_authenticated/admin/system'
@@ -528,13 +566,27 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface ModelsSeriesRouteChildren {
+  ModelsSeriesModelRoute: typeof ModelsSeriesModelRoute
+}
+
+const ModelsSeriesRouteChildren: ModelsSeriesRouteChildren = {
+  ModelsSeriesModelRoute: ModelsSeriesModelRoute,
+}
+
+const ModelsSeriesRouteWithChildren = ModelsSeriesRoute._addFileChildren(
+  ModelsSeriesRouteChildren,
+)
+
 interface ModelsRouteChildren {
+  ModelsSeriesRoute: typeof ModelsSeriesRouteWithChildren
   ModelsR520Route: typeof ModelsR520Route
   ModelsR680Route: typeof ModelsR680Route
   ModelsR950Route: typeof ModelsR950Route
 }
 
 const ModelsRouteChildren: ModelsRouteChildren = {
+  ModelsSeriesRoute: ModelsSeriesRouteWithChildren,
   ModelsR520Route: ModelsR520Route,
   ModelsR680Route: ModelsR680Route,
   ModelsR950Route: ModelsR950Route,

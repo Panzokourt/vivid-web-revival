@@ -49,6 +49,23 @@ export function Footer() {
             </ul>
           </div>
           <div>
+            <EditableField page="home" block="footer" field="showroom_label" type="text" label="Showroom label" as="div" className="text-[11px] uppercase tracking-[0.3em] text-paper/50 mb-4">
+              {block.showroom_label}
+            </EditableField>
+            <ul className="space-y-2 text-sm text-paper/80">
+              <li>
+                <EditableField page="home" block="footer" field="showroom_address" type="text" label="Showroom address">
+                  {block.showroom_address}
+                </EditableField>
+              </li>
+              <li>
+                <EditableField page="home" block="footer" field="showroom_hours" type="text" label="Showroom hours">
+                  {block.showroom_hours}
+                </EditableField>
+              </li>
+            </ul>
+          </div>
+          <div>
             <div className="text-[11px] uppercase tracking-[0.3em] text-paper/50 mb-4">Follow</div>
             <ul className="space-y-2 text-sm text-paper/80">
               <li><a href="#" className="hover:text-copper">Instagram</a></li>

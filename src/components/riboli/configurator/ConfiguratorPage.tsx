@@ -1,9 +1,8 @@
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
-import { ClientOnly } from "@tanstack/react-router";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { Nav } from "@/components/riboli/Nav";
 import { Footer } from "@/components/riboli/Footer";
-import { BoatCanvas } from "./BoatCanvas";
+import { BoatComposite } from "./BoatComposite";
 import { QuoteDialog } from "./QuoteDialog";
 import {
   HULL_COLORS,

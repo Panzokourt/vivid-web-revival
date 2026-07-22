@@ -2,8 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Route as ModelsRoute } from "@/routes/models";
 
 const SITE = "https://ribali.advize.gr";
+const forwardedLoader = ModelsRoute.options.loader as unknown as (ctx: unknown) => unknown;
+
 export const Route = createFileRoute("/en/models")({
-  loader: ((ctx: any) => (undefined as any)) as any,
+  loader: ((ctx: unknown) => forwardedLoader(ctx)) as never,
   head: () => ({
     meta: [
       { title: "RIBALI — Model Series (Odyssey & Alu)" },

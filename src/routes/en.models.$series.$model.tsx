@@ -2,8 +2,10 @@ import { createFileRoute } from "@tanstack/react-router";
 import { Route as ModelRoute } from "@/routes/models.$series.$model";
 
 const SITE = "https://ribali.advize.gr";
+const forwardedLoader = ModelRoute.options.loader as unknown as (ctx: unknown) => unknown;
+
 export const Route = createFileRoute("/en/models/$series/$model")({
-  loader: ((ctx: any) => (undefined as any)) as any,
+  loader: ((ctx: unknown) => forwardedLoader(ctx)) as never,
   head: ({ params }) => ({
     meta: [
       { title: `RIBALI ${params.model.toUpperCase()}` },

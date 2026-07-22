@@ -74,15 +74,15 @@ export function ConfiguratorPage() {
       <section className="grid grid-cols-1 lg:grid-cols-[3fr_2fr] gap-0">
         {/* Canvas */}
         <div className="cfg-section relative bg-paper-2/40 h-[60vh] lg:h-[calc(100vh-2rem)] lg:sticky lg:top-0 border-b lg:border-b-0 lg:border-r border-ink/10">
-          <ClientOnly fallback={<div className="w-full h-full grid place-items-center text-ink/40 text-xs uppercase tracking-[0.3em]">Loading 3D…</div>}>
-            <BoatCanvas
-              hullColor={hullColor}
-              tubeColor={tubeColor}
-              canopyColor={canopyColor}
-              scale={model.scale}
-              equipment={equipment}
-            />
-          </ClientOnly>
+          <BoatComposite
+            modelSlug={modelSlug}
+            hullColor={hullColor}
+            tubeColor={tubeColor}
+            canopyColor={canopyColor}
+            engineHp={engineHp}
+            equipment={equipment}
+            showCanopy={equipment.includes("bimini")}
+          />
           {/* overlay label */}
           <div className="pointer-events-none absolute bottom-6 left-6 md:bottom-10 md:left-10">
             <div className="text-[10px] uppercase tracking-[0.3em] text-ink/50">Model</div>
@@ -92,7 +92,7 @@ export function ConfiguratorPage() {
           </div>
           <div className="pointer-events-none absolute top-24 right-6 md:top-28 md:right-10 text-right text-[10px] uppercase tracking-[0.3em] text-ink/50">
             <div>{model.length.toFixed(2)} m · {model.beam.toFixed(2)} m</div>
-            <div className="text-ink/40 mt-1">Drag to rotate</div>
+            <div className="text-ink/40 mt-1">Placeholder render</div>
           </div>
         </div>
 

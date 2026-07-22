@@ -1,3 +1,4 @@
+import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Route as SeriesRoute } from "@/routes/models.$series";
 
@@ -18,5 +19,11 @@ export const Route = createFileRoute("/en/models/$series")({
       { rel: "alternate", hrefLang: "en", href: `${SITE}/en/models/${params.series}` },
     ],
   }),
-  component: SeriesRoute.options.component as any,
+  component: EnPage,
+});
+
+function EnPage() {
+  const C = SeriesRoute.options.component as unknown as React.ComponentType;
+  return <C />;
+}
 });

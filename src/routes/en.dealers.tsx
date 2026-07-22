@@ -1,3 +1,4 @@
+import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Route as DealersRoute } from "@/routes/dealers";
 
@@ -17,5 +18,11 @@ export const Route = createFileRoute("/en/dealers")({
       { rel: "alternate", hrefLang: "en", href: `${SITE}/en/dealers` },
     ],
   }),
-  component: DealersRoute.options.component as any,
+  component: EnPage,
+});
+
+function EnPage() {
+  const C = DealersRoute.options.component as unknown as React.ComponentType;
+  return <C />;
+}
 });

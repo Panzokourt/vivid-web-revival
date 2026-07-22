@@ -1,3 +1,4 @@
+import * as React from "react";
 import { createFileRoute } from "@tanstack/react-router";
 import { Route as AboutRoute } from "@/routes/about";
 
@@ -17,5 +18,11 @@ export const Route = createFileRoute("/en/about")({
       { rel: "alternate", hrefLang: "en", href: `${SITE}/en/about` },
     ],
   }),
-  component: AboutRoute.options.component as any,
+  component: EnPage,
+});
+
+function EnPage() {
+  const C = AboutRoute.options.component as unknown as React.ComponentType;
+  return <C />;
+}
 });

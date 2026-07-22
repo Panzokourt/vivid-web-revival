@@ -113,6 +113,51 @@ export function ConfiguratorPage() {
 
         {/* Panel */}
         <div className="px-6 md:px-10 py-10 lg:py-16 space-y-12">
+          {presets.length > 0 && (
+            <Section index="00" title="RIBALI-ready presets">
+              <p className="text-xs text-ink/60 mb-4 max-w-md">
+                Start from a curated package, then fine-tune every detail below.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {presets.map((p) => {
+                  const active = activePreset === p.slug;
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => applyPreset(p)}
+                      className={`text-left p-4 border transition-colors group ${
+                        active
+                          ? "bg-ink text-paper border-ink"
+                          : "border-ink/15 hover:border-ink"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className={`w-2 h-2 rounded-full ${active ? "bg-copper" : "bg-ink/30"}`} />
+                        <div className={`text-[10px] uppercase tracking-[0.25em] ${active ? "text-copper" : "text-ink/50"}`}>
+                          {MODELS.find((m) => m.slug === p.modelSlug)?.code ?? p.modelSlug} · {p.engineHp} HP
+                        </div>
+                      </div>
+                      <div className="font-display text-lg leading-tight">{p.name}</div>
+                      {p.tagline && (
+                        <div className={`text-xs mt-1 ${active ? "text-paper/70" : "text-ink/55"}`}>
+                          {p.tagline}
+                        </div>
+                      )}
+                      <div className="mt-3 flex items-center gap-1.5">
+                        <PresetDot hex={p.hullColor} />
+                        <PresetDot hex={p.tubeColor} />
+                        <PresetDot hex={p.canopyColor} />
+                        <span className={`ml-2 text-[10px] uppercase tracking-[0.2em] ${active ? "text-paper/60" : "text-ink/40"}`}>
+                          {p.equipment.length} extras
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </Section>
+          )}
+
           <Section index="01" title="Model">
             <div className="flex flex-wrap gap-2">
               {MODELS.map((m) => (

@@ -28,4 +28,3 @@ function EnPage() {
   const C = ModelsRoute.options.component as unknown as React.ComponentType;
   return <C />;
 }
-});

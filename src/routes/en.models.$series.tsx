@@ -26,4 +26,3 @@ function EnPage() {
   const C = SeriesRoute.options.component as unknown as React.ComponentType;
   return <C />;
 }
-});

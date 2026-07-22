@@ -28,4 +28,3 @@ function EnPage() {
   const C = StockRoute.options.component as unknown as React.ComponentType;
   return <C />;
 }
-});

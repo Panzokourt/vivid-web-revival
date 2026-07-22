@@ -25,4 +25,3 @@ function EnPage() {
   const C = ContactRoute.options.component as unknown as React.ComponentType;
   return <C />;
 }
-});

@@ -1,17 +1,12 @@
 import { useLayoutEffect, useRef } from "react";
 import { Link } from "@tanstack/react-router";
+import { useSuspenseQuery } from "@tanstack/react-query";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { usePageBlock } from "@/lib/page-blocks";
 import { EditableField } from "@/components/editor/EditableField";
-import r680 from "@/assets/model-r680.jpg";
-import r950 from "@/assets/model-r950.jpg";
-import r520 from "@/assets/model-r520.jpg";
+import { modelsListQueryOptions } from "@/lib/models.functions";
+import { resolveAsset } from "@/lib/asset-map";
 
-const models = [
-  { series: "odyssey", slug: "r-680", img: r680, number: "680", name: "R-680 Sport", length: "6.8 M", power: "250 HP", pax: "12", tag: "Best Seller" },
-  { series: "odyssey", slug: "r-950", img: r950, number: "950", name: "R-950 Cruise", length: "9.5 M", power: "600 HP", pax: "16", tag: "Flagship" },
-  { series: "odyssey", slug: "r-520", img: r520, number: "520", name: "R-520 Explore", length: "5.2 M", power: "115 HP", pax: "8", tag: "Compact" },
-] as const;
 
 
 
@@ -19,6 +14,9 @@ export function FeaturedModels() {
   const root = useRef<HTMLElement>(null);
   const track = useRef<HTMLDivElement>(null);
   const block = usePageBlock("home", "featured_models", { eyebrow: "The Collection", title: "Models" });
+  const { data: allModels } = useSuspenseQuery(modelsListQueryOptions());
+  const models = allModels.slice(0, 6);
+
 
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;
@@ -77,13 +75,13 @@ export function FeaturedModels() {
           <Link
             key={m.slug}
             to="/models/$series/$model"
-            params={{ series: m.series, model: m.slug }}
+            params={{ series: m.series_slug ?? "odyssey", model: m.slug }}
             className="model-slide relative shrink-0 w-[85vw] md:w-[70vw] lg:w-[70vw] h-full bg-paper-2 overflow-hidden group block isolate snap-center lg:snap-align-none"
           >
 
 
             <img
-              src={m.img}
+              src={resolveAsset(m.hero_image)}
               alt={m.name}
               loading="lazy"
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -92,13 +90,14 @@ export function FeaturedModels() {
             <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-ink/40 to-transparent" />
 
             <div className="absolute top-6 left-6 md:top-10 md:left-10 text-paper text-[11px] uppercase tracking-[0.3em] flex items-center gap-3">
-              <span className="w-2 h-2 rounded-full bg-copper" /> {m.tag}
+              <span className="w-2 h-2 rounded-full bg-copper" /> {m.tag ?? m.name}
             </div>
             <div className="absolute top-6 right-6 md:top-10 md:right-10 text-paper/70 text-[11px] uppercase tracking-[0.3em] text-right">
-              <div>Length {m.length}</div>
-              <div>Power {m.power}</div>
-              <div>Pax {m.pax}</div>
+              {m.length_m != null ? <div>Length {m.length_m} M</div> : null}
+              {m.max_hp != null ? <div>Power {m.max_hp} HP</div> : null}
+              {m.pax != null ? <div>Pax {m.pax}</div> : null}
             </div>
+
 
             <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-paper">
               <div className="text-[11px] uppercase tracking-[0.3em] text-paper/70">{m.name}</div>

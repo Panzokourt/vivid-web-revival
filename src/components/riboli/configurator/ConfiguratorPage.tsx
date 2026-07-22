@@ -1,4 +1,5 @@
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { Nav } from "@/components/riboli/Nav";
 import { Footer } from "@/components/riboli/Footer";
@@ -12,6 +13,7 @@ import {
   EQUIPMENT,
   type ModelSlug,
 } from "@/lib/configurator-options";
+import { presetsQueryOptions, type ConfiguratorPreset } from "@/lib/presets.functions";
 
 export function ConfiguratorPage() {
   const [modelSlug, setModelSlug] = useState<ModelSlug>("r-680");
@@ -20,6 +22,8 @@ export function ConfiguratorPage() {
   const [canopyColor, setCanopyColor] = useState(CANOPY_COLORS[0].hex);
   const [equipment, setEquipment] = useState<string[]>(["sunbed", "bimini"]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [activePreset, setActivePreset] = useState<string | null>(null);
+  const { data: presets = [] } = useQuery(presetsQueryOptions());
 
   const model = useMemo(() => MODELS.find((m) => m.slug === modelSlug)!, [modelSlug]);
   const [engineHp, setEngineHp] = useState<number>(model.engines[1]);
@@ -50,6 +54,17 @@ export function ConfiguratorPage() {
 
   function toggleEquipment(id: string) {
     setEquipment((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+    setActivePreset(null);
+  }
+
+  function applyPreset(p: ConfiguratorPreset) {
+    setModelSlug(p.modelSlug as ModelSlug);
+    setHullColor(p.hullColor);
+    setTubeColor(p.tubeColor);
+    setCanopyColor(p.canopyColor);
+    setEngineHp(p.engineHp);
+    setEquipment(p.equipment);
+    setActivePreset(p.slug);
   }
 
   return (
@@ -98,12 +113,57 @@ export function ConfiguratorPage() {
 
         {/* Panel */}
         <div className="px-6 md:px-10 py-10 lg:py-16 space-y-12">
+          {presets.length > 0 && (
+            <Section index="00" title="RIBALI-ready presets">
+              <p className="text-xs text-ink/60 mb-4 max-w-md">
+                Start from a curated package, then fine-tune every detail below.
+              </p>
+              <div className="grid gap-3 sm:grid-cols-2">
+                {presets.map((p) => {
+                  const active = activePreset === p.slug;
+                  return (
+                    <button
+                      key={p.id}
+                      onClick={() => applyPreset(p)}
+                      className={`text-left p-4 border transition-colors group ${
+                        active
+                          ? "bg-ink text-paper border-ink"
+                          : "border-ink/15 hover:border-ink"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 mb-1.5">
+                        <span className={`w-2 h-2 rounded-full ${active ? "bg-copper" : "bg-ink/30"}`} />
+                        <div className={`text-[10px] uppercase tracking-[0.25em] ${active ? "text-copper" : "text-ink/50"}`}>
+                          {MODELS.find((m) => m.slug === p.modelSlug)?.code ?? p.modelSlug} · {p.engineHp} HP
+                        </div>
+                      </div>
+                      <div className="font-display text-lg leading-tight">{p.name}</div>
+                      {p.tagline && (
+                        <div className={`text-xs mt-1 ${active ? "text-paper/70" : "text-ink/55"}`}>
+                          {p.tagline}
+                        </div>
+                      )}
+                      <div className="mt-3 flex items-center gap-1.5">
+                        <PresetDot hex={p.hullColor} />
+                        <PresetDot hex={p.tubeColor} />
+                        <PresetDot hex={p.canopyColor} />
+                        <span className={`ml-2 text-[10px] uppercase tracking-[0.2em] ${active ? "text-paper/60" : "text-ink/40"}`}>
+                          {p.equipment.length} extras
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </Section>
+          )}
+
           <Section index="01" title="Model">
             <div className="flex flex-wrap gap-2">
               {MODELS.map((m) => (
                 <button
                   key={m.slug}
-                  onClick={() => setModelSlug(m.slug)}
+                  onClick={() => { setModelSlug(m.slug); setActivePreset(null); }}
                   className={`px-5 py-3 text-[11px] uppercase tracking-[0.25em] border transition-colors ${
                     modelSlug === m.slug
                       ? "bg-ink text-paper border-ink"
@@ -117,15 +177,15 @@ export function ConfiguratorPage() {
           </Section>
 
           <Section index="02" title="Hull color">
-            <SwatchRow items={HULL_COLORS} selected={hullColor} onSelect={setHullColor} />
+            <SwatchRow items={HULL_COLORS} selected={hullColor} onSelect={(h) => { setHullColor(h); setActivePreset(null); }} />
           </Section>
 
           <Section index="03" title="Tube color">
-            <SwatchRow items={TUBE_COLORS} selected={tubeColor} onSelect={setTubeColor} />
+            <SwatchRow items={TUBE_COLORS} selected={tubeColor} onSelect={(h) => { setTubeColor(h); setActivePreset(null); }} />
           </Section>
 
           <Section index="04" title="Canopy color">
-            <SwatchRow items={CANOPY_COLORS} selected={canopyColor} onSelect={setCanopyColor} />
+            <SwatchRow items={CANOPY_COLORS} selected={canopyColor} onSelect={(h) => { setCanopyColor(h); setActivePreset(null); }} />
           </Section>
 
           <Section index="05" title="Engine">
@@ -133,7 +193,7 @@ export function ConfiguratorPage() {
               {model.engines.map((hp) => (
                 <button
                   key={hp}
-                  onClick={() => setEngineHp(hp)}
+                  onClick={() => { setEngineHp(hp); setActivePreset(null); }}
                   className={`px-5 py-3 text-[11px] uppercase tracking-[0.25em] border transition-colors ${
                     engineHp === hp
                       ? "bg-ink text-paper border-ink"
@@ -276,6 +336,15 @@ function Dot({ hex }: { hex: string }) {
   return (
     <span
       className="inline-block w-4 h-4 rounded-full border border-ink/20 align-middle"
+      style={{ backgroundColor: hex }}
+    />
+  );
+}
+
+function PresetDot({ hex }: { hex: string }) {
+  return (
+    <span
+      className="inline-block w-3 h-3 rounded-full border border-ink/20"
       style={{ backgroundColor: hex }}
     />
   );

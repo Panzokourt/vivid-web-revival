@@ -44,6 +44,63 @@ export type Database = {
         }
         Relationships: []
       }
+      configurator_presets: {
+        Row: {
+          canopy_color: string
+          created_at: string
+          description: string | null
+          engine_hp: number
+          equipment: Json
+          featured: boolean
+          hull_color: string
+          id: string
+          model_slug: string
+          name: string
+          published: boolean
+          slug: string
+          sort_order: number
+          tagline: string | null
+          tube_color: string
+          updated_at: string
+        }
+        Insert: {
+          canopy_color: string
+          created_at?: string
+          description?: string | null
+          engine_hp: number
+          equipment?: Json
+          featured?: boolean
+          hull_color: string
+          id?: string
+          model_slug: string
+          name: string
+          published?: boolean
+          slug: string
+          sort_order?: number
+          tagline?: string | null
+          tube_color: string
+          updated_at?: string
+        }
+        Update: {
+          canopy_color?: string
+          created_at?: string
+          description?: string | null
+          engine_hp?: number
+          equipment?: Json
+          featured?: boolean
+          hull_color?: string
+          id?: string
+          model_slug?: string
+          name?: string
+          published?: boolean
+          slug?: string
+          sort_order?: number
+          tagline?: string | null
+          tube_color?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       dealers: {
         Row: {
           active: boolean

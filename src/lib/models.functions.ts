@@ -18,6 +18,19 @@ export type ModelListItem = {
   pax: number | null;
   hero_image: string | null;
   order_index: number;
+  series_slug: string | null;
+  hull_material: string | null;
+};
+
+export type ModelSeries = {
+  id: string;
+  slug: string;
+  name: string;
+  tagline: string | null;
+  description: string | null;
+  hull_material: "polyester" | "aluminium";
+  hero_image: string | null;
+  sort_order: number;
 };
 
 export type ModelDetail = ModelListItem & {

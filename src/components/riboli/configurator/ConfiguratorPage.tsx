@@ -22,6 +22,8 @@ export function ConfiguratorPage() {
   const [canopyColor, setCanopyColor] = useState(CANOPY_COLORS[0].hex);
   const [equipment, setEquipment] = useState<string[]>(["sunbed", "bimini"]);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [activePreset, setActivePreset] = useState<string | null>(null);
+  const { data: presets = [] } = useQuery(presetsQueryOptions());
 
   const model = useMemo(() => MODELS.find((m) => m.slug === modelSlug)!, [modelSlug]);
   const [engineHp, setEngineHp] = useState<number>(model.engines[1]);

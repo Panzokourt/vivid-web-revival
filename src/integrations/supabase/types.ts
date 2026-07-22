@@ -461,6 +461,92 @@ export type Database = {
         }
         Relationships: []
       }
+      stock_boats: {
+        Row: {
+          available_from: string | null
+          condition: string
+          created_at: string
+          description: string | null
+          engine: string | null
+          gallery: Json
+          hero_image: string | null
+          highlights: Json
+          hours: number | null
+          id: string
+          length_m: number | null
+          location: string | null
+          model_id: string | null
+          model_name: string
+          price_eur: number | null
+          price_note: string | null
+          series_slug: string | null
+          slug: string
+          sort_order: number
+          status: string
+          test_drive_available: boolean
+          updated_at: string
+          year: number | null
+        }
+        Insert: {
+          available_from?: string | null
+          condition: string
+          created_at?: string
+          description?: string | null
+          engine?: string | null
+          gallery?: Json
+          hero_image?: string | null
+          highlights?: Json
+          hours?: number | null
+          id?: string
+          length_m?: number | null
+          location?: string | null
+          model_id?: string | null
+          model_name: string
+          price_eur?: number | null
+          price_note?: string | null
+          series_slug?: string | null
+          slug: string
+          sort_order?: number
+          status?: string
+          test_drive_available?: boolean
+          updated_at?: string
+          year?: number | null
+        }
+        Update: {
+          available_from?: string | null
+          condition?: string
+          created_at?: string
+          description?: string | null
+          engine?: string | null
+          gallery?: Json
+          hero_image?: string | null
+          highlights?: Json
+          hours?: number | null
+          id?: string
+          length_m?: number | null
+          location?: string | null
+          model_id?: string | null
+          model_name?: string
+          price_eur?: number | null
+          price_note?: string | null
+          series_slug?: string | null
+          slug?: string
+          sort_order?: number
+          status?: string
+          test_drive_available?: boolean
+          updated_at?: string
+          year?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "stock_boats_model_id_fkey"
+            columns: ["model_id"]
+            isOneToOne: false
+            referencedRelation: "models"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       user_roles: {
         Row: {
           created_at: string

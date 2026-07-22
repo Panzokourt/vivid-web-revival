@@ -1,99 +1,89 @@
 
-Audit results and targeted fixes. Grouped by problem so we can approve/skip per area.
+## Root cause found for the "models σύγχυση"
 
-## 1. Canonical domain inconsistency
+`src/routes/models.tsx` declares `createFileRoute("/models")` with a full page component but never renders `<Outlet />`. In TanStack file routing, `models.tsx` + `models.$series.tsx` makes `models` the **parent** of `$series`. Because the parent has no `<Outlet />`, visiting `/models/odyssey` matches the child route but renders only the parent — that's why the Odyssey/Alu cards on `/models` "do nothing" (they navigate, but the same `/models` overview keeps rendering).
 
-Half the routes use the old Lovable preview host, the other half the real domain.
+The same trap exists one level down: `models.$series.tsx` is the parent of `models.$series.$model.tsx` and also has no `<Outlet />`. Model detail pages currently work only via the legacy `/models/r-XXX` redirect files; the intended `/models/odyssey/r-680` URL is broken by the same bug.
 
-- Files using `SITE = "https://vivid-web-revival.lovable.app"`: `models.tsx`, `models.$series.tsx`, `models.$series.$model.tsx`, `models.r-520.tsx`, `models.r-680.tsx`, `models.r-950.tsx`, `configurator.tsx` (`CANONICAL` const).
-- Files already using `https://ribali.advize.gr`: every `en.*.tsx`, `sitemap[.]xml.ts`, robots sitemap directive is the odd one out (see §2).
+Everything else about "models don't match between homepage / series / detail" flows from this — plus the three legacy `models.r-*.tsx` files, which duplicate content and shadow the hierarchy.
 
-**Fix:** replace `SITE`/`CANONICAL` constants in the seven Greek route files above with `https://ribali.advize.gr`, so `<link rel="canonical">`, `og:url`, and JSON-LD `url` line up with what the sitemap advertises and with the `/en` counterparts.
+## 1. Fix the routing (highest priority)
 
-## 2. robots.txt sitemap URL
+Convert `models.tsx` and `models.$series.tsx` into pure layout routes, move their bodies into new leaf files.
 
-`public/robots.txt` still points to `vivid-web-revival.lovable.app/sitemap.xml`. Change to `https://ribali.advize.gr/sitemap.xml`.
+- Rename `src/routes/models.tsx` → `src/routes/models.index.tsx` (leaf `/models`, keep all current overview code and `head()`).
+- Add a new `src/routes/models.tsx` layout: `component: () => <Outlet />`, no head, no loader.
+- Rename `src/routes/models.$series.tsx` → `src/routes/models.$series.index.tsx` (leaf `/models/$series`, keep `SeriesPage`, head, loader, error/notFound components).
+- Add a new `src/routes/models.$series.tsx` layout: `component: () => <Outlet />`.
+- Mirror the same split under `/en`: split `en.models.tsx` and `en.models.$series.tsx` into `.index.tsx` leaves + Outlet-only layouts.
 
-## 3. Duplicate model routes (legacy vs hierarchy)
+After the split, `/models`, `/models/odyssey`, and `/models/odyssey/r-680` all render the correct component.
 
-Every model is reachable at two URLs:
+## 2. Retire the legacy `/models/r-XXX` routes
 
-- Legacy static: `/models/r-520`, `/models/r-680`, `/models/r-950` (files `models.r-520.tsx` etc.).
-- Hierarchy: `/models/odyssey/r-520`, `/models/odyssey/r-680`, `/models/odyssey/r-950` (`models.$series.$model.tsx`).
+The three files `models.r-520.tsx`, `models.r-680.tsx`, `models.r-950.tsx` will remain (per earlier approval) as **redirect-only** shells to `/models/odyssey/<slug>` — no head, no content, just `useEffect` → `router.navigate({ replace: true })`, return `null`. This removes their duplicate canonicals and stops them competing with the hierarchy URLs. (They already were partially rewritten in the prior turn; this pass finishes them.)
 
-Each declares its own canonical pointing at itself → Google sees two canonicals for the same content. The sitemap currently lists only the legacy URLs, plus `/models/odyssey` and `/models/alu`; the hierarchy detail URLs are missing entirely.
+## 3. Reconcile models shown across the site
 
-**Decision needed** (default proposal in parens): pick one canonical URL shape.
+Single source of truth = `public.models` + `public.model_series` (DB currently has: series `odyssey`, `alu`; models `r-520`, `r-680`, `r-950`, all under `odyssey`; Alu series has 0 models).
 
-- (a) **Recommended — hierarchy is canonical.** Keep the three legacy files but change their canonical/`og:url`/JSON-LD `url` to the hierarchy URL (`/models/odyssey/<slug>`), and add a client-side redirect (`useEffect` → `router.navigate`, replace: true) so users landing on the legacy URL end up on the hierarchy URL. Sitemap lists only hierarchy URLs.
-- (b) Legacy is canonical: sitemap keeps `/models/r-520` etc., hierarchy pages set their canonical back to the legacy URL. Simpler but breaks the "series" story in URLs.
-- (c) Delete the three legacy files entirely. Cleanest, but any external link/bookmark to `/models/r-520` 404s.
+- `FeaturedModels.tsx`: today it hardcodes 3 Odyssey models. Convert to `useSuspenseQuery(modelsListQueryOptions())` and render up to 3 real DB rows (fallback to hero images only when `hero_image` is null). This guarantees the homepage models = models on `/models/odyssey` = models in `ModelRelated`.
+- `models.$series.tsx` (leaf, after §1) already fetches its models via `seriesDetailQueryOptions`. Verify the "3 μοντέλα" count on `/models` matches by relying on the same list query it already does.
+- `ModelRelated.tsx`: keep DB-driven; nothing to change.
+- Alu series: on the overview card, show "Έρχονται σύντομα" (already implemented). On `/models/alu`, show the existing empty-state (already implemented). Confirm both keep working after §1.
 
-Please confirm (a) or pick another. Rest of the plan assumes (a).
+## 4. Configurator ↔ models alignment
 
-## 4. Internal links still point at legacy model URLs
+Currently `src/lib/configurator-layers.ts` is code-defined and independent of DB models. This is a source of confusion ("does this model exist in the configurator?").
 
-Even after §3, code links bypass the series hierarchy and the locale prefix:
+Proposal (small, non-breaking):
+- Read the configurator layer keys and compare to DB model slugs.
+- If any DB model has no corresponding configurator entry, either (a) add a stub layer set, or (b) hide that model's "Configure" CTA. Pick (b) for now — data-driven flag `has_configurator` derived from `Object.keys(layers)` — and disable/hide the Configure button in `ModelHero`/`ModelCTA` for models without layers.
+- Document this contract in the audit script (§6).
 
-- `src/components/riboli/FeaturedModels.tsx`: hardcoded `to="/models/r-680"` etc. in the `models` array. Should be `to="/models/$series/$model"` with `params={{ series: "odyssey", model: "r-680" }}`, and wrapped with `localizeHref` (or use a locale-aware `<Link>`) so an EN visitor doesn't get bounced to `/models/...` outside `/en`.
-- `src/components/riboli/model/ModelRelated.tsx`: hardcoded `routeMap` of `r-520|r-680|r-950 → /models/r-XXX`. Replace with `<Link to="/models/$series/$model" params={{ series: m.series_slug ?? "odyssey", model: m.slug }}>`. Also add locale prefix.
-- Confirm all other `<Link>`s in components respect `useLocalePrefix`.
+Confirm in build mode before I add a DB column — no schema change is needed if we derive the flag in code.
 
-## 5. Sitemap contents
+## 5. Sitemap + hreflang audit
 
-`src/routes/sitemap[.]xml.ts` currently lists `/models/r-520|r-680|r-950` (legacy). After §3(a) the sitemap should:
+- Recompute `ROUTES` in `sitemap[.]xml.ts` from the actual routeTree (static list is fine, but every entry must exist in both `/` and `/en`). Verified pairs: `/`, `/about`, `/models`, `/models/odyssey`, `/models/alu`, `/models/odyssey/r-520|680|950`, `/stock`, `/configurator`, `/dealers`, `/contact`. Same list stays.
+- Add a **build-time check** (§6) that fails when a sitemap path has no matching route file (EL or EN).
+- Verify each leaf route's `canonical` self-references its own hierarchy URL under `ribali.advize.gr`. Fix any drift found by the audit script.
 
-- Drop the three legacy `/models/r-XXX` entries.
-- Add `/models/odyssey/r-520`, `/models/odyssey/r-680`, `/models/odyssey/r-950`.
-- Keep `/models/odyssey` and `/models/alu`.
-- Optionally: fetch models from DB inside the handler (via `modelsListQueryOptions`' query fn) so new models auto-appear. Nice-to-have; low priority for now.
+## 6. Add `bun run check:links` script
 
-Each entry still emits both `el` and `/en` variants with hreflang, per existing pattern.
+New file `scripts/check-links.ts`, wired as `"check:links": "bun run scripts/check-links.ts"` in `package.json`. It runs offline against source only (no network, no dev server) and exits non-zero on any violation. Checks:
 
-## 6. Contact / email inconsistency
+1. **Sitemap ↔ routes**: every path in `sitemap[.]xml.ts` must resolve to a route file (EL) and its `/en` mirror.
+2. **Canonical consistency**: every route file that declares `<link rel="canonical">` must use `https://ribali.advize.gr` and self-reference its own path (params interpolated with `$series`/`$model` placeholders).
+3. **No hardcoded legacy model hrefs**: forbid `to="/models/r-520|r-680|r-950"` and `href="/models/r-…"` outside the 3 legacy redirect files.
+4. **Locale-prefixed anchors**: any `<a href="/...">` inside `src/components/**` must go through `localizeHref(prefix, …)` — grep-based rule.
+5. **Model naming**: allow-list of model slugs = DB slugs (read from `src/lib/models.functions.ts` list or a small `MODELS.json` snapshot committed alongside). Any UI string matching `/R-?\d{3}/` must be one of the allow-listed codes. Catches typos like `R520` vs `R-520`.
+6. **Series naming**: same for series slugs (`odyssey`, `alu`) and display names (`Odyssey`, `Alu Series`).
+7. **Configurator coverage**: for each DB model slug, warn (not fail) if no entry in `configurator-layers.ts`.
+8. **Email/contact**: forbid `riboli.gr` and `hello@riboli.*`; require `hello@ribali.gr`.
 
-- `src/components/riboli/model/ModelCTA.tsx`: `mailto:hello@riboli.gr` (old brand, wrong TLD/spelling).
-- `Footer.tsx` fallback: `hello@ribali.gr`.
+Run it in `bun run build` (add `"prebuild": "bun run check:links"`) so regressions block deploy.
 
-Standardise to a single address. Proposal: `hello@ribali.gr` everywhere (matches Footer + brand). Update ModelCTA. If the real inbox is different, tell me and I'll use that instead.
+## 7. Deliverables for the audit report
 
-## 7. Footer polish
+Once the fixes ship, I'll also produce a one-off `AUDIT.md` with the full pass output: broken hrefs found, mislocalized links, sitemap/hreflang pairs, canonical map, and configurator coverage matrix. This is the human-readable version of what §6 checks automatically.
 
-`src/components/riboli/Footer.tsx` has:
+## Out of scope (call out only)
 
-- Social links all `href="#"` (Instagram/YouTube/LinkedIn).
-- Legal links all `href="#"` (Privacy / Terms / Cookies).
-- No "Explore" nav column although `t("footer.explore")` exists in the i18n files.
-
-Proposal: (i) Add an Explore column with locale-prefixed links to Models / Stock / About / Dealers / Contact. (ii) Replace social `#` with real URLs — please provide them, or I'll leave placeholders and remove until you supply. (iii) Replace legal `#` with real pages, or hide the items until pages exist. Please confirm which.
-
-## 8. `public/llms.txt` outdated
-
-Current file describes "three RIB hulls (R-520, R-680, R-950)" and a "Live 3D configurator". Reality after Phases 3–5: Odyssey + Alu Series, 2D layered configurator, plus `/stock`. Rewrite to reflect series hierarchy, add `/stock`, `/models/odyssey`, `/models/alu`, `/models/odyssey/r-520|680|950`, and note EN mirror at `/en/*`.
-
-## 9. `en.models.$series.$model.tsx` weak head
-
-Only sets a title (`RIBALI <MODEL>`); no description, no og:image, no JSON-LD. The Greek variant has description + `og:type: product`. Mirror the Greek head with English text so the `/en/models/...` pages don't ship half-empty metadata.
-
-## 10. ModelCTA copy not localised
-
-`ModelCTA.tsx` is hardcoded English ("Book a private sea trial", "Step aboard the …"). Route through `t()` with keys under `model.cta.*` and add both locale files. Small but noticeable.
-
-## Out of scope for this pass (call out only)
-
-- No changes to Supabase schema, RLS, or admin CMS.
-- Not touching GSAP/scroll behaviour.
-- Not adding real Privacy/Terms/Cookies content — only wiring or hiding.
+- No CMS/schema changes.
+- No new Alu Series models — Alu will keep its empty state until Michalis provides data.
+- Not implementing server-side 301 for the legacy `/models/r-*` URLs; client redirect only, as previously agreed.
 
 ## Order of execution
 
-1. Confirm §3 decision (a/b/c) and §6 email, §7 social/legal handling.
-2. Ship §1, §2, §5, §8, §9 (pure config/text — safe).
-3. Ship §4 link updates.
-4. Ship §3 canonical rewrite + legacy redirect.
-5. Ship §6, §7, §10.
+1. §1 route split (unblocks everything else and fixes the visible bug).
+2. §2 finish legacy redirect shells.
+3. §3 FeaturedModels DB-driven.
+4. §5 sitemap re-verify + fix any canonicals drift found.
+5. §6 add `check:links`, wire to prebuild, fix whatever it flags.
+6. §4 configurator flag + hide/disable CTAs.
+7. §7 write AUDIT.md.
 
-## Technical notes
+## Question before I start
 
-- Legacy → hierarchy redirect: safest client-side pattern is inside the legacy route's component, `useEffect(() => router.navigate({ to: "/models/$series/$model", params: {...}, replace: true }), [])`, returning `null` while it redirects. Search engines see the canonical tag; humans get bounced. If you'd rather do a real HTTP 301, we'd need to convert the leaf into a server route — heavier change, not recommended unless you ask.
-- Locale-aware `<Link>`: current `localizeHref` returns a string suitable for `<a href>`. For typed `<Link to="/models/$series/$model">`, TanStack Router doesn't accept a prefix on `to` — the `/en` mirror is a separate route ID. Options: (i) keep using `<a href={L(...)}>` in FeaturedModels/Related; (ii) branch on `prefix` and use `to="/en/models/$series/$model"` vs `to="/models/$series/$model"`. I'll pick (i) for consistency with the rest of the nav unless you prefer typed links.
+For §4 (configurator coverage): do you want models without configurator support to **hide** the Configure button entirely, or **show it disabled** with a "Έρχεται σύντομα" tooltip? Default = hide.

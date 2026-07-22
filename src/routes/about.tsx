@@ -5,6 +5,8 @@ import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
 import { Nav } from "@/components/riboli/Nav";
 import { Footer } from "@/components/riboli/Footer";
 import { MagneticButton } from "@/components/riboli/MagneticButton";
+import { WhyRibali } from "@/components/riboli/WhyRibali";
+import { Heritage } from "@/components/riboli/Heritage";
 import techImg from "@/assets/tech-detail.jpg";
 import heroImg from "@/assets/hero.jpg";
 import r520 from "@/assets/model-r520.jpg";
@@ -231,7 +233,7 @@ function AboutPage() {
       {/* HERO */}
       <section className="about-hero relative pt-32 pb-16 md:pb-24 px-6 md:px-10 overflow-hidden border-b border-ink/10">
         <div className="about-eyebrow text-[10px] uppercase tracking-[0.35em] text-copper mb-6">
-          Since 1998 · Piraeus, Greece
+          Εισαγωγή & κατασκευή σκαφών από το 1963 · Πειραιάς
         </div>
         <h1 className="about-title font-display text-[13vw] md:text-[9vw] leading-[0.9] tracking-tight max-w-6xl">
           {title.map((c, i) => (
@@ -241,9 +243,9 @@ function AboutPage() {
           ))}
         </h1>
         <p className="about-hero-lede mt-10 max-w-2xl text-ink/70 text-base md:text-lg leading-relaxed">
-          RIBALI is a small shipyard on the edge of the Piraeus harbor. For almost three decades
-          we have built rigid inflatable boats one hull at a time — for fishermen, for coast
-          guards, for families who understand that the best sea days begin with a boat you trust.
+          Η οικογένεια Αλιβιζάτου εισάγει και υποστηρίζει σκάφη στην Ελλάδα από το 1963. Η RIBALI
+          είναι το επόμενο βήμα: δικές μας κατασκευές χειροποίητες στον Πειραιά, με το ίδιο
+          πανελλαδικό δίκτυο και τις ίδιες γραπτές εγγυήσεις.
         </p>
 
         <div className="about-hero-media mt-16 relative aspect-[16/9] overflow-hidden">
@@ -409,6 +411,10 @@ function AboutPage() {
           </div>
         </div>
       </section>
+
+      <WhyRibali />
+
+      <Heritage />
 
       {/* CTA */}
       <section className="px-6 md:px-10 py-20 md:py-32">

@@ -9,6 +9,7 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as StockRouteImport } from './routes/stock'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
 import { Route as ModelsRouteImport } from './routes/models'
 import { Route as DealersRouteImport } from './routes/dealers'
@@ -35,6 +36,11 @@ import { Route as AuthenticatedAdminContentRouteImport } from './routes/_authent
 import { Route as AuthenticatedAdminAnalyticsRouteImport } from './routes/_authenticated/admin.analytics'
 import { Route as AuthenticatedAdminContentHistoryRouteImport } from './routes/_authenticated/admin.content.history'
 
+const StockRoute = StockRouteImport.update({
+  id: '/stock',
+  path: '/stock',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
@@ -177,6 +183,7 @@ export interface FileRoutesByFullPath {
   '/dealers': typeof DealersRoute
   '/models': typeof ModelsRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/stock': typeof StockRoute
   '/models/$series': typeof ModelsSeriesRouteWithChildren
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
@@ -203,6 +210,7 @@ export interface FileRoutesByTo {
   '/dealers': typeof DealersRoute
   '/models': typeof ModelsRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/stock': typeof StockRoute
   '/models/$series': typeof ModelsSeriesRouteWithChildren
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
@@ -231,6 +239,7 @@ export interface FileRoutesById {
   '/dealers': typeof DealersRoute
   '/models': typeof ModelsRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
+  '/stock': typeof StockRoute
   '/models/$series': typeof ModelsSeriesRouteWithChildren
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
@@ -259,6 +268,7 @@ export interface FileRouteTypes {
     | '/dealers'
     | '/models'
     | '/sitemap.xml'
+    | '/stock'
     | '/models/$series'
     | '/models/r-520'
     | '/models/r-680'
@@ -285,6 +295,7 @@ export interface FileRouteTypes {
     | '/dealers'
     | '/models'
     | '/sitemap.xml'
+    | '/stock'
     | '/models/$series'
     | '/models/r-520'
     | '/models/r-680'
@@ -312,6 +323,7 @@ export interface FileRouteTypes {
     | '/dealers'
     | '/models'
     | '/sitemap.xml'
+    | '/stock'
     | '/models/$series'
     | '/models/r-520'
     | '/models/r-680'
@@ -340,10 +352,18 @@ export interface RootRouteChildren {
   DealersRoute: typeof DealersRoute
   ModelsRoute: typeof ModelsRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
+  StockRoute: typeof StockRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/stock': {
+      id: '/stock'
+      path: '/stock'
+      fullPath: '/stock'
+      preLoaderRoute: typeof StockRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/sitemap.xml': {
       id: '/sitemap.xml'
       path: '/sitemap.xml'
@@ -605,6 +625,7 @@ const rootRouteChildren: RootRouteChildren = {
   DealersRoute: DealersRoute,
   ModelsRoute: ModelsRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
+  StockRoute: StockRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

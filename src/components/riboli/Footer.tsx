@@ -3,10 +3,13 @@ import { usePageBlock } from "@/lib/page-blocks";
 import { EditableField } from "@/components/editor/EditableField";
 
 const FALLBACK = {
-  tagline: "Handcrafted RIBs for those who read the sea before the map.",
-  studio_line1: "Piraeus · Greece",
+  tagline: "Χειροποίητα σκάφη για όσους διαβάζουν τη θάλασσα πριν τον χάρτη.",
+  studio_line1: "Πειραιάς · Ελλάδα",
   studio_line2: "+30 210 000 0000",
-  studio_line3: "hello@riboli.gr",
+  studio_line3: "hello@ribali.gr",
+  showroom_label: "Showroom",
+  showroom_address: "Ακτή Θεμιστοκλέους 142, Πειραιάς 18538",
+  showroom_hours: "Δευ–Παρ · 09:00 – 18:00 · Σάβ κατόπιν ραντεβού",
   wordmark: "RIBALI",
 };
 
@@ -16,7 +19,7 @@ export function Footer() {
   return (
     <footer id="footer" className="relative bg-ink text-paper overflow-hidden isolate">
       <div className="max-w-[1600px] mx-auto px-6 md:px-10 py-16 md:py-20">
-        <div className="grid md:grid-cols-4 gap-10 border-b border-paper/15 pb-12">
+        <div className="grid md:grid-cols-5 gap-10 border-b border-paper/15 pb-12">
           <div>
             <Link to="/" className="font-display text-3xl tracking-widest inline-block hover:text-copper transition-colors">RIBALI</Link>
             <EditableField page="home" block="footer" field="tagline" type="textarea" label="Tagline" as="div" className="mt-4 max-w-xs">
@@ -41,6 +44,23 @@ export function Footer() {
               <li>
                 <EditableField page="home" block="footer" field="studio_line3" type="text" label="Studio line 3">
                   {block.studio_line3}
+                </EditableField>
+              </li>
+            </ul>
+          </div>
+          <div>
+            <EditableField page="home" block="footer" field="showroom_label" type="text" label="Showroom label" as="div" className="text-[11px] uppercase tracking-[0.3em] text-paper/50 mb-4">
+              {block.showroom_label}
+            </EditableField>
+            <ul className="space-y-2 text-sm text-paper/80">
+              <li>
+                <EditableField page="home" block="footer" field="showroom_address" type="text" label="Showroom address">
+                  {block.showroom_address}
+                </EditableField>
+              </li>
+              <li>
+                <EditableField page="home" block="footer" field="showroom_hours" type="text" label="Showroom hours">
+                  {block.showroom_hours}
                 </EditableField>
               </li>
             </ul>

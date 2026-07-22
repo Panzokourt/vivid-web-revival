@@ -177,15 +177,15 @@ export function ConfiguratorPage() {
           </Section>
 
           <Section index="02" title="Hull color">
-            <SwatchRow items={HULL_COLORS} selected={hullColor} onSelect={setHullColor} />
+            <SwatchRow items={HULL_COLORS} selected={hullColor} onSelect={(h) => { setHullColor(h); setActivePreset(null); }} />
           </Section>
 
           <Section index="03" title="Tube color">
-            <SwatchRow items={TUBE_COLORS} selected={tubeColor} onSelect={setTubeColor} />
+            <SwatchRow items={TUBE_COLORS} selected={tubeColor} onSelect={(h) => { setTubeColor(h); setActivePreset(null); }} />
           </Section>
 
           <Section index="04" title="Canopy color">
-            <SwatchRow items={CANOPY_COLORS} selected={canopyColor} onSelect={setCanopyColor} />
+            <SwatchRow items={CANOPY_COLORS} selected={canopyColor} onSelect={(h) => { setCanopyColor(h); setActivePreset(null); }} />
           </Section>
 
           <Section index="05" title="Engine">
@@ -193,7 +193,7 @@ export function ConfiguratorPage() {
               {model.engines.map((hp) => (
                 <button
                   key={hp}
-                  onClick={() => setEngineHp(hp)}
+                  onClick={() => { setEngineHp(hp); setActivePreset(null); }}
                   className={`px-5 py-3 text-[11px] uppercase tracking-[0.25em] border transition-colors ${
                     engineHp === hp
                       ? "bg-ink text-paper border-ink"

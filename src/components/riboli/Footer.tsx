@@ -1,7 +1,7 @@
-import { Link } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { usePageBlock } from "@/lib/page-blocks";
 import { EditableField } from "@/components/editor/EditableField";
+import { useLocalePrefix, localizeHref } from "@/lib/use-locale-prefix";
 
 const FALLBACK = {
   tagline: "Χειροποίητα σκάφη για όσους διαβάζουν τη θάλασσα πριν τον χάρτη.",
@@ -17,13 +17,14 @@ const FALLBACK = {
 export function Footer() {
   const { t } = useTranslation();
   const block = usePageBlock("home", "footer", FALLBACK);
+  const prefix = useLocalePrefix();
 
   return (
     <footer id="footer" className="relative bg-ink text-paper overflow-hidden isolate">
       <div className="max-w-[1600px] mx-auto px-6 md:px-10 py-16 md:py-20">
         <div className="grid md:grid-cols-5 gap-10 border-b border-paper/15 pb-12">
           <div>
-            <Link to="/" className="font-display text-3xl tracking-widest inline-block hover:text-copper transition-colors">RIBALI</Link>
+            <a href={localizeHref(prefix, "/")} className="font-display text-3xl tracking-widest inline-block hover:text-copper transition-colors">RIBALI</a>
             <EditableField page="home" block="footer" field="tagline" type="textarea" label="Tagline" as="div" className="mt-4 max-w-xs">
               <p className="text-sm text-paper/60 leading-relaxed">
                 {block.tagline}

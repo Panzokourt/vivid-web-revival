@@ -184,6 +184,48 @@ export type Database = {
           },
         ]
       }
+      model_series: {
+        Row: {
+          created_at: string
+          description: string | null
+          hero_image: string | null
+          hull_material: string
+          id: string
+          name: string
+          published: boolean
+          slug: string
+          sort_order: number
+          tagline: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          hero_image?: string | null
+          hull_material: string
+          id?: string
+          name: string
+          published?: boolean
+          slug: string
+          sort_order?: number
+          tagline?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          hero_image?: string | null
+          hull_material?: string
+          id?: string
+          name?: string
+          published?: boolean
+          slug?: string
+          sort_order?: number
+          tagline?: string | null
+          updated_at?: string
+        }
+        Relationships: []
+      }
       models: {
         Row: {
           beam_m: number | null
@@ -192,6 +234,7 @@ export type Database = {
           description: string | null
           fuel_l: number | null
           hero_image: string | null
+          hull_material: string | null
           hull_type: string | null
           id: string
           length_m: number | null
@@ -200,6 +243,7 @@ export type Database = {
           number: string
           order_index: number
           pax: number | null
+          series_slug: string | null
           slug: string
           tag: string | null
           tagline: string | null
@@ -213,6 +257,7 @@ export type Database = {
           description?: string | null
           fuel_l?: number | null
           hero_image?: string | null
+          hull_material?: string | null
           hull_type?: string | null
           id?: string
           length_m?: number | null
@@ -221,6 +266,7 @@ export type Database = {
           number: string
           order_index?: number
           pax?: number | null
+          series_slug?: string | null
           slug: string
           tag?: string | null
           tagline?: string | null
@@ -234,6 +280,7 @@ export type Database = {
           description?: string | null
           fuel_l?: number | null
           hero_image?: string | null
+          hull_material?: string | null
           hull_type?: string | null
           id?: string
           length_m?: number | null
@@ -242,13 +289,22 @@ export type Database = {
           number?: string
           order_index?: number
           pax?: number | null
+          series_slug?: string | null
           slug?: string
           tag?: string | null
           tagline?: string | null
           tube_material?: string | null
           weight_kg?: number | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "models_series_slug_fkey"
+            columns: ["series_slug"]
+            isOneToOne: false
+            referencedRelation: "model_series"
+            referencedColumns: ["slug"]
+          },
+        ]
       }
       page_block_versions: {
         Row: {

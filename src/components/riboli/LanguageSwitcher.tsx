@@ -7,10 +7,32 @@ type Props = {
   overHero?: boolean;
 };
 
+/**
+ * Toggles between /path and /en/path so both locales get their own URL
+ * (SEO alternate). Full navigation ensures Nav/Footer re-render with the
+ * new locale-prefixed hrefs.
+ */
+function swapLocaleUrl(target: AppLocale): string {
+  if (typeof window === "undefined") return "/";
+  const { pathname, search, hash } = window.location;
+  const stripped = pathname.replace(/^\/en(\/|$)/, "/");
+  const base = stripped === "" ? "/" : stripped;
+  const next = target === "en" ? (base === "/" ? "/en" : `/en${base}`) : base;
+  return `${next}${search}${hash}`;
+}
+
 export function LanguageSwitcher({ className, overHero }: Props) {
   const { i18n } = useTranslation();
   const [open, setOpen] = useState(false);
-  const current = (i18n.resolvedLanguage ?? i18n.language ?? "el").slice(0, 2) as AppLocale;
+  const [pathBased, setPathBased] = useState<AppLocale | null>(null);
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const isEn = window.location.pathname.startsWith("/en");
+    setPathBased(isEn ? "en" : "el");
+  }, []);
+
+  const current: AppLocale = pathBased ?? ((i18n.resolvedLanguage ?? i18n.language ?? "el").slice(0, 2) as AppLocale);
 
   useEffect(() => {
     if (typeof document !== "undefined") document.documentElement.lang = current;
@@ -20,6 +42,9 @@ export function LanguageSwitcher({ className, overHero }: Props) {
     setOpen(false);
     if (loc === current) return;
     await setLocale(loc);
+    if (typeof window !== "undefined") {
+      window.location.assign(swapLocaleUrl(loc));
+    }
   };
 
   const btnCls = overHero

@@ -26,7 +26,10 @@
     "book_test_drive": "Κλείσε test drive",
     "learn_more": "Μάθε περισσότερα",
     "back": "Πίσω",
-    "download_pdf": "Κατέβασε PDF"
+    "download_pdf": "Κατέβασε PDF",
+    "reserve": "Κράτηση",
+    "explore": "Εξερεύνησε",
+    "get_in_touch": "Επικοινώνησε"
   },
   "common": {
     "loading": "Φόρτωση…",
@@ -36,18 +39,52 @@
     "submit": "Αποστολή",
     "cancel": "Ακύρωση",
     "save": "Αποθήκευση",
-    "language": "Γλώσσα"
+    "language": "Γλώσσα",
+    "from": "Από",
+    "eur": "€",
+    "length_m": "μέτρα",
+    "hp": "HP",
+    "pax": "άτομα"
   },
   "form": {
     "name": "Ονοματεπώνυμο",
     "email": "Email",
     "phone": "Τηλέφωνο",
     "message": "Μήνυμα",
-    "required": "Υποχρεωτικό πεδίο"
+    "required": "Υποχρεωτικό πεδίο",
+    "sent": "Το μήνυμά σου εστάλη.",
+    "send_failed": "Η αποστολή απέτυχε."
   },
   "language": {
     "el": "Ελληνικά",
     "en": "English",
     "switch": "Άλλαξε γλώσσα"
+  },
+  "stock": {
+    "title": "Ετοιμοπαράδοτα & Test Drive",
+    "empty": "Δεν υπάρχουν διαθέσιμα σκάφη αυτή τη στιγμή.",
+    "condition": { "new": "Καινούριο", "demo": "Demo", "used": "Μεταχειρισμένο" },
+    "status": { "available": "Διαθέσιμο", "reserved": "Κρατημένο", "sold": "Πωλήθηκε" },
+    "test_drive": "Test Drive"
+  },
+  "configurator": {
+    "title": "RIBALI Configurator",
+    "presets": "RIBALI-ready presets",
+    "hull": "Γάστρα",
+    "tubes": "Φουσκωτά",
+    "canopy": "Κουμπούκι",
+    "engine": "Κινητήρας",
+    "extras": "Extras",
+    "trailer": "Τρέιλερ",
+    "total": "Σύνολο",
+    "vat_included": "με ΦΠΑ 24%",
+    "finance": "Χρηματοδότηση"
+  },
+  "models": {
+    "series": "Σειρές",
+    "polyester": "Πολυεστέρας",
+    "aluminium": "Αλουμίνιο",
+    "specs": "Χαρακτηριστικά",
+    "gallery": "Gallery"
   }
 }

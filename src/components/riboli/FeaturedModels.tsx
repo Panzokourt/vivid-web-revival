@@ -75,13 +75,13 @@ export function FeaturedModels() {
           <Link
             key={m.slug}
             to="/models/$series/$model"
-            params={{ series: m.series, model: m.slug }}
+            params={{ series: m.series_slug ?? "odyssey", model: m.slug }}
             className="model-slide relative shrink-0 w-[85vw] md:w-[70vw] lg:w-[70vw] h-full bg-paper-2 overflow-hidden group block isolate snap-center lg:snap-align-none"
           >
 
 
             <img
-              src={m.img}
+              src={resolveAsset(m.hero_image)}
               alt={m.name}
               loading="lazy"
               className="absolute inset-0 h-full w-full object-cover transition-transform duration-700 group-hover:scale-105"
@@ -90,13 +90,14 @@ export function FeaturedModels() {
             <div className="absolute inset-x-0 top-0 h-1/3 bg-gradient-to-b from-ink/40 to-transparent" />
 
             <div className="absolute top-6 left-6 md:top-10 md:left-10 text-paper text-[11px] uppercase tracking-[0.3em] flex items-center gap-3">
-              <span className="w-2 h-2 rounded-full bg-copper" /> {m.tag}
+              <span className="w-2 h-2 rounded-full bg-copper" /> {m.tag ?? m.name}
             </div>
             <div className="absolute top-6 right-6 md:top-10 md:right-10 text-paper/70 text-[11px] uppercase tracking-[0.3em] text-right">
-              <div>Length {m.length}</div>
-              <div>Power {m.power}</div>
-              <div>Pax {m.pax}</div>
+              {m.length_m != null ? <div>Length {m.length_m} M</div> : null}
+              {m.max_hp != null ? <div>Power {m.max_hp} HP</div> : null}
+              {m.pax != null ? <div>Pax {m.pax}</div> : null}
             </div>
+
 
             <div className="absolute bottom-6 left-6 md:bottom-10 md:left-10 text-paper">
               <div className="text-[11px] uppercase tracking-[0.3em] text-paper/70">{m.name}</div>

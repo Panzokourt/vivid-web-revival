@@ -3,7 +3,14 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { MagneticButton } from "@/components/riboli/MagneticButton";
 
 const links = [
-  { label: "Models", href: "/models" },
+  {
+    label: "Models",
+    href: "/models",
+    children: [
+      { label: "Odyssey · Πολυεστέρας", href: "/models/odyssey" },
+      { label: "Alu Series · Αλουμίνιο", href: "/models/alu" },
+    ],
+  },
   { label: "About", href: "/about" },
   { label: "Dealers", href: "/dealers" },
   { label: "Contact", href: "/contact" },

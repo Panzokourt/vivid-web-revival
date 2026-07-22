@@ -2,16 +2,24 @@
 
 > Greek atelier of handcrafted rigid inflatable boats (RIBs). Editorial performance craft built by hand in Piraeus since 1998 — Deep-V hulls, ORCA Hypalon tubes, sold through an authorised dealer network across the Mediterranean.
 
-RIBALI designs and hand-builds three RIB hulls (R-520, R-680, R-950) in its Piraeus, Greece workshop. Each boat is laid, finished, and sea-trialled by hand. Sea trials and service are available through authorised dealers in Greece, Italy, France, Spain, Croatia, and the UAE.
+RIBALI designs and hand-builds two families of RIBs in its Piraeus, Greece workshop: the polyester **Odyssey** series and the aluminium **Alu Series**. Every hull is laid, finished, and sea-trialled by hand. Sea trials and service are available through authorised dealers in Greece, Italy, France, Spain, Croatia, and the UAE. The site ships in Greek at the default paths and in English mirrored under `/en/*`.
 
 ## Pages
 
 - [Home](/): RIBALI brand, philosophy, and featured models.
 - [About](/about): The Piraeus atelier — story, craft, values, people.
-- [Collection](/models): The three RIBALI hulls compared — R-520, R-680, R-950.
-- [R-520 Explore](/models/r-520): Compact 5.2m RIB, handcrafted for coves and tender duty.
-- [R-680 Sport](/models/r-680): 6.8m Deep-V RIB with ORCA Hypalon tubes — the everyday performer.
-- [R-950 Cruise](/models/r-950): 9.5m flagship stepped Deep-V RIB with forward cabin.
-- [Configurator](/configurator): Live 3D configurator — hull, tubes, canopy, engine, extras.
+- [Collection](/models): The full RIBALI collection with polyester / aluminium filter.
+- [Odyssey series](/models/odyssey): Polyester Deep-V hulls (R-520, R-680, R-950).
+- [Alu Series](/models/alu): Aluminium hulls, 5–10 metres.
+- [R-520 Explore](/models/odyssey/r-520): Compact 5.2m polyester RIB, tender and cove duty.
+- [R-680 Sport](/models/odyssey/r-680): 6.8m Deep-V polyester RIB — the everyday performer.
+- [R-950 Cruise](/models/odyssey/r-950): 9.5m flagship stepped Deep-V polyester RIB with forward cabin.
+- [Stock & Test Drive](/stock): Boats available for immediate delivery and test drives in Piraeus.
+- [Configurator](/configurator): Layered 2D configurator — hull, tubes, canopy, engine, extras, trailer, live pricing and PDF quote.
 - [Dealers](/dealers): Authorised RIBALI partners across the Mediterranean.
 - [Contact](/contact): Book a sea trial, request a quote, or visit the Piraeus shipyard.
+
+## Optional
+
+- [English mirror](/en): Every page above is available under `/en/*` (e.g. `/en/models/odyssey/r-680`).
+- [Sitemap](/sitemap.xml): Full URL list with `hreflang` alternates.

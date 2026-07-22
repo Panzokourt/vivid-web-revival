@@ -1,7 +1,9 @@
 import { useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
+import { useTranslation } from "react-i18next";
 import { supabase } from "@/integrations/supabase/client";
 import { useEditorOptional } from "@/components/editor/EditorProvider";
+import { DEFAULT_LOCALE, type AppLocale } from "@/lib/i18n";
 
 export type PageBlockContent = Record<string, unknown>;
 
@@ -17,19 +19,30 @@ export function isPreviewMode(): boolean {
 async function fetchPageBlock(
   page: string,
   key: string,
+  locale: AppLocale,
   preview: boolean,
 ): Promise<PageBlockContent | null> {
-  let query = supabase
-    .from("page_blocks")
-    .select("content, published, updated_at")
-    .eq("page_slug", page)
-    .eq("block_key", key);
+  // Try requested locale first; fall back to default (el) if missing.
+  const tryFetch = async (loc: AppLocale) => {
+    let query = supabase
+      .from("page_blocks")
+      .select("content, published, updated_at")
+      .eq("page_slug", page)
+      .eq("block_key", key)
+      .eq("locale", loc);
+    if (!preview) query = query.eq("published", true);
+    const { data, error } = await query
+      .order("updated_at", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw error;
+    return (data?.content as PageBlockContent) ?? null;
+  };
 
-  if (!preview) query = query.eq("published", true);
-
-  const { data, error } = await query.order("updated_at", { ascending: false }).limit(1).maybeSingle();
-  if (error) throw error;
-  return (data?.content as PageBlockContent) ?? null;
+  const primary = await tryFetch(locale);
+  if (primary) return primary;
+  if (locale !== DEFAULT_LOCALE) return tryFetch(DEFAULT_LOCALE);
+  return null;
 }
 
 /**
@@ -46,9 +59,11 @@ export function usePageBlock<T extends PageBlockContent>(
   fallback: T,
 ): T {
   const preview = isPreviewMode();
+  const { i18n } = useTranslation();
+  const locale = ((i18n.resolvedLanguage ?? i18n.language ?? DEFAULT_LOCALE).slice(0, 2) as AppLocale);
   const { data } = useQuery({
-    queryKey: ["page_block", page, key, preview ? "preview" : "live"],
-    queryFn: () => fetchPageBlock(page, key, preview),
+    queryKey: ["page_block", page, key, locale, preview ? "preview" : "live"],
+    queryFn: () => fetchPageBlock(page, key, locale, preview),
     staleTime: preview ? 0 : 5 * 60_000,
     gcTime: 30 * 60_000,
   });
@@ -70,3 +85,4 @@ export function usePageBlock<T extends PageBlockContent>(
   }
   return merged;
 }
+

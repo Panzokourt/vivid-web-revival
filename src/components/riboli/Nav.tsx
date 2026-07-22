@@ -1,25 +1,13 @@
 import { useEffect, useState } from "react";
 import { Link, useRouterState } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import { MagneticButton } from "@/components/riboli/MagneticButton";
-
-const links = [
-  {
-    label: "Models",
-    href: "/models",
-    children: [
-      { label: "Odyssey · Πολυεστέρας", href: "/models/odyssey" },
-      { label: "Alu Series · Αλουμίνιο", href: "/models/alu" },
-    ],
-  },
-  { label: "Stock", href: "/stock" },
-  { label: "About", href: "/about" },
-  { label: "Dealers", href: "/dealers" },
-  { label: "Contact", href: "/contact" },
-];
+import { LanguageSwitcher } from "@/components/riboli/LanguageSwitcher";
 
 const NAV_TEXT_SHADOW = "0 2px 12px rgba(0,0,0,0.6), 0 0 2px rgba(0,0,0,0.4)";
 
 export function Nav() {
+  const { t } = useTranslation();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
 
@@ -37,6 +25,21 @@ export function Nav() {
   const textCls = overHero ? "text-paper" : "text-ink";
   const linkCls = overHero ? "text-paper/85 hover:text-copper" : "text-ink/70 hover:text-copper";
   const shadow = overHero ? { textShadow: NAV_TEXT_SHADOW } : undefined;
+
+  const links = [
+    {
+      label: t("nav.models"),
+      href: "/models",
+      children: [
+        { label: t("nav.odyssey"), href: "/models/odyssey" },
+        { label: t("nav.alu"), href: "/models/alu" },
+      ],
+    },
+    { label: t("nav.stock"), href: "/stock" },
+    { label: t("nav.about"), href: "/about" },
+    { label: t("nav.dealers"), href: "/dealers" },
+    { label: t("nav.contact"), href: "/contact" },
+  ];
 
   return (
     <nav
@@ -76,6 +79,7 @@ export function Nav() {
         ))}
       </div>
       <div className="flex items-center gap-4">
+        <LanguageSwitcher overHero={overHero} />
         <MagneticButton
           as={Link}
           to="/configurator"
@@ -85,11 +89,11 @@ export function Nav() {
               : "bg-ink text-paper hover:bg-copper"
           }`}
         >
-          Configure
+          {t("nav.configure")}
           <span className="text-base leading-none">+</span>
         </MagneticButton>
         <button
-          aria-label="Menu"
+          aria-label={t("nav.menu")}
           onClick={() => setOpen((v) => !v)}
           className={`md:hidden p-2 border ${overHero ? "border-paper/40" : "border-ink/20"}`}
         >

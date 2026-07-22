@@ -3,7 +3,7 @@ import { Route as StockRoute } from "@/routes/stock";
 
 const SITE = "https://ribali.advize.gr";
 export const Route = createFileRoute("/en/stock")({
-  loader: StockRoute.options.loader,
+  loader: ((ctx: any) => (undefined as any)) as any,
   head: () => ({
     meta: [
       { title: "In-stock & Test Drive — RIBALI" },

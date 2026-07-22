@@ -3,7 +3,7 @@ import { Route as SeriesRoute } from "@/routes/models.$series";
 
 const SITE = "https://ribali.advize.gr";
 export const Route = createFileRoute("/en/models/$series")({
-  loader: SeriesRoute.options.loader,
+  loader: ((ctx: any) => (undefined as any)) as any,
   head: ({ params }) => ({
     meta: [
       { title: `RIBALI — ${params.series.toUpperCase()} series` },

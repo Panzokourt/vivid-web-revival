@@ -3,7 +3,7 @@ import { Route as ModelsRoute } from "@/routes/models";
 
 const SITE = "https://ribali.advize.gr";
 export const Route = createFileRoute("/en/models")({
-  loader: ModelsRoute.options.loader,
+  loader: ((ctx: any) => (undefined as any)) as any,
   head: () => ({
     meta: [
       { title: "RIBALI — Model Series (Odyssey & Alu)" },

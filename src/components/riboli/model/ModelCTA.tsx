@@ -51,7 +51,7 @@ export function ModelCTA({ model }: { model: ModelDetail }) {
           from Piraeus, arranged around your schedule.
         </p>
         <a
-          href={`mailto:hello@riboli.gr?subject=Sea%20trial%20request%20—%20${encodeURIComponent(model.code)}`}
+          href={`mailto:hello@ribali.gr?subject=Sea%20trial%20request%20—%20${encodeURIComponent(model.code)}`}
           className="mc-el mt-10 inline-flex items-center gap-3 bg-ink text-paper px-10 py-5 text-[11px] uppercase tracking-[0.3em] hover:bg-copper transition-colors"
         >
           Request a trial <span className="text-lg leading-none">+</span>

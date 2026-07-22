@@ -3,6 +3,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { useTranslation } from "react-i18next";
 import { MagneticButton } from "@/components/riboli/MagneticButton";
 import { LanguageSwitcher } from "@/components/riboli/LanguageSwitcher";
+import { useLocalePrefix, localizeHref } from "@/lib/use-locale-prefix";
 
 const NAV_TEXT_SHADOW = "0 2px 12px rgba(0,0,0,0.6), 0 0 2px rgba(0,0,0,0.4)";
 
@@ -10,9 +11,11 @@ export function Nav() {
   const { t } = useTranslation();
   const [scrolled, setScrolled] = useState(false);
   const [open, setOpen] = useState(false);
+  const prefix = useLocalePrefix();
+  const L = (h: string) => localizeHref(prefix, h);
 
   const pathname = useRouterState({ select: (s) => s.location.pathname });
-  const hasHero = pathname === "/";
+  const hasHero = pathname === "/" || pathname === "/en";
 
   useEffect(() => {
     const onScroll = () => setScrolled(window.scrollY > 40);
@@ -29,16 +32,16 @@ export function Nav() {
   const links = [
     {
       label: t("nav.models"),
-      href: "/models",
+      href: L("/models"),
       children: [
-        { label: t("nav.odyssey"), href: "/models/odyssey" },
-        { label: t("nav.alu"), href: "/models/alu" },
+        { label: t("nav.odyssey"), href: L("/models/odyssey") },
+        { label: t("nav.alu"), href: L("/models/alu") },
       ],
     },
-    { label: t("nav.stock"), href: "/stock" },
-    { label: t("nav.about"), href: "/about" },
-    { label: t("nav.dealers"), href: "/dealers" },
-    { label: t("nav.contact"), href: "/contact" },
+    { label: t("nav.stock"), href: L("/stock") },
+    { label: t("nav.about"), href: L("/about") },
+    { label: t("nav.dealers"), href: L("/dealers") },
+    { label: t("nav.contact"), href: L("/contact") },
   ];
 
   return (
@@ -47,9 +50,9 @@ export function Nav() {
         !overHero ? "bg-paper/85 backdrop-blur-md border-b border-ink/10" : ""
       }`}
     >
-      <Link to="/" className="font-display text-2xl tracking-widest" style={shadow}>
+      <a href={L("/")} className="font-display text-2xl tracking-widest" style={shadow}>
         RIBALI
-      </Link>
+      </a>
       <div className="hidden md:flex space-x-8 lg:space-x-10 text-[11px] uppercase tracking-[0.25em]">
         {links.map((l) => (
           <div key={l.href} className="relative group">
@@ -81,8 +84,8 @@ export function Nav() {
       <div className="flex items-center gap-4">
         <LanguageSwitcher overHero={overHero} />
         <MagneticButton
-          as={Link}
-          to="/configurator"
+          as="a"
+          href={L("/configurator")}
           className={`hidden sm:inline-flex items-center gap-2 px-4 py-2.5 text-[10px] uppercase tracking-[0.25em] transition-colors ${
             overHero
               ? "bg-paper text-ink hover:bg-copper hover:text-paper"

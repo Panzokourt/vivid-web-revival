@@ -17,5 +17,5 @@ export const Route = createFileRoute("/en/configurator")({
       { rel: "alternate", hrefLang: "en", href: `${SITE}/en/configurator` },
     ],
   }),
-  component: ConfigRoute.options.component!,
+  component: ConfigRoute.options.component as any,
 });

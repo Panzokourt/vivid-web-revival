@@ -17,5 +17,5 @@ export const Route = createFileRoute("/en/contact")({
       { rel: "alternate", hrefLang: "en", href: `${SITE}/en/contact` },
     ],
   }),
-  component: ContactRoute.options.component!,
+  component: ContactRoute.options.component as any,
 });

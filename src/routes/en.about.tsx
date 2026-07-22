@@ -17,5 +17,5 @@ export const Route = createFileRoute("/en/about")({
       { rel: "alternate", hrefLang: "en", href: `${SITE}/en/about` },
     ],
   }),
-  component: AboutRoute.options.component!,
+  component: AboutRoute.options.component as any,
 });

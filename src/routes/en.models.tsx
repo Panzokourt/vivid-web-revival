@@ -20,5 +20,5 @@ export const Route = createFileRoute("/en/models")({
       { rel: "alternate", hrefLang: "en", href: `${SITE}/en/models` },
     ],
   }),
-  component: ModelsRoute.options.component!,
+  component: ModelsRoute.options.component as any,
 });

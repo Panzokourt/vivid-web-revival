@@ -18,5 +18,5 @@ export const Route = createFileRoute("/en/models/$series")({
       { rel: "alternate", hrefLang: "en", href: `${SITE}/en/models/${params.series}` },
     ],
   }),
-  component: SeriesRoute.options.component!,
+  component: SeriesRoute.options.component as any,
 });

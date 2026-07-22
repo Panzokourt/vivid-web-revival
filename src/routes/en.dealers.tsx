@@ -17,5 +17,5 @@ export const Route = createFileRoute("/en/dealers")({
       { rel: "alternate", hrefLang: "en", href: `${SITE}/en/dealers` },
     ],
   }),
-  component: DealersRoute.options.component!,
+  component: DealersRoute.options.component as any,
 });

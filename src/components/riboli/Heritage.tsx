@@ -8,16 +8,17 @@ import { EditableItemControls, EditableAddButton } from "@/components/editor/Edi
 type Milestone = { year: number; title: string; body: string };
 
 const FALLBACK = {
-  eyebrow: "Heritage",
-  title: "A quarter century\non the water",
+  eyebrow: "Κληρονομιά",
+  title: "Έξι δεκαετίες\nστη θάλασσα.",
   intro:
-    "Twenty-five years, five hundred hulls, one obsession — the way a boat behaves at speed in a Force 5.",
+    "Από το 1963 η οικογένεια Αλιβιζάτου εισάγει, συντηρεί και υποστηρίζει σκάφη. Η RIBALI είναι η φυσική συνέχεια — δικές μας κατασκευές, με το ίδιο δίκτυο και την ίδια υπόσχεση.",
   milestones: [
-    { year: 2000, title: "Founded on the Saronic coast", body: "Two shipwrights, one shed, and a stubborn idea about hull geometry." },
-    { year: 2007, title: "First deep-V RIBALI hull", body: "Our signature 22° deadrise enters production. Dry, fast, unmistakable." },
-    { year: 2013, title: "ORCA Hypalon partnership", body: "We move to 1670 dtex tubes across the range. Ten-year UV rating, standard." },
-    { year: 2019, title: "500th boat delivered", body: "Handed over to a family in Spetses. Same shipwrights, bigger shed." },
-    { year: 2025, title: "R-950 flagship debuts", body: "Our first 9.5m platform — twin outboards, cabin option, 40+ knot cruise." },
+    { year: 1963, title: "Ο Αλιβιζάτος ξεκινά", body: "Ίδρυση της πρώτης εισαγωγικής εταιρείας σκαφών από την οικογένεια Αλιβιζάτου στον Πειραιά." },
+    { year: 1984, title: "Πανελλαδικό δίκτυο", body: "Το δίκτυο εξυπηρέτησης επεκτείνεται σε 12 λιμάνια — από την Καβάλα μέχρι τα Χανιά." },
+    { year: 1998, title: "Πρώτη γάστρα RIBALI", body: "Η οικογένεια περνά από την εισαγωγή στην ίδια κατασκευή — δοκιμαστική Deep-V γάστρα στον Σαρωνικό." },
+    { year: 2013, title: "Συνεργασία ORCA Hypalon", body: "Όλη η σειρά περνά σε 1670 dtex tubes με 10ετή εγγύηση UV." },
+    { year: 2019, title: "500ό σκάφος", body: "Παράδοση στο 500ό σκάφος σε οικογένεια από τις Σπέτσες. Ίδιοι τεχνίτες, μεγαλύτερος χώρος." },
+    { year: 2026, title: "R-950 flagship", body: "Η πρώτη 9,5μ πλατφόρμα — twin outboards, cabin option, 40+ κόμβοι cruise." },
   ] as Milestone[],
 };
 

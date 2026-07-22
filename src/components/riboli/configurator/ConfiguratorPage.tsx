@@ -1,4 +1,5 @@
 import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { Nav } from "@/components/riboli/Nav";
 import { Footer } from "@/components/riboli/Footer";
@@ -12,6 +13,7 @@ import {
   EQUIPMENT,
   type ModelSlug,
 } from "@/lib/configurator-options";
+import { presetsQueryOptions, type ConfiguratorPreset } from "@/lib/presets.functions";
 
 export function ConfiguratorPage() {
   const [modelSlug, setModelSlug] = useState<ModelSlug>("r-680");

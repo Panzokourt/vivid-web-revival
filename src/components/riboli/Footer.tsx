@@ -1,4 +1,5 @@
 import { Link } from "@tanstack/react-router";
+import { useTranslation } from "react-i18next";
 import { usePageBlock } from "@/lib/page-blocks";
 import { EditableField } from "@/components/editor/EditableField";
 

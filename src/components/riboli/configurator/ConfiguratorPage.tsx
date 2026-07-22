@@ -54,6 +54,17 @@ export function ConfiguratorPage() {
 
   function toggleEquipment(id: string) {
     setEquipment((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
+    setActivePreset(null);
+  }
+
+  function applyPreset(p: ConfiguratorPreset) {
+    setModelSlug(p.modelSlug as ModelSlug);
+    setHullColor(p.hullColor);
+    setTubeColor(p.tubeColor);
+    setCanopyColor(p.canopyColor);
+    setEngineHp(p.engineHp);
+    setEquipment(p.equipment);
+    setActivePreset(p.slug);
   }
 
   return (

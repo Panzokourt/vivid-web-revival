@@ -11,6 +11,7 @@ const links = [
       { label: "Alu Series · Αλουμίνιο", href: "/models/alu" },
     ],
   },
+  { label: "Stock", href: "/stock" },
   { label: "About", href: "/about" },
   { label: "Dealers", href: "/dealers" },
   { label: "Contact", href: "/contact" },

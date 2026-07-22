@@ -6,6 +6,7 @@ import { FeaturedModels } from "@/components/riboli/FeaturedModels";
 import { AnatomyRIB } from "@/components/riboli/AnatomyRIB";
 import { Experiences } from "@/components/riboli/Experiences";
 import { Heritage } from "@/components/riboli/Heritage";
+import { WhyRibali } from "@/components/riboli/WhyRibali";
 import { Stats } from "@/components/riboli/Stats";
 import { DealersCTA } from "@/components/riboli/DealersCTA";
 import { Footer } from "@/components/riboli/Footer";
@@ -106,6 +107,7 @@ function Index() {
         <div data-snap><Hero /></div>
         <div data-snap><FeaturedModels /></div>
         <div data-snap><AnatomyRIB /></div>
+        <div data-snap><WhyRibali /></div>
         <div data-snap><Experiences /></div>
         <div data-snap><Heritage /></div>
         <div data-snap><Stats /></div>

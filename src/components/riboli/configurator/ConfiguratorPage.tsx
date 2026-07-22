@@ -340,3 +340,12 @@ function Dot({ hex }: { hex: string }) {
     />
   );
 }
+
+function PresetDot({ hex }: { hex: string }) {
+  return (
+    <span
+      className="inline-block w-3 h-3 rounded-full border border-ink/20"
+      style={{ backgroundColor: hex }}
+    />
+  );
+}

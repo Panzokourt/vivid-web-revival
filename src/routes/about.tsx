@@ -243,9 +243,9 @@ function AboutPage() {
           ))}
         </h1>
         <p className="about-hero-lede mt-10 max-w-2xl text-ink/70 text-base md:text-lg leading-relaxed">
-          RIBALI is a small shipyard on the edge of the Piraeus harbor. For almost three decades
-          we have built rigid inflatable boats one hull at a time — for fishermen, for coast
-          guards, for families who understand that the best sea days begin with a boat you trust.
+          Η οικογένεια Αλιβιζάτου εισάγει και υποστηρίζει σκάφη στην Ελλάδα από το 1963. Η RIBALI
+          είναι το επόμενο βήμα: δικές μας κατασκευές χειροποίητες στον Πειραιά, με το ίδιο
+          πανελλαδικό δίκτυο και τις ίδιες γραπτές εγγυήσεις.
         </p>
 
         <div className="about-hero-media mt-16 relative aspect-[16/9] overflow-hidden">

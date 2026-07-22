@@ -175,6 +175,35 @@ export const SCHEMAS: Record<string, BlockSchema> = {
       { key: "marquee", label: "Marquee (φόντο)", type: "text" },
     ],
   },
+  "home/why_ribali": {
+    title: "Home · Why RIBALI",
+    fields: [
+      eyebrow,
+      title,
+      { key: "intro", label: "Εισαγωγή", type: "richtext" },
+      {
+        key: "pillars", label: "Πυλώνες", type: "list",
+        itemLabel: (it) => (it.title as string) || "Πυλώνας",
+        itemSchema: [
+          { key: "title", label: "Τίτλος", type: "text" },
+          { key: "body", label: "Κείμενο", type: "richtext" },
+        ],
+      },
+    ],
+  },
+  "home/footer": {
+    title: "Home · Footer",
+    fields: [
+      { key: "tagline", label: "Tagline", type: "textarea", rows: 2 },
+      { key: "studio_line1", label: "Studio γραμμή 1", type: "text" },
+      { key: "studio_line2", label: "Studio γραμμή 2 (τηλέφωνο)", type: "text" },
+      { key: "studio_line3", label: "Studio γραμμή 3 (email)", type: "text" },
+      { key: "showroom_label", label: "Showroom ετικέτα", type: "text" },
+      { key: "showroom_address", label: "Showroom διεύθυνση", type: "text" },
+      { key: "showroom_hours", label: "Showroom ωράριο", type: "text" },
+      { key: "wordmark", label: "Wordmark", type: "text" },
+    ],
+  },
 
   // ─── ABOUT ───────────────────────────────────────────────────────────────
   "about/hero": {

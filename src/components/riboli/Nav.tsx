@@ -101,14 +101,25 @@ export function Nav() {
       {open && (
         <div className="md:hidden absolute top-full left-0 right-0 bg-paper border-t border-ink/10 flex flex-col py-4">
           {links.map((l) => (
-            <a
-              key={l.href}
-              href={l.href}
-              onClick={() => setOpen(false)}
-              className="px-6 py-3 text-xs uppercase tracking-[0.25em] text-ink/70 hover:text-copper"
-            >
-              {l.label}
-            </a>
+            <div key={l.href}>
+              <a
+                href={l.href}
+                onClick={() => setOpen(false)}
+                className="block px-6 py-3 text-xs uppercase tracking-[0.25em] text-ink/70 hover:text-copper"
+              >
+                {l.label}
+              </a>
+              {l.children?.map((c) => (
+                <a
+                  key={c.href}
+                  href={c.href}
+                  onClick={() => setOpen(false)}
+                  className="block pl-10 pr-6 py-2 text-[10px] tracking-[0.2em] text-ink/50 hover:text-copper"
+                >
+                  ↳ {c.label}
+                </a>
+              ))}
+            </div>
           ))}
         </div>
       )}

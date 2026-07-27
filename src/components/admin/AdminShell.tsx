@@ -11,6 +11,7 @@ import {
   Users,
   Server,
   Database,
+  Sparkles,
   LogOut,
   ExternalLink,
 } from "lucide-react";
@@ -45,6 +46,7 @@ type NavItem = {
 const items: NavItem[] = [
   { title: "Dashboard", url: "/admin", icon: LayoutDashboard, exact: true },
   { title: "Models", url: "/admin/models", icon: Ship },
+  { title: "Proposals", url: "/admin/proposals", icon: Sparkles },
   { title: "Leads", url: "/admin/leads", icon: Inbox },
   { title: "Dealers", url: "/admin/dealers", icon: MapPin },
   { title: "Content", url: "/admin/content", icon: FileText },

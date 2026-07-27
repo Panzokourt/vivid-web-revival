@@ -10,7 +10,7 @@ import { WhyRibali } from "@/components/riboli/WhyRibali";
 import { Stats } from "@/components/riboli/Stats";
 import { DealersCTA } from "@/components/riboli/DealersCTA";
 import { Footer } from "@/components/riboli/Footer";
-import { SectionSnap } from "@/components/riboli/SectionSnap";
+
 import heroImg from "@/assets/hero.jpg";
 
 const SITE = "https://vivid-web-revival.lovable.app";
@@ -96,7 +96,6 @@ export const Route = createFileRoute("/")({
 function Index() {
   return (
     <main className="relative bg-paper min-h-screen text-ink">
-      <SectionSnap />
       <div className="relative z-10">
 
         <Nav />

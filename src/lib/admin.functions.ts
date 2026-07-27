@@ -129,6 +129,7 @@ const modelUpdateSchema = z.object({
     tube_material: z.string().max(80).nullable().optional(),
     hero_image: z.string().max(500).nullable().optional(),
     order_index: z.number().int().optional(),
+    persona: z.enum(["family", "sport", "adventure", "pro"]).nullable().optional(),
   }),
 });
 

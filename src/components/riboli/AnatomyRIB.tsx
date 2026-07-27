@@ -132,6 +132,7 @@ export function AnatomyRIB() {
           </ol>
         </div>
       </div>
+      </div>
     </section>
   );
 }

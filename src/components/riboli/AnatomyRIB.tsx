@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import anatomyImg from "@/assets/anatomy-rib.jpg";
 import { usePageBlock } from "@/lib/page-blocks";
 import { EditableField } from "@/components/editor/EditableField";
+import { gsap, ScrollTrigger, prefersReducedMotion } from "@/lib/gsap";
 
 type Hotspot = { id: string; title: string; body: string; x: number; y: number };
 
@@ -18,18 +19,45 @@ const FALLBACK = {
 
 export function AnatomyRIB() {
   const [active, setActive] = useState(0);
+  const root = useRef<HTMLElement>(null);
   const block = usePageBlock("home", "anatomy", FALLBACK);
   const hotspots = (block.hotspots ?? FALLBACK.hotspots) as Hotspot[];
 
   const current = hotspots[active] ?? hotspots[0];
 
+  useLayoutEffect(() => {
+    if (typeof window === "undefined") return;
+    if (prefersReducedMotion()) return;
+    if (window.matchMedia("(pointer: coarse)").matches) return;
+    if (!root.current) return;
+    const total = hotspots.length;
+
+    const ctx = gsap.context(() => {
+      ScrollTrigger.create({
+        trigger: root.current!,
+        start: "top top",
+        end: () => `+=${window.innerHeight * total}`,
+        pin: true,
+        scrub: 0.6,
+        anticipatePin: 1,
+        invalidateOnRefresh: true,
+        onUpdate: (self) => {
+          const idx = Math.min(total - 1, Math.floor(self.progress * total));
+          setActive((prev) => (prev === idx ? prev : idx));
+        },
+      });
+    }, root);
+    return () => ctx.revert();
+  }, [hotspots.length]);
+
   return (
     <section
+      ref={root}
       id="anatomy"
-      className="relative bg-ink text-paper overflow-hidden"
+      className="relative bg-ink text-paper overflow-hidden min-h-screen"
     >
 
-      <div className="max-w-[1600px] mx-auto px-6 md:px-10 grid lg:grid-cols-[1.2fr_1fr] gap-10 items-center py-20 md:py-28">
+      <div className="max-w-[1600px] mx-auto px-6 md:px-10 grid lg:grid-cols-[1.2fr_1fr] gap-10 items-center py-20 md:py-28 min-h-screen">
         {/* Boat image with hotspots */}
         <div className="relative h-[48vh] min-h-[360px] lg:h-[62vh] lg:max-h-[760px] w-full">
           <img

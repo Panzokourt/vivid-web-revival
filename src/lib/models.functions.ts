@@ -5,6 +5,8 @@ import { z } from "zod";
 import { queryOptions } from "@tanstack/react-query";
 import type { Database } from "@/integrations/supabase/types";
 
+export type ModelPersona = "family" | "sport" | "adventure" | "pro";
+
 export type ModelListItem = {
   id: string;
   slug: string;
@@ -20,6 +22,7 @@ export type ModelListItem = {
   order_index: number;
   series_slug: string | null;
   hull_material: string | null;
+  persona: string | null;
 };
 
 export type ModelSeries = {
@@ -68,7 +71,7 @@ export const listModels = createServerFn({ method: "GET" }).handler(
     const { data, error } = await supabase
       .from("models")
       .select(
-        "id, slug, code, name, number, tag, tagline, length_m, max_hp, pax, hero_image, order_index, series_slug, hull_material",
+        "id, slug, code, name, number, tag, tagline, length_m, max_hp, pax, hero_image, order_index, series_slug, hull_material, persona",
       )
       .order("order_index", { ascending: true });
     if (error) throw new Error(error.message);
@@ -139,7 +142,7 @@ export const getSeriesBySlug = createServerFn({ method: "GET" })
     const { data: models, error: mErr } = await supabase
       .from("models")
       .select(
-        "id, slug, code, name, number, tag, tagline, length_m, max_hp, pax, hero_image, order_index, series_slug, hull_material",
+        "id, slug, code, name, number, tag, tagline, length_m, max_hp, pax, hero_image, order_index, series_slug, hull_material, persona",
       )
       .eq("series_slug", data.slug)
       .order("length_m", { ascending: true });

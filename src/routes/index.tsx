@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import { Nav } from "@/components/riboli/Nav";
 import { Hero } from "@/components/riboli/Hero";
 import { FeaturedModels } from "@/components/riboli/FeaturedModels";
+import { RibaliProposals } from "@/components/riboli/RibaliProposals";
 import { AnatomyRIB } from "@/components/riboli/AnatomyRIB";
 import { Experiences } from "@/components/riboli/Experiences";
 import { Heritage } from "@/components/riboli/Heritage";
@@ -106,6 +107,7 @@ function Index() {
         <Nav />
         <div data-snap><Hero /></div>
         <div data-snap><FeaturedModels /></div>
+        <div data-snap><RibaliProposals /></div>
         <div data-snap><AnatomyRIB /></div>
         <div data-snap><WhyRibali /></div>
         <div data-snap><Experiences /></div>

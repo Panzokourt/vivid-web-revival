@@ -28,14 +28,15 @@ export function computeBreakdown(input: {
 }): PriceBreakdown {
   const model = MODELS.find((m) => m.slug === input.modelSlug)!;
   const brand = ENGINE_BRANDS.find((b) => b.id === input.engineBrand) ?? ENGINE_BRANDS[0];
-  const engineBase = ENGINE_BASE_PRICES[input.engineHp] ?? 0;
-  const enginePrice = Math.round(engineBase * brand.multiplier);
+  const hasEngine = input.engineHp > 0;
+  const engineBase = hasEngine ? (ENGINE_BASE_PRICES[input.engineHp] ?? 0) : 0;
+  const enginePrice = hasEngine ? Math.round(engineBase * brand.multiplier) : 0;
   const extras = EQUIPMENT.filter((e) => input.equipment.includes(e.id));
   const trailer = TRAILERS.find((t) => t.id === input.trailerId);
 
   const lines: PriceLine[] = [
     { label: `${model.code} · base`, amount: model.basePrice },
-    { label: `${brand.label} ${input.engineHp} HP`, amount: enginePrice },
+    ...(hasEngine ? [{ label: `${brand.label} ${input.engineHp} HP`, amount: enginePrice }] : [{ label: "Without engine", amount: 0 }]),
     ...extras.map((e) => ({ label: e.label, amount: e.price })),
   ];
   if (trailer && trailer.price > 0) {

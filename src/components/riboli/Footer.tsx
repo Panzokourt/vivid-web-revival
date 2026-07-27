@@ -72,10 +72,18 @@ export function Footer() {
             <div className="text-[11px] uppercase tracking-[0.3em] text-paper/50 mb-4">{t("footer.explore")}</div>
             <ul className="space-y-2 text-sm text-paper/80">
               <li><a href={localizeHref(prefix, "/models")} className="hover:text-copper">{t("nav.models")}</a></li>
+              <li><a href={localizeHref(prefix, "/proposals")} className="hover:text-copper">{t("nav.proposals")}</a></li>
               <li><a href={localizeHref(prefix, "/stock")} className="hover:text-copper">{t("nav.stock")}</a></li>
+              <li><a href={localizeHref(prefix, "/offers")} className="hover:text-copper">{t("nav.offers")}</a></li>
               <li><a href={localizeHref(prefix, "/about")} className="hover:text-copper">{t("nav.about")}</a></li>
               <li><a href={localizeHref(prefix, "/dealers")} className="hover:text-copper">{t("nav.dealers")}</a></li>
               <li><a href={localizeHref(prefix, "/contact")} className="hover:text-copper">{t("nav.contact")}</a></li>
+            </ul>
+            <div className="text-[11px] uppercase tracking-[0.3em] text-paper/50 mt-6 mb-3">{t("footer.legal")}</div>
+            <ul className="space-y-2 text-xs text-paper/60">
+              <li><a href={localizeHref(prefix, "/privacy")} className="hover:text-copper">Privacy</a></li>
+              <li><a href={localizeHref(prefix, "/terms")} className="hover:text-copper">Terms</a></li>
+              <li><a href={localizeHref(prefix, "/cookies")} className="hover:text-copper">Cookies</a></li>
             </ul>
           </div>
         </div>

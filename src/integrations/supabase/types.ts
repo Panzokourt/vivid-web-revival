@@ -258,6 +258,7 @@ export type Database = {
           order_index: number
           overview_en: string | null
           pax: number | null
+          persona: string | null
           series_slug: string | null
           slug: string
           tag: string | null
@@ -285,6 +286,7 @@ export type Database = {
           order_index?: number
           overview_en?: string | null
           pax?: number | null
+          persona?: string | null
           series_slug?: string | null
           slug: string
           tag?: string | null
@@ -312,6 +314,7 @@ export type Database = {
           order_index?: number
           overview_en?: string | null
           pax?: number | null
+          persona?: string | null
           series_slug?: string | null
           slug?: string
           tag?: string | null
@@ -412,6 +415,80 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: []
+      }
+      proposals: {
+        Row: {
+          created_at: string
+          cta_label: string | null
+          cta_label_en: string | null
+          description: string | null
+          description_en: string | null
+          equipment_summary: Json
+          hero_image: string | null
+          id: string
+          persona: string
+          preset_id: string | null
+          price_from: number | null
+          published: boolean
+          slug: string
+          sort_order: number
+          subtitle: string | null
+          subtitle_en: string | null
+          title: string
+          title_en: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          cta_label?: string | null
+          cta_label_en?: string | null
+          description?: string | null
+          description_en?: string | null
+          equipment_summary?: Json
+          hero_image?: string | null
+          id?: string
+          persona: string
+          preset_id?: string | null
+          price_from?: number | null
+          published?: boolean
+          slug: string
+          sort_order?: number
+          subtitle?: string | null
+          subtitle_en?: string | null
+          title: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          cta_label?: string | null
+          cta_label_en?: string | null
+          description?: string | null
+          description_en?: string | null
+          equipment_summary?: Json
+          hero_image?: string | null
+          id?: string
+          persona?: string
+          preset_id?: string | null
+          price_from?: number | null
+          published?: boolean
+          slug?: string
+          sort_order?: number
+          subtitle?: string | null
+          subtitle_en?: string | null
+          title?: string
+          title_en?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "proposals_preset_id_fkey"
+            columns: ["preset_id"]
+            isOneToOne: false
+            referencedRelation: "configurator_presets"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       quote_requests: {
         Row: {

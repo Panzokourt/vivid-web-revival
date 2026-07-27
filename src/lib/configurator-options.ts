@@ -46,12 +46,12 @@ export const MODELS: ModelSpec[] = [
   { slug: "r-950", code: "R-950", name: "Nove cinque zero", length: 9.5, beam: 3.1, engines: [250, 300, 350], scale: 1.2, basePrice: 125000 },
 ];
 
-export type EngineBrandId = "yamaha" | "suzuki" | "mercury";
+export type EngineBrandId = "yamaha" | "suzuki" | "honda";
 
 export const ENGINE_BRANDS: { id: EngineBrandId; label: string; multiplier: number }[] = [
   { id: "yamaha", label: "Yamaha", multiplier: 1.0 },
   { id: "suzuki", label: "Suzuki", multiplier: 0.95 },
-  { id: "mercury", label: "Mercury", multiplier: 1.05 },
+  { id: "honda", label: "Honda", multiplier: 1.02 },
 ];
 
 // Base engine price per HP tier (before brand multiplier).

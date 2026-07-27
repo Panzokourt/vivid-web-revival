@@ -9,33 +9,47 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as TermsRouteImport } from './routes/terms'
 import { Route as StockRouteImport } from './routes/stock'
 import { Route as SitemapDotxmlRouteImport } from './routes/sitemap[.]xml'
+import { Route as ProposalsRouteImport } from './routes/proposals'
+import { Route as PrivacyRouteImport } from './routes/privacy'
+import { Route as OffersRouteImport } from './routes/offers'
 import { Route as ModelsRouteImport } from './routes/models'
 import { Route as EnRouteImport } from './routes/en'
 import { Route as DealersRouteImport } from './routes/dealers'
+import { Route as CookiesRouteImport } from './routes/cookies'
 import { Route as ContactRouteImport } from './routes/contact'
 import { Route as ConfiguratorRouteImport } from './routes/configurator'
 import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AboutRouteImport } from './routes/about'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ProposalsIndexRouteImport } from './routes/proposals.index'
 import { Route as ModelsIndexRouteImport } from './routes/models.index'
 import { Route as EnIndexRouteImport } from './routes/en.index'
+import { Route as ProposalsSlugRouteImport } from './routes/proposals.$slug'
 import { Route as ModelsR950RouteImport } from './routes/models.r-950'
 import { Route as ModelsR680RouteImport } from './routes/models.r-680'
 import { Route as ModelsR520RouteImport } from './routes/models.r-520'
 import { Route as ModelsSeriesRouteImport } from './routes/models.$series'
+import { Route as EnTermsRouteImport } from './routes/en.terms'
 import { Route as EnStockRouteImport } from './routes/en.stock'
+import { Route as EnProposalsRouteImport } from './routes/en.proposals'
+import { Route as EnPrivacyRouteImport } from './routes/en.privacy'
+import { Route as EnOffersRouteImport } from './routes/en.offers'
 import { Route as EnModelsRouteImport } from './routes/en.models'
 import { Route as EnDealersRouteImport } from './routes/en.dealers'
+import { Route as EnCookiesRouteImport } from './routes/en.cookies'
 import { Route as EnContactRouteImport } from './routes/en.contact'
 import { Route as EnConfiguratorRouteImport } from './routes/en.configurator'
 import { Route as EnAboutRouteImport } from './routes/en.about'
 import { Route as ModelsSeriesIndexRouteImport } from './routes/models.$series.index'
+import { Route as EnProposalsIndexRouteImport } from './routes/en.proposals.index'
 import { Route as EnModelsIndexRouteImport } from './routes/en.models.index'
 import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as ModelsSeriesModelRouteImport } from './routes/models.$series.$model'
+import { Route as EnProposalsSlugRouteImport } from './routes/en.proposals.$slug'
 import { Route as EnModelsSeriesRouteImport } from './routes/en.models.$series'
 import { Route as AuthenticatedAdminSystemRouteImport } from './routes/_authenticated/admin.system'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
@@ -50,6 +64,11 @@ import { Route as EnModelsSeriesIndexRouteImport } from './routes/en.models.$ser
 import { Route as EnModelsSeriesModelRouteImport } from './routes/en.models.$series.$model'
 import { Route as AuthenticatedAdminContentHistoryRouteImport } from './routes/_authenticated/admin.content.history'
 
+const TermsRoute = TermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const StockRoute = StockRouteImport.update({
   id: '/stock',
   path: '/stock',
@@ -58,6 +77,21 @@ const StockRoute = StockRouteImport.update({
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
   id: '/sitemap.xml',
   path: '/sitemap.xml',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProposalsRoute = ProposalsRouteImport.update({
+  id: '/proposals',
+  path: '/proposals',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const PrivacyRoute = PrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OffersRoute = OffersRouteImport.update({
+  id: '/offers',
+  path: '/offers',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ModelsRoute = ModelsRouteImport.update({
@@ -73,6 +107,11 @@ const EnRoute = EnRouteImport.update({
 const DealersRoute = DealersRouteImport.update({
   id: '/dealers',
   path: '/dealers',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CookiesRoute = CookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
   getParentRoute: () => rootRouteImport,
 } as any)
 const ContactRoute = ContactRouteImport.update({
@@ -104,6 +143,11 @@ const IndexRoute = IndexRouteImport.update({
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ProposalsIndexRoute = ProposalsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => ProposalsRoute,
+} as any)
 const ModelsIndexRoute = ModelsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -113,6 +157,11 @@ const EnIndexRoute = EnIndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => EnRoute,
+} as any)
+const ProposalsSlugRoute = ProposalsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => ProposalsRoute,
 } as any)
 const ModelsR950Route = ModelsR950RouteImport.update({
   id: '/r-950',
@@ -134,9 +183,29 @@ const ModelsSeriesRoute = ModelsSeriesRouteImport.update({
   path: '/$series',
   getParentRoute: () => ModelsRoute,
 } as any)
+const EnTermsRoute = EnTermsRouteImport.update({
+  id: '/terms',
+  path: '/terms',
+  getParentRoute: () => EnRoute,
+} as any)
 const EnStockRoute = EnStockRouteImport.update({
   id: '/stock',
   path: '/stock',
+  getParentRoute: () => EnRoute,
+} as any)
+const EnProposalsRoute = EnProposalsRouteImport.update({
+  id: '/proposals',
+  path: '/proposals',
+  getParentRoute: () => EnRoute,
+} as any)
+const EnPrivacyRoute = EnPrivacyRouteImport.update({
+  id: '/privacy',
+  path: '/privacy',
+  getParentRoute: () => EnRoute,
+} as any)
+const EnOffersRoute = EnOffersRouteImport.update({
+  id: '/offers',
+  path: '/offers',
   getParentRoute: () => EnRoute,
 } as any)
 const EnModelsRoute = EnModelsRouteImport.update({
@@ -147,6 +216,11 @@ const EnModelsRoute = EnModelsRouteImport.update({
 const EnDealersRoute = EnDealersRouteImport.update({
   id: '/dealers',
   path: '/dealers',
+  getParentRoute: () => EnRoute,
+} as any)
+const EnCookiesRoute = EnCookiesRouteImport.update({
+  id: '/cookies',
+  path: '/cookies',
   getParentRoute: () => EnRoute,
 } as any)
 const EnContactRoute = EnContactRouteImport.update({
@@ -169,6 +243,11 @@ const ModelsSeriesIndexRoute = ModelsSeriesIndexRouteImport.update({
   path: '/',
   getParentRoute: () => ModelsSeriesRoute,
 } as any)
+const EnProposalsIndexRoute = EnProposalsIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => EnProposalsRoute,
+} as any)
 const EnModelsIndexRoute = EnModelsIndexRouteImport.update({
   id: '/',
   path: '/',
@@ -183,6 +262,11 @@ const ModelsSeriesModelRoute = ModelsSeriesModelRouteImport.update({
   id: '/$model',
   path: '/$model',
   getParentRoute: () => ModelsSeriesRoute,
+} as any)
+const EnProposalsSlugRoute = EnProposalsSlugRouteImport.update({
+  id: '/$slug',
+  path: '/$slug',
+  getParentRoute: () => EnProposalsRoute,
 } as any)
 const EnModelsSeriesRoute = EnModelsSeriesRouteImport.update({
   id: '/$series',
@@ -264,23 +348,35 @@ export interface FileRoutesByFullPath {
   '/auth': typeof AuthRoute
   '/configurator': typeof ConfiguratorRoute
   '/contact': typeof ContactRoute
+  '/cookies': typeof CookiesRoute
   '/dealers': typeof DealersRoute
   '/en': typeof EnRouteWithChildren
   '/models': typeof ModelsRouteWithChildren
+  '/offers': typeof OffersRoute
+  '/privacy': typeof PrivacyRoute
+  '/proposals': typeof ProposalsRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stock': typeof StockRoute
+  '/terms': typeof TermsRoute
   '/en/about': typeof EnAboutRoute
   '/en/configurator': typeof EnConfiguratorRoute
   '/en/contact': typeof EnContactRoute
+  '/en/cookies': typeof EnCookiesRoute
   '/en/dealers': typeof EnDealersRoute
   '/en/models': typeof EnModelsRouteWithChildren
+  '/en/offers': typeof EnOffersRoute
+  '/en/privacy': typeof EnPrivacyRoute
+  '/en/proposals': typeof EnProposalsRouteWithChildren
   '/en/stock': typeof EnStockRoute
+  '/en/terms': typeof EnTermsRoute
   '/models/$series': typeof ModelsSeriesRouteWithChildren
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
+  '/proposals/$slug': typeof ProposalsSlugRoute
   '/en/': typeof EnIndexRoute
   '/models/': typeof ModelsIndexRoute
+  '/proposals/': typeof ProposalsIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/content': typeof AuthenticatedAdminContentRouteWithChildren
   '/admin/database': typeof AuthenticatedAdminDatabaseRoute
@@ -291,9 +387,11 @@ export interface FileRoutesByFullPath {
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/system': typeof AuthenticatedAdminSystemRoute
   '/en/models/$series': typeof EnModelsSeriesRouteWithChildren
+  '/en/proposals/$slug': typeof EnProposalsSlugRoute
   '/models/$series/$model': typeof ModelsSeriesModelRoute
   '/admin/': typeof AuthenticatedAdminIndexRoute
   '/en/models/': typeof EnModelsIndexRoute
+  '/en/proposals/': typeof EnProposalsIndexRoute
   '/models/$series/': typeof ModelsSeriesIndexRoute
   '/admin/content/history': typeof AuthenticatedAdminContentHistoryRoute
   '/en/models/$series/$model': typeof EnModelsSeriesModelRoute
@@ -305,19 +403,29 @@ export interface FileRoutesByTo {
   '/auth': typeof AuthRoute
   '/configurator': typeof ConfiguratorRoute
   '/contact': typeof ContactRoute
+  '/cookies': typeof CookiesRoute
   '/dealers': typeof DealersRoute
+  '/offers': typeof OffersRoute
+  '/privacy': typeof PrivacyRoute
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stock': typeof StockRoute
+  '/terms': typeof TermsRoute
   '/en/about': typeof EnAboutRoute
   '/en/configurator': typeof EnConfiguratorRoute
   '/en/contact': typeof EnContactRoute
+  '/en/cookies': typeof EnCookiesRoute
   '/en/dealers': typeof EnDealersRoute
+  '/en/offers': typeof EnOffersRoute
+  '/en/privacy': typeof EnPrivacyRoute
   '/en/stock': typeof EnStockRoute
+  '/en/terms': typeof EnTermsRoute
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
+  '/proposals/$slug': typeof ProposalsSlugRoute
   '/en': typeof EnIndexRoute
   '/models': typeof ModelsIndexRoute
+  '/proposals': typeof ProposalsIndexRoute
   '/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/admin/content': typeof AuthenticatedAdminContentRouteWithChildren
   '/admin/database': typeof AuthenticatedAdminDatabaseRoute
@@ -327,9 +435,11 @@ export interface FileRoutesByTo {
   '/admin/models': typeof AuthenticatedAdminModelsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/system': typeof AuthenticatedAdminSystemRoute
+  '/en/proposals/$slug': typeof EnProposalsSlugRoute
   '/models/$series/$model': typeof ModelsSeriesModelRoute
   '/admin': typeof AuthenticatedAdminIndexRoute
   '/en/models': typeof EnModelsIndexRoute
+  '/en/proposals': typeof EnProposalsIndexRoute
   '/models/$series': typeof ModelsSeriesIndexRoute
   '/admin/content/history': typeof AuthenticatedAdminContentHistoryRoute
   '/en/models/$series/$model': typeof EnModelsSeriesModelRoute
@@ -343,23 +453,35 @@ export interface FileRoutesById {
   '/auth': typeof AuthRoute
   '/configurator': typeof ConfiguratorRoute
   '/contact': typeof ContactRoute
+  '/cookies': typeof CookiesRoute
   '/dealers': typeof DealersRoute
   '/en': typeof EnRouteWithChildren
   '/models': typeof ModelsRouteWithChildren
+  '/offers': typeof OffersRoute
+  '/privacy': typeof PrivacyRoute
+  '/proposals': typeof ProposalsRouteWithChildren
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/stock': typeof StockRoute
+  '/terms': typeof TermsRoute
   '/en/about': typeof EnAboutRoute
   '/en/configurator': typeof EnConfiguratorRoute
   '/en/contact': typeof EnContactRoute
+  '/en/cookies': typeof EnCookiesRoute
   '/en/dealers': typeof EnDealersRoute
   '/en/models': typeof EnModelsRouteWithChildren
+  '/en/offers': typeof EnOffersRoute
+  '/en/privacy': typeof EnPrivacyRoute
+  '/en/proposals': typeof EnProposalsRouteWithChildren
   '/en/stock': typeof EnStockRoute
+  '/en/terms': typeof EnTermsRoute
   '/models/$series': typeof ModelsSeriesRouteWithChildren
   '/models/r-520': typeof ModelsR520Route
   '/models/r-680': typeof ModelsR680Route
   '/models/r-950': typeof ModelsR950Route
+  '/proposals/$slug': typeof ProposalsSlugRoute
   '/en/': typeof EnIndexRoute
   '/models/': typeof ModelsIndexRoute
+  '/proposals/': typeof ProposalsIndexRoute
   '/_authenticated/admin/analytics': typeof AuthenticatedAdminAnalyticsRoute
   '/_authenticated/admin/content': typeof AuthenticatedAdminContentRouteWithChildren
   '/_authenticated/admin/database': typeof AuthenticatedAdminDatabaseRoute
@@ -370,9 +492,11 @@ export interface FileRoutesById {
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/system': typeof AuthenticatedAdminSystemRoute
   '/en/models/$series': typeof EnModelsSeriesRouteWithChildren
+  '/en/proposals/$slug': typeof EnProposalsSlugRoute
   '/models/$series/$model': typeof ModelsSeriesModelRoute
   '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/en/models/': typeof EnModelsIndexRoute
+  '/en/proposals/': typeof EnProposalsIndexRoute
   '/models/$series/': typeof ModelsSeriesIndexRoute
   '/_authenticated/admin/content/history': typeof AuthenticatedAdminContentHistoryRoute
   '/en/models/$series/$model': typeof EnModelsSeriesModelRoute
@@ -386,23 +510,35 @@ export interface FileRouteTypes {
     | '/auth'
     | '/configurator'
     | '/contact'
+    | '/cookies'
     | '/dealers'
     | '/en'
     | '/models'
+    | '/offers'
+    | '/privacy'
+    | '/proposals'
     | '/sitemap.xml'
     | '/stock'
+    | '/terms'
     | '/en/about'
     | '/en/configurator'
     | '/en/contact'
+    | '/en/cookies'
     | '/en/dealers'
     | '/en/models'
+    | '/en/offers'
+    | '/en/privacy'
+    | '/en/proposals'
     | '/en/stock'
+    | '/en/terms'
     | '/models/$series'
     | '/models/r-520'
     | '/models/r-680'
     | '/models/r-950'
+    | '/proposals/$slug'
     | '/en/'
     | '/models/'
+    | '/proposals/'
     | '/admin/analytics'
     | '/admin/content'
     | '/admin/database'
@@ -413,9 +549,11 @@ export interface FileRouteTypes {
     | '/admin/settings'
     | '/admin/system'
     | '/en/models/$series'
+    | '/en/proposals/$slug'
     | '/models/$series/$model'
     | '/admin/'
     | '/en/models/'
+    | '/en/proposals/'
     | '/models/$series/'
     | '/admin/content/history'
     | '/en/models/$series/$model'
@@ -427,19 +565,29 @@ export interface FileRouteTypes {
     | '/auth'
     | '/configurator'
     | '/contact'
+    | '/cookies'
     | '/dealers'
+    | '/offers'
+    | '/privacy'
     | '/sitemap.xml'
     | '/stock'
+    | '/terms'
     | '/en/about'
     | '/en/configurator'
     | '/en/contact'
+    | '/en/cookies'
     | '/en/dealers'
+    | '/en/offers'
+    | '/en/privacy'
     | '/en/stock'
+    | '/en/terms'
     | '/models/r-520'
     | '/models/r-680'
     | '/models/r-950'
+    | '/proposals/$slug'
     | '/en'
     | '/models'
+    | '/proposals'
     | '/admin/analytics'
     | '/admin/content'
     | '/admin/database'
@@ -449,9 +597,11 @@ export interface FileRouteTypes {
     | '/admin/models'
     | '/admin/settings'
     | '/admin/system'
+    | '/en/proposals/$slug'
     | '/models/$series/$model'
     | '/admin'
     | '/en/models'
+    | '/en/proposals'
     | '/models/$series'
     | '/admin/content/history'
     | '/en/models/$series/$model'
@@ -464,23 +614,35 @@ export interface FileRouteTypes {
     | '/auth'
     | '/configurator'
     | '/contact'
+    | '/cookies'
     | '/dealers'
     | '/en'
     | '/models'
+    | '/offers'
+    | '/privacy'
+    | '/proposals'
     | '/sitemap.xml'
     | '/stock'
+    | '/terms'
     | '/en/about'
     | '/en/configurator'
     | '/en/contact'
+    | '/en/cookies'
     | '/en/dealers'
     | '/en/models'
+    | '/en/offers'
+    | '/en/privacy'
+    | '/en/proposals'
     | '/en/stock'
+    | '/en/terms'
     | '/models/$series'
     | '/models/r-520'
     | '/models/r-680'
     | '/models/r-950'
+    | '/proposals/$slug'
     | '/en/'
     | '/models/'
+    | '/proposals/'
     | '/_authenticated/admin/analytics'
     | '/_authenticated/admin/content'
     | '/_authenticated/admin/database'
@@ -491,9 +653,11 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/system'
     | '/en/models/$series'
+    | '/en/proposals/$slug'
     | '/models/$series/$model'
     | '/_authenticated/admin/'
     | '/en/models/'
+    | '/en/proposals/'
     | '/models/$series/'
     | '/_authenticated/admin/content/history'
     | '/en/models/$series/$model'
@@ -507,15 +671,27 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   ConfiguratorRoute: typeof ConfiguratorRoute
   ContactRoute: typeof ContactRoute
+  CookiesRoute: typeof CookiesRoute
   DealersRoute: typeof DealersRoute
   EnRoute: typeof EnRouteWithChildren
   ModelsRoute: typeof ModelsRouteWithChildren
+  OffersRoute: typeof OffersRoute
+  PrivacyRoute: typeof PrivacyRoute
+  ProposalsRoute: typeof ProposalsRouteWithChildren
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   StockRoute: typeof StockRoute
+  TermsRoute: typeof TermsRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/terms': {
+      id: '/terms'
+      path: '/terms'
+      fullPath: '/terms'
+      preLoaderRoute: typeof TermsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/stock': {
       id: '/stock'
       path: '/stock'
@@ -528,6 +704,27 @@ declare module '@tanstack/react-router' {
       path: '/sitemap.xml'
       fullPath: '/sitemap.xml'
       preLoaderRoute: typeof SitemapDotxmlRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/proposals': {
+      id: '/proposals'
+      path: '/proposals'
+      fullPath: '/proposals'
+      preLoaderRoute: typeof ProposalsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/privacy': {
+      id: '/privacy'
+      path: '/privacy'
+      fullPath: '/privacy'
+      preLoaderRoute: typeof PrivacyRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/offers': {
+      id: '/offers'
+      path: '/offers'
+      fullPath: '/offers'
+      preLoaderRoute: typeof OffersRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/models': {
@@ -549,6 +746,13 @@ declare module '@tanstack/react-router' {
       path: '/dealers'
       fullPath: '/dealers'
       preLoaderRoute: typeof DealersRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/cookies': {
+      id: '/cookies'
+      path: '/cookies'
+      fullPath: '/cookies'
+      preLoaderRoute: typeof CookiesRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/contact': {
@@ -593,6 +797,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/proposals/': {
+      id: '/proposals/'
+      path: '/'
+      fullPath: '/proposals/'
+      preLoaderRoute: typeof ProposalsIndexRouteImport
+      parentRoute: typeof ProposalsRoute
+    }
     '/models/': {
       id: '/models/'
       path: '/'
@@ -606,6 +817,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/en/'
       preLoaderRoute: typeof EnIndexRouteImport
       parentRoute: typeof EnRoute
+    }
+    '/proposals/$slug': {
+      id: '/proposals/$slug'
+      path: '/$slug'
+      fullPath: '/proposals/$slug'
+      preLoaderRoute: typeof ProposalsSlugRouteImport
+      parentRoute: typeof ProposalsRoute
     }
     '/models/r-950': {
       id: '/models/r-950'
@@ -635,11 +853,39 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ModelsSeriesRouteImport
       parentRoute: typeof ModelsRoute
     }
+    '/en/terms': {
+      id: '/en/terms'
+      path: '/terms'
+      fullPath: '/en/terms'
+      preLoaderRoute: typeof EnTermsRouteImport
+      parentRoute: typeof EnRoute
+    }
     '/en/stock': {
       id: '/en/stock'
       path: '/stock'
       fullPath: '/en/stock'
       preLoaderRoute: typeof EnStockRouteImport
+      parentRoute: typeof EnRoute
+    }
+    '/en/proposals': {
+      id: '/en/proposals'
+      path: '/proposals'
+      fullPath: '/en/proposals'
+      preLoaderRoute: typeof EnProposalsRouteImport
+      parentRoute: typeof EnRoute
+    }
+    '/en/privacy': {
+      id: '/en/privacy'
+      path: '/privacy'
+      fullPath: '/en/privacy'
+      preLoaderRoute: typeof EnPrivacyRouteImport
+      parentRoute: typeof EnRoute
+    }
+    '/en/offers': {
+      id: '/en/offers'
+      path: '/offers'
+      fullPath: '/en/offers'
+      preLoaderRoute: typeof EnOffersRouteImport
       parentRoute: typeof EnRoute
     }
     '/en/models': {
@@ -654,6 +900,13 @@ declare module '@tanstack/react-router' {
       path: '/dealers'
       fullPath: '/en/dealers'
       preLoaderRoute: typeof EnDealersRouteImport
+      parentRoute: typeof EnRoute
+    }
+    '/en/cookies': {
+      id: '/en/cookies'
+      path: '/cookies'
+      fullPath: '/en/cookies'
+      preLoaderRoute: typeof EnCookiesRouteImport
       parentRoute: typeof EnRoute
     }
     '/en/contact': {
@@ -684,6 +937,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof ModelsSeriesIndexRouteImport
       parentRoute: typeof ModelsSeriesRoute
     }
+    '/en/proposals/': {
+      id: '/en/proposals/'
+      path: '/'
+      fullPath: '/en/proposals/'
+      preLoaderRoute: typeof EnProposalsIndexRouteImport
+      parentRoute: typeof EnProposalsRoute
+    }
     '/en/models/': {
       id: '/en/models/'
       path: '/'
@@ -704,6 +964,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/models/$series/$model'
       preLoaderRoute: typeof ModelsSeriesModelRouteImport
       parentRoute: typeof ModelsSeriesRoute
+    }
+    '/en/proposals/$slug': {
+      id: '/en/proposals/$slug'
+      path: '/$slug'
+      fullPath: '/en/proposals/$slug'
+      preLoaderRoute: typeof EnProposalsSlugRouteImport
+      parentRoute: typeof EnProposalsRoute
     }
     '/en/models/$series': {
       id: '/en/models/$series'
@@ -871,13 +1138,32 @@ const EnModelsRouteWithChildren = EnModelsRoute._addFileChildren(
   EnModelsRouteChildren,
 )
 
+interface EnProposalsRouteChildren {
+  EnProposalsSlugRoute: typeof EnProposalsSlugRoute
+  EnProposalsIndexRoute: typeof EnProposalsIndexRoute
+}
+
+const EnProposalsRouteChildren: EnProposalsRouteChildren = {
+  EnProposalsSlugRoute: EnProposalsSlugRoute,
+  EnProposalsIndexRoute: EnProposalsIndexRoute,
+}
+
+const EnProposalsRouteWithChildren = EnProposalsRoute._addFileChildren(
+  EnProposalsRouteChildren,
+)
+
 interface EnRouteChildren {
   EnAboutRoute: typeof EnAboutRoute
   EnConfiguratorRoute: typeof EnConfiguratorRoute
   EnContactRoute: typeof EnContactRoute
+  EnCookiesRoute: typeof EnCookiesRoute
   EnDealersRoute: typeof EnDealersRoute
   EnModelsRoute: typeof EnModelsRouteWithChildren
+  EnOffersRoute: typeof EnOffersRoute
+  EnPrivacyRoute: typeof EnPrivacyRoute
+  EnProposalsRoute: typeof EnProposalsRouteWithChildren
   EnStockRoute: typeof EnStockRoute
+  EnTermsRoute: typeof EnTermsRoute
   EnIndexRoute: typeof EnIndexRoute
 }
 
@@ -885,9 +1171,14 @@ const EnRouteChildren: EnRouteChildren = {
   EnAboutRoute: EnAboutRoute,
   EnConfiguratorRoute: EnConfiguratorRoute,
   EnContactRoute: EnContactRoute,
+  EnCookiesRoute: EnCookiesRoute,
   EnDealersRoute: EnDealersRoute,
   EnModelsRoute: EnModelsRouteWithChildren,
+  EnOffersRoute: EnOffersRoute,
+  EnPrivacyRoute: EnPrivacyRoute,
+  EnProposalsRoute: EnProposalsRouteWithChildren,
   EnStockRoute: EnStockRoute,
+  EnTermsRoute: EnTermsRoute,
   EnIndexRoute: EnIndexRoute,
 }
 
@@ -926,6 +1217,20 @@ const ModelsRouteChildren: ModelsRouteChildren = {
 const ModelsRouteWithChildren =
   ModelsRoute._addFileChildren(ModelsRouteChildren)
 
+interface ProposalsRouteChildren {
+  ProposalsSlugRoute: typeof ProposalsSlugRoute
+  ProposalsIndexRoute: typeof ProposalsIndexRoute
+}
+
+const ProposalsRouteChildren: ProposalsRouteChildren = {
+  ProposalsSlugRoute: ProposalsSlugRoute,
+  ProposalsIndexRoute: ProposalsIndexRoute,
+}
+
+const ProposalsRouteWithChildren = ProposalsRoute._addFileChildren(
+  ProposalsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
@@ -933,22 +1238,17 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   ConfiguratorRoute: ConfiguratorRoute,
   ContactRoute: ContactRoute,
+  CookiesRoute: CookiesRoute,
   DealersRoute: DealersRoute,
   EnRoute: EnRouteWithChildren,
   ModelsRoute: ModelsRouteWithChildren,
+  OffersRoute: OffersRoute,
+  PrivacyRoute: PrivacyRoute,
+  ProposalsRoute: ProposalsRouteWithChildren,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   StockRoute: StockRoute,
+  TermsRoute: TermsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { startInstance } from './start.ts'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-    config: Awaited<ReturnType<typeof startInstance.getOptions>>
-  }
-}

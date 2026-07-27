@@ -8,7 +8,7 @@ import { resolveAsset } from "@/lib/asset-map";
 
 const SITE = "https://ribali.advize.gr";
 
-export const Route = createFileRoute("/proposals")({
+export const Route = createFileRoute("/proposals/")({
   loader: ({ context }) => context.queryClient.ensureQueryData(proposalsListQueryOptions()),
   head: () => ({
     meta: [

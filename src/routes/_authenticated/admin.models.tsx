@@ -40,6 +40,7 @@ type ModelRow = {
   tube_material: string | null;
   hero_image: string | null;
   order_index: number;
+  persona: string | null;
 };
 
 function ModelsAdmin() {
@@ -103,6 +104,7 @@ function ModelEditor({ model, onDone }: { model: ModelRow; onDone: () => void })
     tube_material: model.tube_material ?? "",
     hero_image: model.hero_image ?? "",
     order_index: model.order_index.toString(),
+    persona: model.persona ?? "",
   });
 
   const mutation = useMutation({
@@ -124,6 +126,7 @@ function ModelEditor({ model, onDone }: { model: ModelRow; onDone: () => void })
           tube_material: form.tube_material || null,
           hero_image: form.hero_image || null,
           order_index: Number(form.order_index) || 0,
+          persona: (form.persona || null) as "family" | "sport" | "adventure" | "pro" | null,
         },
       },
     }),
@@ -159,6 +162,20 @@ function ModelEditor({ model, onDone }: { model: ModelRow; onDone: () => void })
           <div><Label>Tube material</Label><Input value={form.tube_material} onChange={(e) => setForm({ ...form, tube_material: e.target.value })} /></div>
         </div>
         <div><Label>Hero image URL</Label><Input value={form.hero_image} onChange={(e) => setForm({ ...form, hero_image: e.target.value })} placeholder="/storage/media/…" /></div>
+        <div>
+          <Label>Persona (για badge στο ModelHero)</Label>
+          <select
+            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm"
+            value={form.persona}
+            onChange={(e) => setForm({ ...form, persona: e.target.value })}
+          >
+            <option value="">— καμία —</option>
+            <option value="family">Family</option>
+            <option value="sport">Sport</option>
+            <option value="adventure">Adventure</option>
+            <option value="pro">Pro / Charter</option>
+          </select>
+        </div>
         <div className="flex justify-end gap-2 pt-2">
           <Button type="button" variant="ghost" onClick={onDone}>Cancel</Button>
           <Button type="submit" disabled={mutation.isPending}>{mutation.isPending ? "Saving…" : "Save"}</Button>

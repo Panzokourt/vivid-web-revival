@@ -29,9 +29,9 @@ export function AnatomyRIB() {
       className="relative bg-ink text-paper overflow-hidden"
     >
 
-      <div className="max-w-[1600px] mx-auto px-6 md:px-10 grid lg:grid-cols-[1.2fr_1fr] gap-10 items-center py-24 md:py-32 lg:min-h-screen">
+      <div className="max-w-[1600px] mx-auto px-6 md:px-10 grid lg:grid-cols-[1.2fr_1fr] gap-10 items-center py-20 md:py-28">
         {/* Boat image with hotspots */}
-        <div className="relative h-[48vh] min-h-[360px] lg:h-[70vh] w-full">
+        <div className="relative h-[48vh] min-h-[360px] lg:h-[62vh] lg:max-h-[760px] w-full">
           <img
             src={anatomyImg}
             alt="RIBALI RIB anatomy"

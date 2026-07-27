@@ -7,6 +7,7 @@ import img4 from "@/assets/model-r520.jpg";
 import { usePageBlock } from "@/lib/page-blocks";
 import { EditableField } from "@/components/editor/EditableField";
 import { EditableItemControls, EditableAddButton } from "@/components/editor/EditableList";
+import { useEditorOptional } from "@/components/editor/EditorProvider";
 import { resolveAsset } from "@/lib/asset-map";
 
 type Experience = { img?: string; image_key?: string; eyebrow: string; title: string; body: string };
@@ -26,6 +27,8 @@ export function Experiences() {
   const root = useRef<HTMLElement>(null);
   const block = usePageBlock("home", "experiences", FALLBACK);
   const items = (block.items ?? FALLBACK.items) as Experience[];
+  const editor = useEditorOptional();
+  const showEditorControls = Boolean(editor?.isAdmin && editor.mode === "edit");
 
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;
@@ -108,15 +111,17 @@ export function Experiences() {
             </div>
           </article>
         ))}
-        <div className="shrink-0 flex items-center pl-2">
-          <EditableAddButton
-            page="home"
-            block="experiences"
-            path="items"
-            template={{ img: "", eyebrow: "05 — Νέα εμπειρία", title: "Τίτλος εμπειρίας", body: "Περιγραφή..." }}
-            label="Προσθήκη experience"
-          />
-        </div>
+        {showEditorControls ? (
+          <div className="shrink-0 flex items-center pl-2">
+            <EditableAddButton
+              page="home"
+              block="experiences"
+              path="items"
+              template={{ img: "", eyebrow: "05 — Νέα εμπειρία", title: "Τίτλος εμπειρίας", body: "Περιγραφή..." }}
+              label="Προσθήκη experience"
+            />
+          </div>
+        ) : null}
       </div>
     </section>
   );

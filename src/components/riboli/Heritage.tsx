@@ -4,6 +4,7 @@ import { usePageBlock } from "@/lib/page-blocks";
 import { RichText } from "@/components/admin/cms/RichText";
 import { EditableField } from "@/components/editor/EditableField";
 import { EditableItemControls, EditableAddButton } from "@/components/editor/EditableList";
+import { useEditorOptional } from "@/components/editor/EditorProvider";
 
 type Milestone = { year: number; title: string; body: string };
 
@@ -26,6 +27,8 @@ export function Heritage() {
   const root = useRef<HTMLElement>(null);
   const block = usePageBlock("home", "heritage", FALLBACK);
   const milestones = (block.milestones ?? FALLBACK.milestones) as Milestone[];
+  const editor = useEditorOptional();
+  const showEditorControls = Boolean(editor?.isAdmin && editor.mode === "edit");
 
   useLayoutEffect(() => {
     const ctx = gsap.context(() => {
@@ -124,15 +127,17 @@ export function Heritage() {
               </EditableField>
             </li>
           ))}
-          <li className="relative mt-4">
-            <EditableAddButton
-              page="home"
-              block="heritage"
-              path="milestones"
-              template={{ year: new Date().getFullYear(), title: "Νέο ορόσημο", body: "Περιγραφή..." }}
-              label="Προσθήκη ορόσημου"
-            />
-          </li>
+          {showEditorControls ? (
+            <li className="relative mt-4">
+              <EditableAddButton
+                page="home"
+                block="heritage"
+                path="milestones"
+                template={{ year: new Date().getFullYear(), title: "Νέο ορόσημο", body: "Περιγραφή..." }}
+                label="Προσθήκη ορόσημου"
+              />
+            </li>
+          ) : null}
         </ol>
       </div>
     </section>

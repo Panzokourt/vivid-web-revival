@@ -1,6 +1,7 @@
 import { usePageBlock } from "@/lib/page-blocks";
 import { EditableField } from "@/components/editor/EditableField";
 import { EditableItemControls, EditableAddButton } from "@/components/editor/EditableList";
+import { useEditorOptional } from "@/components/editor/EditorProvider";
 import { RichText } from "@/components/admin/cms/RichText";
 
 type Pillar = { title: string; body: string };
@@ -29,6 +30,8 @@ const FALLBACK: WhyContent = {
 export function WhyRibali() {
   const block = usePageBlock<WhyContent>("home", "why_ribali", FALLBACK);
   const pillars = Array.isArray(block.pillars) && block.pillars.length ? block.pillars : FALLBACK.pillars;
+  const editor = useEditorOptional();
+  const showEditorControls = Boolean(editor?.isAdmin && editor.mode === "edit");
 
   return (
     <section id="why-ribali" className="relative bg-paper text-ink border-y border-ink/10">
@@ -60,15 +63,17 @@ export function WhyRibali() {
               </EditableField>
             </li>
           ))}
-          <li className="bg-paper p-8 md:p-10 flex items-center justify-center">
-            <EditableAddButton
-              page="home"
-              block="why_ribali"
-              path="pillars"
-              template={{ title: "Νέος πυλώνας", body: "Περιγραφή..." }}
-              label="Προσθήκη πυλώνα"
-            />
-          </li>
+          {showEditorControls ? (
+            <li className="bg-paper p-8 md:p-10 flex items-center justify-center">
+              <EditableAddButton
+                page="home"
+                block="why_ribali"
+                path="pillars"
+                template={{ title: "Νέος πυλώνας", body: "Περιγραφή..." }}
+                label="Προσθήκη πυλώνα"
+              />
+            </li>
+          ) : null}
         </ul>
       </div>
     </section>

@@ -43,7 +43,7 @@ export const Route = createFileRoute("/")({
     ],
     links: [
       { rel: "canonical", href: `${SITE}/` },
-      { rel: "preload", as: "image", href: heroImg, fetchpriority: "high" } as unknown as { rel: string; href: string },
+      { rel: "preload", as: "image", href: heroImg, fetchPriority: "high" } as unknown as { rel: string; href: string },
     ],
     scripts: [
       {

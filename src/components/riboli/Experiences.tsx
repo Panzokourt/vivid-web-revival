@@ -25,13 +25,16 @@ const FALLBACK = {
 
 export function Experiences() {
   const root = useRef<HTMLElement>(null);
+  const track = useRef<HTMLDivElement>(null);
   const block = usePageBlock("home", "experiences", FALLBACK);
   const items = (block.items ?? FALLBACK.items) as Experience[];
   const editor = useEditorOptional();
   const showEditorControls = Boolean(editor?.isAdmin && editor.mode === "edit");
 
   useLayoutEffect(() => {
+    if (typeof window === "undefined") return;
     if (prefersReducedMotion()) return;
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
     const ctx = gsap.context(() => {
       gsap.from(".exp-eyebrow", {
         y: 24,
@@ -39,9 +42,29 @@ export function Experiences() {
         duration: 0.7,
         scrollTrigger: { trigger: root.current, start: "top 80%" },
       });
+      if (isTouch || !track.current) return;
+      const trackEl = track.current;
+      const getDistance = () => Math.max(0, trackEl.scrollWidth - window.innerWidth);
+      gsap.to(trackEl, {
+        x: () => -getDistance(),
+        ease: "none",
+        scrollTrigger: {
+          trigger: root.current,
+          start: "top top",
+          end: () => `+=${getDistance()}`,
+          scrub: 1,
+          pin: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
     }, root);
     return () => ctx.revert();
   }, []);
+
+  const useNative =
+    typeof window !== "undefined" &&
+    (window.matchMedia("(pointer: coarse)").matches || prefersReducedMotion());
 
   return (
     <section
@@ -68,8 +91,13 @@ export function Experiences() {
       </div>
 
       <div
-        className="flex gap-6 md:gap-10 px-6 md:px-10 pb-4 items-stretch overflow-x-auto snap-x snap-mandatory scrollbar-none overscroll-x-contain"
-        style={{ WebkitOverflowScrolling: "touch" }}
+        ref={track}
+        className={`flex gap-6 md:gap-10 px-6 md:px-10 pb-4 items-stretch ${
+          useNative
+            ? "overflow-x-auto snap-x snap-mandatory scrollbar-none overscroll-x-contain"
+            : "will-change-transform"
+        }`}
+        style={useNative ? { WebkitOverflowScrolling: "touch" } : undefined}
       >
 
         {items.map((e, i) => (

@@ -12,13 +12,16 @@ import { resolveAsset } from "@/lib/asset-map";
 
 export function FeaturedModels() {
   const root = useRef<HTMLElement>(null);
+  const track = useRef<HTMLDivElement>(null);
   const block = usePageBlock("home", "featured_models", { eyebrow: "The Collection", title: "Models" });
   const { data: allModels } = useSuspenseQuery(modelsListQueryOptions());
   const models = allModels.slice(0, 6);
 
 
   useLayoutEffect(() => {
+    if (typeof window === "undefined") return;
     if (prefersReducedMotion()) return;
+    const isTouch = window.matchMedia("(pointer: coarse)").matches;
     const ctx = gsap.context(() => {
       gsap.from(".models-eyebrow", {
         y: 30,
@@ -26,9 +29,29 @@ export function FeaturedModels() {
         duration: 0.7,
         scrollTrigger: { trigger: root.current, start: "top 80%" },
       });
+      if (isTouch || !track.current) return;
+      const trackEl = track.current;
+      const getDistance = () => Math.max(0, trackEl.scrollWidth - window.innerWidth);
+      gsap.to(trackEl, {
+        x: () => -getDistance(),
+        ease: "none",
+        scrollTrigger: {
+          trigger: root.current,
+          start: "top top",
+          end: () => `+=${getDistance()}`,
+          scrub: 1,
+          pin: true,
+          anticipatePin: 1,
+          invalidateOnRefresh: true,
+        },
+      });
     }, root);
     return () => ctx.revert();
   }, []);
+
+  const useNative =
+    typeof window !== "undefined" &&
+    (window.matchMedia("(pointer: coarse)").matches || prefersReducedMotion());
 
   return (
     <section ref={root} id="models" className="relative bg-paper text-ink overflow-hidden py-24 md:py-32">
@@ -49,8 +72,13 @@ export function FeaturedModels() {
       </div>
 
       <div
-        className="flex gap-6 md:gap-10 px-6 md:px-10 pb-4 items-stretch overflow-x-auto snap-x snap-mandatory scrollbar-none overscroll-x-contain"
-        style={{ WebkitOverflowScrolling: "touch" }}
+        ref={track}
+        className={`flex gap-6 md:gap-10 px-6 md:px-10 pb-4 items-stretch ${
+          useNative
+            ? "overflow-x-auto snap-x snap-mandatory scrollbar-none overscroll-x-contain"
+            : "will-change-transform"
+        }`}
+        style={useNative ? { WebkitOverflowScrolling: "touch" } : undefined}
       >
         {models.map((m) => (
           <Link

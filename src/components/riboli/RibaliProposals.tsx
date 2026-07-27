@@ -51,7 +51,7 @@ export function RibaliProposals() {
   );
 }
 
-function ProposalCard({ p, isEn, prefix }: { p: Proposal; isEn: boolean; prefix: string }) {
+function ProposalCard({ p, isEn, prefix }: { p: Proposal; isEn: boolean; prefix: "" | "/en" }) {
   const title = isEn && p.titleEn ? p.titleEn : p.title;
   const subtitle = isEn && p.subtitleEn ? p.subtitleEn : p.subtitle;
   const cta = isEn && p.ctaLabelEn ? p.ctaLabelEn : (p.ctaLabel ?? (isEn ? "Explore" : "Δες τη σύνθεση"));

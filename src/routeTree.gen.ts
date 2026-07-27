@@ -53,6 +53,7 @@ import { Route as EnProposalsSlugRouteImport } from './routes/en.proposals.$slug
 import { Route as EnModelsSeriesRouteImport } from './routes/en.models.$series'
 import { Route as AuthenticatedAdminSystemRouteImport } from './routes/_authenticated/admin.system'
 import { Route as AuthenticatedAdminSettingsRouteImport } from './routes/_authenticated/admin.settings'
+import { Route as AuthenticatedAdminProposalsRouteImport } from './routes/_authenticated/admin.proposals'
 import { Route as AuthenticatedAdminModelsRouteImport } from './routes/_authenticated/admin.models'
 import { Route as AuthenticatedAdminMediaRouteImport } from './routes/_authenticated/admin.media'
 import { Route as AuthenticatedAdminLeadsRouteImport } from './routes/_authenticated/admin.leads'
@@ -285,6 +286,12 @@ const AuthenticatedAdminSettingsRoute =
     path: '/admin/settings',
     getParentRoute: () => AuthenticatedRouteRoute,
   } as any)
+const AuthenticatedAdminProposalsRoute =
+  AuthenticatedAdminProposalsRouteImport.update({
+    id: '/admin/proposals',
+    path: '/admin/proposals',
+    getParentRoute: () => AuthenticatedRouteRoute,
+  } as any)
 const AuthenticatedAdminModelsRoute =
   AuthenticatedAdminModelsRouteImport.update({
     id: '/admin/models',
@@ -384,6 +391,7 @@ export interface FileRoutesByFullPath {
   '/admin/leads': typeof AuthenticatedAdminLeadsRoute
   '/admin/media': typeof AuthenticatedAdminMediaRoute
   '/admin/models': typeof AuthenticatedAdminModelsRoute
+  '/admin/proposals': typeof AuthenticatedAdminProposalsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/system': typeof AuthenticatedAdminSystemRoute
   '/en/models/$series': typeof EnModelsSeriesRouteWithChildren
@@ -433,6 +441,7 @@ export interface FileRoutesByTo {
   '/admin/leads': typeof AuthenticatedAdminLeadsRoute
   '/admin/media': typeof AuthenticatedAdminMediaRoute
   '/admin/models': typeof AuthenticatedAdminModelsRoute
+  '/admin/proposals': typeof AuthenticatedAdminProposalsRoute
   '/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/admin/system': typeof AuthenticatedAdminSystemRoute
   '/en/proposals/$slug': typeof EnProposalsSlugRoute
@@ -489,6 +498,7 @@ export interface FileRoutesById {
   '/_authenticated/admin/leads': typeof AuthenticatedAdminLeadsRoute
   '/_authenticated/admin/media': typeof AuthenticatedAdminMediaRoute
   '/_authenticated/admin/models': typeof AuthenticatedAdminModelsRoute
+  '/_authenticated/admin/proposals': typeof AuthenticatedAdminProposalsRoute
   '/_authenticated/admin/settings': typeof AuthenticatedAdminSettingsRoute
   '/_authenticated/admin/system': typeof AuthenticatedAdminSystemRoute
   '/en/models/$series': typeof EnModelsSeriesRouteWithChildren
@@ -546,6 +556,7 @@ export interface FileRouteTypes {
     | '/admin/leads'
     | '/admin/media'
     | '/admin/models'
+    | '/admin/proposals'
     | '/admin/settings'
     | '/admin/system'
     | '/en/models/$series'
@@ -595,6 +606,7 @@ export interface FileRouteTypes {
     | '/admin/leads'
     | '/admin/media'
     | '/admin/models'
+    | '/admin/proposals'
     | '/admin/settings'
     | '/admin/system'
     | '/en/proposals/$slug'
@@ -650,6 +662,7 @@ export interface FileRouteTypes {
     | '/_authenticated/admin/leads'
     | '/_authenticated/admin/media'
     | '/_authenticated/admin/models'
+    | '/_authenticated/admin/proposals'
     | '/_authenticated/admin/settings'
     | '/_authenticated/admin/system'
     | '/en/models/$series'
@@ -993,6 +1006,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminSettingsRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_authenticated/admin/proposals': {
+      id: '/_authenticated/admin/proposals'
+      path: '/admin/proposals'
+      fullPath: '/admin/proposals'
+      preLoaderRoute: typeof AuthenticatedAdminProposalsRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/models': {
       id: '/_authenticated/admin/models'
       path: '/admin/models'
@@ -1089,6 +1109,7 @@ interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminLeadsRoute: typeof AuthenticatedAdminLeadsRoute
   AuthenticatedAdminMediaRoute: typeof AuthenticatedAdminMediaRoute
   AuthenticatedAdminModelsRoute: typeof AuthenticatedAdminModelsRoute
+  AuthenticatedAdminProposalsRoute: typeof AuthenticatedAdminProposalsRoute
   AuthenticatedAdminSettingsRoute: typeof AuthenticatedAdminSettingsRoute
   AuthenticatedAdminSystemRoute: typeof AuthenticatedAdminSystemRoute
   AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
@@ -1102,6 +1123,7 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminLeadsRoute: AuthenticatedAdminLeadsRoute,
   AuthenticatedAdminMediaRoute: AuthenticatedAdminMediaRoute,
   AuthenticatedAdminModelsRoute: AuthenticatedAdminModelsRoute,
+  AuthenticatedAdminProposalsRoute: AuthenticatedAdminProposalsRoute,
   AuthenticatedAdminSettingsRoute: AuthenticatedAdminSettingsRoute,
   AuthenticatedAdminSystemRoute: AuthenticatedAdminSystemRoute,
   AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,

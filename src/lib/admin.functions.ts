@@ -129,6 +129,7 @@ const modelUpdateSchema = z.object({
     tube_material: z.string().max(80).nullable().optional(),
     hero_image: z.string().max(500).nullable().optional(),
     order_index: z.number().int().optional(),
+    persona: z.enum(["family", "sport", "adventure", "pro"]).nullable().optional(),
   }),
 });
 
@@ -747,6 +748,70 @@ export const adminClearBlockMediaField = createServerFn({ method: "POST" })
     if (uErr) throw new Error(uErr.message);
     return { ok: true };
   });
+
+// ─── Proposals CRUD ─────────────────────────────────────────────────────────
+export const adminListProposals = createServerFn({ method: "GET" })
+  .middleware([requireSupabaseAuth])
+  .handler(async ({ context }) => {
+    const { data, error } = await context.supabase
+      .from("proposals")
+      .select("*")
+      .order("sort_order", { ascending: true });
+    if (error) throw new Error(error.message);
+    return data ?? [];
+  });
+
+export const adminProposalsQueryOptions = () =>
+  queryOptions({ queryKey: ["admin", "proposals"], queryFn: () => adminListProposals() });
+
+const proposalPatchSchema = z.object({
+  slug: z.string().min(1).max(100),
+  persona: z.string().min(1).max(40),
+  title: z.string().min(1).max(200),
+  subtitle: z.string().max(300).nullable().optional(),
+  description: z.string().max(4000).nullable().optional(),
+  hero_image: z.string().max(500).nullable().optional(),
+  price_from: z.number().nullable().optional(),
+  preset_id: z.string().uuid().nullable().optional(),
+  equipment_summary: z.array(z.string().max(200)).max(30).optional(),
+  cta_label: z.string().max(80).nullable().optional(),
+  sort_order: z.number().int().optional(),
+  published: z.boolean().optional(),
+  title_en: z.string().max(200).nullable().optional(),
+  subtitle_en: z.string().max(300).nullable().optional(),
+  description_en: z.string().max(4000).nullable().optional(),
+  cta_label_en: z.string().max(80).nullable().optional(),
+});
+
+export const adminUpsertProposal = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw) =>
+    z.object({ id: z.string().uuid().nullable().optional(), patch: proposalPatchSchema }).parse(raw),
+  )
+  .handler(async ({ context, data }) => {
+    if (data.id) {
+      const { error } = await context.supabase.from("proposals").update(data.patch).eq("id", data.id);
+      if (error) throw new Error(error.message);
+      return { ok: true, id: data.id };
+    }
+    const { data: row, error } = await context.supabase
+      .from("proposals")
+      .insert(data.patch)
+      .select("id")
+      .single();
+    if (error) throw new Error(error.message);
+    return { ok: true, id: row.id };
+  });
+
+export const adminDeleteProposal = createServerFn({ method: "POST" })
+  .middleware([requireSupabaseAuth])
+  .inputValidator((raw) => z.object({ id: z.string().uuid() }).parse(raw))
+  .handler(async ({ context, data }) => {
+    const { error } = await context.supabase.from("proposals").delete().eq("id", data.id);
+    if (error) throw new Error(error.message);
+    return { ok: true };
+  });
+
 
 
 

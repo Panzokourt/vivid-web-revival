@@ -125,6 +125,7 @@ export function FeaturedModels() {
           </Link>
         ))}
       </div>
+      </div>
 
     </section>
   );

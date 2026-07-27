@@ -1,5 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react";
-import { gsap, prefersReducedMotion } from "@/lib/gsap";
+import { useState } from "react";
 import anatomyImg from "@/assets/anatomy-rib.jpg";
 import { usePageBlock } from "@/lib/page-blocks";
 import { EditableField } from "@/components/editor/EditableField";
@@ -18,63 +17,21 @@ const FALLBACK = {
 };
 
 export function AnatomyRIB() {
-  const root = useRef<HTMLElement>(null);
   const [active, setActive] = useState(0);
   const block = usePageBlock("home", "anatomy", FALLBACK);
   const hotspots = (block.hotspots ?? FALLBACK.hotspots) as Hotspot[];
-
-  useLayoutEffect(() => {
-    if (prefersReducedMotion()) return;
-    // Mobile / tablet: skip pinned scroll-jack. Hotspots are tap-driven.
-    if (!window.matchMedia("(min-width: 1024px)").matches) return;
-    const ctx = gsap.context(() => {
-      const steps = hotspots.length;
-      const st = gsap.to({}, {
-        scrollTrigger: {
-          trigger: root.current,
-          start: "top top",
-          end: () => `+=${window.innerHeight * 1.2}`,
-          pin: true,
-          scrub: 0.6,
-          anticipatePin: 1,
-          snap: { snapTo: 1 / (steps - 1), duration: 0.3, ease: "power1.inOut" },
-          invalidateOnRefresh: true,
-          onUpdate: (self) => {
-            const idx = Math.min(steps - 1, Math.round(self.progress * (steps - 1)));
-            setActive(idx);
-          },
-        },
-      });
-      return () => st.scrollTrigger?.kill();
-    }, root);
-    return () => ctx.revert();
-  }, [hotspots.length]);
-
-
-  useLayoutEffect(() => {
-    if (prefersReducedMotion()) return;
-    const ctx = gsap.context(() => {
-      gsap.fromTo(
-        ".anatomy-copy-active",
-        { y: 20, opacity: 0 },
-        { y: 0, opacity: 1, duration: 0.5, ease: "power2.out" },
-      );
-    }, root);
-    return () => ctx.revert();
-  }, [active]);
 
   const current = hotspots[active] ?? hotspots[0];
 
   return (
     <section
-      ref={root}
       id="anatomy"
-      className="relative bg-ink text-paper overflow-hidden min-h-screen lg:h-screen"
+      className="relative bg-ink text-paper overflow-hidden"
     >
 
-      <div className="max-w-[1600px] mx-auto px-6 md:px-10 h-full grid lg:grid-cols-[1.2fr_1fr] gap-10 items-center py-16">
+      <div className="max-w-[1600px] mx-auto px-6 md:px-10 grid lg:grid-cols-[1.2fr_1fr] gap-10 items-center py-20 md:py-28">
         {/* Boat image with hotspots */}
-        <div className="relative h-[45vh] lg:h-[70vh] w-full">
+        <div className="relative h-[48vh] min-h-[360px] lg:h-[62vh] lg:max-h-[760px] w-full">
           <img
             src={anatomyImg}
             alt="RIBALI RIB anatomy"
@@ -116,7 +73,7 @@ export function AnatomyRIB() {
             </h2>
           </EditableField>
 
-          <div key={active} className="anatomy-copy-active mt-10 max-w-md">
+          <div key={active} className="mt-10 max-w-md animate-in fade-in-0 slide-in-from-bottom-3 duration-500">
             <div className="text-[11px] uppercase tracking-[0.3em] text-copper">
               0{active + 1} — of 0{hotspots.length}
             </div>

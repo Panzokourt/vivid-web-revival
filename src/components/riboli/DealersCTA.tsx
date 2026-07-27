@@ -50,17 +50,18 @@ export function DealersCTA() {
       id="dealers"
       className="relative overflow-hidden bg-paper-2 text-ink py-32 md:py-48"
     >
-      <EditableField
-        page="home"
-        block="dealers_cta"
-        field="marquee"
-        type="text"
-        label="Marquee (φόντο)"
-        as="div"
-        className="cta-outline pointer-events-none absolute -top-6 left-0 right-0 font-display text-[26vw] leading-none text-outline text-ink/25 whitespace-nowrap"
-      >
-        {block.marquee}
-      </EditableField>
+      <div className="cta-outline pointer-events-none absolute -top-6 left-0 right-0 font-display text-[26vw] leading-none text-outline text-ink/25 whitespace-nowrap">
+        <EditableField
+          page="home"
+          block="dealers_cta"
+          field="marquee"
+          type="text"
+          label="Marquee (φόντο)"
+          as="div"
+        >
+          {block.marquee}
+        </EditableField>
+      </div>
 
       <div className="relative max-w-4xl mx-auto text-center px-6">
         <EditableField

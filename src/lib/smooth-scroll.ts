@@ -9,12 +9,12 @@ export function getLenis(): Lenis | null {
 
 export function initSmoothScroll() {
   const lenis = new Lenis({
-    duration: 1.1,
+    duration: 0.9,
     easing: (t: number) => 1 - Math.pow(1 - t, 3),
     wheelMultiplier: 1,
     touchMultiplier: 1.2,
     smoothWheel: true,
-    lerp: 0.1,
+    lerp: 0.12,
   });
   lenisInstance = lenis;
 

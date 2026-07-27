@@ -12,7 +12,6 @@ import { resolveAsset } from "@/lib/asset-map";
 
 export function FeaturedModels() {
   const root = useRef<HTMLElement>(null);
-  const track = useRef<HTMLDivElement>(null);
   const block = usePageBlock("home", "featured_models", { eyebrow: "The Collection", title: "Models" });
   const { data: allModels } = useSuspenseQuery(modelsListQueryOptions());
   const models = allModels.slice(0, 6);
@@ -21,24 +20,6 @@ export function FeaturedModels() {
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;
     const ctx = gsap.context(() => {
-      const slides = gsap.utils.toArray<HTMLElement>(".model-slide");
-      const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
-      if (isDesktop && track.current && slides.length > 1) {
-        const totalScroll = () => track.current!.scrollWidth - window.innerWidth;
-        gsap.to(track.current, {
-          x: () => -totalScroll(),
-          ease: "none",
-          scrollTrigger: {
-            trigger: root.current,
-            start: "top top",
-            end: () => `+=${totalScroll()}`,
-            scrub: 0.6,
-            pin: true,
-            anticipatePin: 1,
-            invalidateOnRefresh: true,
-          },
-        });
-      }
       gsap.from(".models-eyebrow", {
         y: 30,
         opacity: 0,
@@ -50,7 +31,7 @@ export function FeaturedModels() {
   }, []);
 
   return (
-    <section ref={root} id="models" className="relative bg-paper text-ink overflow-hidden h-screen flex flex-col">
+    <section ref={root} id="models" className="relative bg-paper text-ink overflow-hidden py-24 md:py-32">
       <div className="px-6 md:px-10 pt-16 md:pt-20 pb-6 shrink-0">
         <div className="models-eyebrow flex items-end justify-between gap-6 max-w-[1600px] mx-auto">
           <div>
@@ -68,8 +49,7 @@ export function FeaturedModels() {
       </div>
 
       <div
-        ref={track}
-        className="flex gap-6 md:gap-10 px-6 md:px-10 pb-10 will-change-transform flex-1 min-h-0 items-stretch overflow-x-auto snap-x snap-mandatory scrollbar-none lg:overflow-visible lg:snap-none"
+        className="flex gap-6 md:gap-10 px-6 md:px-10 pb-4 items-stretch overflow-x-auto snap-x snap-mandatory scrollbar-none overscroll-x-contain"
         style={{ WebkitOverflowScrolling: "touch" }}
       >
         {models.map((m) => (
@@ -77,7 +57,7 @@ export function FeaturedModels() {
             key={m.slug}
             to="/models/$series/$model"
             params={{ series: m.series_slug ?? "odyssey", model: m.slug }}
-            className="model-slide relative shrink-0 w-[85vw] md:w-[70vw] lg:w-[70vw] h-full bg-paper-2 overflow-hidden group block isolate snap-center lg:snap-align-none"
+            className="model-slide relative shrink-0 w-[85vw] md:w-[70vw] lg:w-[58vw] h-[68vh] min-h-[520px] max-h-[760px] bg-paper-2 overflow-hidden group block isolate snap-center"
           >
 
 

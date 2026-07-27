@@ -20,10 +20,18 @@ const ROUTES: SitemapEntry[] = [
   { path: "/models/odyssey/r-520", changefreq: "monthly", priority: "0.7" },
   { path: "/models/odyssey/r-680", changefreq: "monthly", priority: "0.7" },
   { path: "/models/odyssey/r-950", changefreq: "monthly", priority: "0.7" },
+  { path: "/proposals", changefreq: "weekly", priority: "0.9" },
+  { path: "/proposals/family-cruiser", changefreq: "monthly", priority: "0.7" },
+  { path: "/proposals/sport-adventure", changefreq: "monthly", priority: "0.7" },
+  { path: "/proposals/pro-charter", changefreq: "monthly", priority: "0.7" },
   { path: "/stock", changefreq: "weekly", priority: "0.8" },
+  { path: "/offers", changefreq: "weekly", priority: "0.8" },
   { path: "/configurator", changefreq: "monthly", priority: "0.7" },
   { path: "/dealers", changefreq: "monthly", priority: "0.7" },
   { path: "/contact", changefreq: "yearly", priority: "0.6" },
+  { path: "/privacy", changefreq: "yearly", priority: "0.3" },
+  { path: "/terms", changefreq: "yearly", priority: "0.3" },
+  { path: "/cookies", changefreq: "yearly", priority: "0.3" },
 ];
 
 export const Route = createFileRoute("/sitemap.xml")({

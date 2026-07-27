@@ -250,15 +250,24 @@ export function ConfiguratorPage() {
                 <button
                   key={b.id}
                   onClick={() => { setEngineBrand(b.id); markManual(); }}
+                  disabled={engineHp === 0}
                   className={`px-4 py-2 text-[10px] uppercase tracking-[0.25em] border transition-colors ${
                     engineBrand === b.id ? "bg-ink text-paper border-ink" : "border-ink/20 text-ink/70 hover:border-ink"
-                  }`}
+                  } ${engineHp === 0 ? "opacity-30 cursor-not-allowed" : ""}`}
                 >
                   {b.label}
                 </button>
               ))}
             </div>
             <div className="flex flex-wrap gap-2">
+              <button
+                onClick={() => { setEngineHp(0); markManual(); }}
+                className={`px-5 py-3 text-[11px] uppercase tracking-[0.25em] border transition-colors ${
+                  engineHp === 0 ? "bg-ink text-paper border-ink" : "border-ink/20 text-ink/70 hover:border-ink"
+                }`}
+              >
+                Χωρίς κινητήρα
+              </button>
               {model.engines.map((hp) => (
                 <button
                   key={hp}

@@ -73,6 +73,7 @@ export function Experiences() {
       id="experiences"
       className="relative bg-paper text-ink overflow-hidden py-24 md:py-32"
     >
+      <div ref={pinRef}>
       <div className="px-6 md:px-10 pb-6">
         <div className="exp-eyebrow flex items-end justify-between gap-6 max-w-[1600px] mx-auto">
           <div>
@@ -151,6 +152,7 @@ export function Experiences() {
             />
           </div>
         ) : null}
+      </div>
       </div>
     </section>
   );

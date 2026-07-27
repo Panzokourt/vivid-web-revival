@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { Nav } from "@/components/riboli/Nav";
@@ -36,6 +36,17 @@ export function ConfiguratorPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [activePreset, setActivePreset] = useState<string | null>(null);
   const { data: presets = [] } = useQuery(presetsQueryOptions());
+
+  // Deep-link: /configurator?preset=<slug> auto-applies a preset once presets load.
+  useEffect(() => {
+    if (typeof window === "undefined" || presets.length === 0) return;
+    const params = new URLSearchParams(window.location.search);
+    const slug = params.get("preset");
+    if (!slug) return;
+    const p = presets.find((x) => x.slug === slug);
+    if (p) applyPreset(p);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [presets]);
 
   const model = useMemo(() => MODELS.find((m) => m.slug === modelSlug)!, [modelSlug]);
   const [engineHp, setEngineHp] = useState<number>(model.engines[1]);

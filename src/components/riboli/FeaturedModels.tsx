@@ -32,8 +32,9 @@ export function FeaturedModels() {
             trigger: root.current,
             start: "top top",
             end: () => `+=${totalScroll()}`,
-            scrub: 1,
+            scrub: 0.6,
             pin: true,
+            anticipatePin: 1,
             invalidateOnRefresh: true,
           },
         });

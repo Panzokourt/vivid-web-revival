@@ -9,11 +9,12 @@ export function getLenis(): Lenis | null {
 
 export function initSmoothScroll() {
   const lenis = new Lenis({
-    duration: 1.4,
+    duration: 1.1,
     easing: (t: number) => 1 - Math.pow(1 - t, 3),
-    wheelMultiplier: 0.85,
+    wheelMultiplier: 1,
     touchMultiplier: 1.2,
     smoothWheel: true,
+    lerp: 0.1,
   });
   lenisInstance = lenis;
 
@@ -24,6 +25,11 @@ export function initSmoothScroll() {
   };
   gsap.ticker.add(tickerCb);
   gsap.ticker.lagSmoothing(0);
+
+  // After fonts load, layout can shift — recalc all trigger offsets.
+  if (typeof document !== "undefined" && "fonts" in document) {
+    document.fonts.ready.then(() => ScrollTrigger.refresh()).catch(() => {});
+  }
 
   return () => {
     gsap.ticker.remove(tickerCb);

@@ -33,9 +33,10 @@ export function AnatomyRIB() {
         scrollTrigger: {
           trigger: root.current,
           start: "top top",
-          end: () => `+=${window.innerHeight * (steps - 0.5)}`,
+          end: () => `+=${window.innerHeight * 1.2}`,
           pin: true,
-          scrub: 0.5,
+          scrub: 0.6,
+          anticipatePin: 1,
           snap: { snapTo: 1 / (steps - 1), duration: 0.3, ease: "power1.inOut" },
           invalidateOnRefresh: true,
           onUpdate: (self) => {

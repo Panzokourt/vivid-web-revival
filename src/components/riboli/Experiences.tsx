@@ -41,24 +41,13 @@ export function Experiences() {
             trigger: root.current,
             start: "top top",
             end: () => `+=${totalScroll()}`,
-            scrub: 1,
+            scrub: 0.6,
             pin: true,
+            anticipatePin: 1,
             invalidateOnRefresh: true,
           },
         });
       }
-
-      gsap.utils.toArray<HTMLElement>(".exp-img").forEach((el) => {
-        gsap.fromTo(
-          el,
-          { yPercent: -8 },
-          {
-            yPercent: 8,
-            ease: "none",
-            scrollTrigger: { trigger: el, start: "top bottom", end: "bottom top", scrub: true },
-          },
-        );
-      });
 
       gsap.from(".exp-eyebrow", {
         y: 24,
@@ -111,7 +100,7 @@ export function Experiences() {
                 src={e.img && /^(https?:|data:|blob:|\/)/.test(e.img) ? e.img : resolveAsset(e.image_key ?? e.img)}
                 alt={e.title}
                 loading="lazy"
-                className="exp-img absolute inset-0 h-[120%] w-full object-cover"
+                className="exp-img absolute inset-0 h-full w-full object-cover"
                 style={{ filter: "contrast(1.02) saturate(0.85)" }}
               />
             </div>

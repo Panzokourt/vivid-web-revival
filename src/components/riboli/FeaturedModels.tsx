@@ -12,6 +12,7 @@ import { resolveAsset } from "@/lib/asset-map";
 
 export function FeaturedModels() {
   const root = useRef<HTMLElement>(null);
+  const pinRef = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLDivElement>(null);
   const block = usePageBlock("home", "featured_models", { eyebrow: "The Collection", title: "Models" });
   const { data: allModels } = useSuspenseQuery(modelsListQueryOptions());
@@ -29,18 +30,18 @@ export function FeaturedModels() {
         duration: 0.7,
         scrollTrigger: { trigger: root.current, start: "top 80%" },
       });
-      if (isTouch || !track.current) return;
+      if (isTouch || !track.current || !pinRef.current) return;
       const trackEl = track.current;
       const getDistance = () => Math.max(0, trackEl.scrollWidth - window.innerWidth);
       gsap.to(trackEl, {
         x: () => -getDistance(),
         ease: "none",
         scrollTrigger: {
-          trigger: root.current,
+          trigger: pinRef.current!,
           start: "top top",
           end: () => `+=${getDistance()}`,
           scrub: 1,
-          pin: true,
+          pin: pinRef.current!,
           anticipatePin: 1,
           invalidateOnRefresh: true,
         },
@@ -55,6 +56,7 @@ export function FeaturedModels() {
 
   return (
     <section ref={root} id="models" className="relative bg-paper text-ink overflow-hidden py-24 md:py-32">
+      <div ref={pinRef}>
       <div className="px-6 md:px-10 pt-16 md:pt-20 pb-6 shrink-0">
         <div className="models-eyebrow flex items-end justify-between gap-6 max-w-[1600px] mx-auto">
           <div>
@@ -122,6 +124,7 @@ export function FeaturedModels() {
             </span>
           </Link>
         ))}
+      </div>
       </div>
 
     </section>

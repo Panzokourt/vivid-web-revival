@@ -9,8 +9,26 @@ export function SmoothScroll() {
     // Skip Lenis on touch devices — native momentum scrolling is smoother
     // and preserves pull-to-refresh + overscroll behaviors on mobile.
     if (window.matchMedia("(pointer: coarse)").matches) return;
-    const cleanup = initSmoothScroll();
-    return cleanup;
+
+    let cleanup: (() => void) | undefined;
+    let started = false;
+    const start = () => {
+      if (started) return;
+      started = true;
+      cleanup = initSmoothScroll();
+    };
+
+    // Wait for the intro overlay to finish before enabling Lenis so it doesn't
+    // fight the GSAP timeline mid-mount. Fallback timer in case the event was
+    // dispatched before we subscribed.
+    window.addEventListener("ribali:intro-done", start, { once: true });
+    const t = window.setTimeout(start, 2000);
+
+    return () => {
+      window.removeEventListener("ribali:intro-done", start);
+      window.clearTimeout(t);
+      cleanup?.();
+    };
   }, []);
   return null;
 }

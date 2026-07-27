@@ -12,6 +12,7 @@ import { resolveAsset } from "@/lib/asset-map";
 
 export function FeaturedModels() {
   const root = useRef<HTMLElement>(null);
+  const pinRef = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLDivElement>(null);
   const block = usePageBlock("home", "featured_models", { eyebrow: "The Collection", title: "Models" });
   const { data: allModels } = useSuspenseQuery(modelsListQueryOptions());
@@ -29,18 +30,18 @@ export function FeaturedModels() {
         duration: 0.7,
         scrollTrigger: { trigger: root.current, start: "top 80%" },
       });
-      if (isTouch || !track.current) return;
+      if (isTouch || !track.current || !pinRef.current) return;
       const trackEl = track.current;
       const getDistance = () => Math.max(0, trackEl.scrollWidth - window.innerWidth);
       gsap.to(trackEl, {
         x: () => -getDistance(),
         ease: "none",
         scrollTrigger: {
-          trigger: root.current,
+          trigger: pinRef.current!,
           start: "top top",
           end: () => `+=${getDistance()}`,
           scrub: 1,
-          pin: true,
+          pin: pinRef.current!,
           anticipatePin: 1,
           invalidateOnRefresh: true,
         },

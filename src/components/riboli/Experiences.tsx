@@ -25,6 +25,7 @@ const FALLBACK = {
 
 export function Experiences() {
   const root = useRef<HTMLElement>(null);
+  const pinRef = useRef<HTMLDivElement>(null);
   const track = useRef<HTMLDivElement>(null);
   const block = usePageBlock("home", "experiences", FALLBACK);
   const items = (block.items ?? FALLBACK.items) as Experience[];

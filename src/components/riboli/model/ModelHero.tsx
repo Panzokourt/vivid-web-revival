@@ -4,6 +4,19 @@ import { gsap, prefersReducedMotion } from "@/lib/gsap";
 import { resolveAsset } from "@/lib/asset-map";
 import type { ModelDetail } from "@/lib/models.functions";
 
+const PERSONA_LABELS: Record<string, string> = {
+  family: "Οικογένεια",
+  sport: "Sport & Adventure",
+  adventure: "Adventure",
+  pro: "Επαγγελματική χρήση",
+};
+
+function personaLabel(p: string | null): string {
+  if (!p) return "";
+  return PERSONA_LABELS[p] ?? p;
+}
+
+
 export function ModelHero({ model }: { model: ModelDetail }) {
   const root = useRef<HTMLElement>(null);
 
@@ -39,8 +52,16 @@ export function ModelHero({ model }: { model: ModelDetail }) {
       </div>
 
       <div className="absolute inset-x-0 top-1/2 -translate-y-1/2 z-20 flex items-center justify-between px-6 md:px-16 pointer-events-none">
-        <div className="mh-eyebrow flex items-center gap-3 text-[11px] uppercase tracking-[0.3em] text-copper">
-          <span className="w-2 h-2 rounded-full bg-copper" /> {model.tag ?? "Model"}
+        <div className="mh-eyebrow flex flex-col gap-2">
+          <div className="flex items-center gap-3 text-[11px] uppercase tracking-[0.3em] text-copper">
+            <span className="w-2 h-2 rounded-full bg-copper" /> {model.tag ?? "Model"}
+          </div>
+          {model.persona && (
+            <div className="inline-flex self-start items-center gap-2 border border-ink/30 px-3 py-1.5 text-[10px] uppercase tracking-[0.25em] text-ink/70 bg-paper/60 backdrop-blur-sm">
+              <span className="text-copper">◆</span>
+              <span>Ταιριάζει σε: <strong className="text-ink font-medium">{personaLabel(model.persona)}</strong></span>
+            </div>
+          )}
         </div>
         <h1 className="mh-title font-display text-[22vw] md:text-[15vw] leading-[0.85] tracking-tight text-invert-blend text-right select-none">
           {model.number.split("").map((c, i) => (

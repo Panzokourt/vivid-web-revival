@@ -94,14 +94,11 @@ export const Route = createFileRoute("/")({
 });
 
 function Index() {
-  const [mounted, setMounted] = useState(false);
-  useEffect(() => setMounted(true), []);
-
   return (
     <main className="relative bg-paper min-h-screen text-ink">
-      {mounted && <ThreeBackground />}
       <SectionSnap />
       <div className="relative z-10">
+
         <Nav />
         <div data-snap><Hero /></div>
         <div data-snap><FeaturedModels /></div>

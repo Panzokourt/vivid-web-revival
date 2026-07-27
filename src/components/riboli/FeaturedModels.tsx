@@ -56,6 +56,7 @@ export function FeaturedModels() {
 
   return (
     <section ref={root} id="models" className="relative bg-paper text-ink overflow-hidden py-24 md:py-32">
+      <div ref={pinRef}>
       <div className="px-6 md:px-10 pt-16 md:pt-20 pb-6 shrink-0">
         <div className="models-eyebrow flex items-end justify-between gap-6 max-w-[1600px] mx-auto">
           <div>

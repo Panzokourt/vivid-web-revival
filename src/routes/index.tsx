@@ -99,16 +99,16 @@ function Index() {
       <div className="relative z-10">
 
         <Nav />
-        <div data-snap><Hero /></div>
-        <div data-snap><FeaturedModels /></div>
-        <div data-snap><RibaliProposals /></div>
-        <div data-snap><AnatomyRIB /></div>
-        <div data-snap><WhyRibali /></div>
-        <div data-snap><Experiences /></div>
-        <div data-snap><Heritage /></div>
-        <div data-snap><Stats /></div>
-        <div data-snap><DealersCTA /></div>
-        <div data-snap><Footer /></div>
+        <Hero />
+        <FeaturedModels />
+        <RibaliProposals />
+        <AnatomyRIB />
+        <WhyRibali />
+        <Experiences />
+        <Heritage />
+        <Stats />
+        <DealersCTA />
+        <Footer />
       </div>
     </main>
   );

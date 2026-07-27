@@ -24,31 +24,12 @@ const FALLBACK = {
 
 export function Experiences() {
   const root = useRef<HTMLElement>(null);
-  const track = useRef<HTMLDivElement>(null);
   const block = usePageBlock("home", "experiences", FALLBACK);
   const items = (block.items ?? FALLBACK.items) as Experience[];
 
   useLayoutEffect(() => {
     if (prefersReducedMotion()) return;
     const ctx = gsap.context(() => {
-      const isDesktop = window.matchMedia("(min-width: 1024px)").matches;
-      if (isDesktop && track.current) {
-        const totalScroll = () => track.current!.scrollWidth - window.innerWidth;
-        gsap.to(track.current, {
-          x: () => -totalScroll(),
-          ease: "none",
-          scrollTrigger: {
-            trigger: root.current,
-            start: "top top",
-            end: () => `+=${totalScroll()}`,
-            scrub: 0.6,
-            pin: true,
-            anticipatePin: 1,
-            invalidateOnRefresh: true,
-          },
-        });
-      }
-
       gsap.from(".exp-eyebrow", {
         y: 24,
         opacity: 0,
@@ -63,9 +44,9 @@ export function Experiences() {
     <section
       ref={root}
       id="experiences"
-      className="relative bg-paper text-ink overflow-hidden h-screen flex flex-col"
+      className="relative bg-paper text-ink overflow-hidden py-24 md:py-32"
     >
-      <div className="px-6 md:px-10 pt-16 md:pt-20 pb-6 shrink-0">
+      <div className="px-6 md:px-10 pb-6">
         <div className="exp-eyebrow flex items-end justify-between gap-6 max-w-[1600px] mx-auto">
           <div>
             <EditableField page="home" block="experiences" field="eyebrow" type="text" label="Eyebrow" as="div" className="text-[11px] uppercase tracking-[0.3em] text-ink/50">
@@ -84,15 +65,14 @@ export function Experiences() {
       </div>
 
       <div
-        ref={track}
-        className="flex gap-6 md:gap-10 px-6 md:px-10 pb-10 will-change-transform flex-1 min-h-0 items-stretch overflow-x-auto snap-x snap-mandatory scrollbar-none lg:overflow-visible lg:snap-none"
+        className="flex gap-6 md:gap-10 px-6 md:px-10 pb-4 items-stretch overflow-x-auto snap-x snap-mandatory scrollbar-none overscroll-x-contain"
         style={{ WebkitOverflowScrolling: "touch" }}
       >
 
         {items.map((e, i) => (
           <article
             key={i}
-            className="relative shrink-0 w-[85vw] md:w-[60vw] lg:w-[55vw] h-full bg-paper-2 overflow-hidden isolate snap-center lg:snap-align-none"
+            className="relative shrink-0 w-[85vw] md:w-[60vw] lg:w-[44vw] h-[68vh] min-h-[520px] max-h-[760px] bg-paper-2 overflow-hidden isolate snap-center"
           >
 
             <div className="absolute inset-0 overflow-hidden">
